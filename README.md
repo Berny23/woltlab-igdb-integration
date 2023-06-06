@@ -10,6 +10,7 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 - Users can add games to their library
 - Users can rate games and see the average ratings
 - Modern and user-friendly design
+- English and German interface
 - Supports automated Trophies
 - Supports system-wide image proxy
 - Supports permissions
@@ -20,7 +21,7 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 
 ## Demo
 
-To-do.
+![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/12ac316e-9b18-40e5-acc2-db6ddced439c)
 
 ## Download
 
