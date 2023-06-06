@@ -9,6 +9,9 @@
             <category name="IgdbIntegration_auth">
                 <parent>IgdbIntegration</parent>
             </category>
+            <category name="IgdbIntegration_general">
+                <parent>IgdbIntegration</parent>
+            </category>
         </categories>
         <options>
             <option name="IgdbIntegration_auth_clientId">
@@ -26,6 +29,13 @@
                 <optiontype>password</optiontype>
                 <defaultvalue></defaultvalue>
                 <hidden>1</hidden>
+            </option>
+            <option name="IgdbIntegration_general_result_limit">
+                <categoryname>IgdbIntegration_general</categoryname>
+                <optiontype>integer</optiontype>
+                <defaultvalue>30</defaultvalue>
+                <minvalue>0</minvalue>
+				<maxvalue>500</maxvalue>
             </option>
         </options>
     </import>

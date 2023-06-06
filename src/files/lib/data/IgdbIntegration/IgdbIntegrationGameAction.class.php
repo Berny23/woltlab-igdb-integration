@@ -2,6 +2,7 @@
 
 namespace wcf\data\IgdbIntegration;
 
+use Exception;
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
 use wcf\util\IgdbIntegrationUtil;
 use wcf\system\WCF;
@@ -15,6 +16,7 @@ use wcf\system\form\builder\field\RatingFormField;
 use wcf\system\form\builder\field\TitleFormField;
 use wcf\system\form\builder\field\TextFormField;
 use wcf\system\form\builder\field\DescriptionFormField;
+use wcf\system\form\builder\TemplateFormNode;
 
 /**
  * Executes game-related actions.
@@ -57,11 +59,23 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
     protected $game;
 
     /**
+     * The user ID of the game owner, if sent in request.
+     */
+    protected $ownerId;
+
+    /**
      * Override default function because it always returns false, even for admins (I don't know why).
      */
     public function validateAction()
     {
         $this->readInteger('gameId');
+        try {
+            // Try reading userId (if it is present, use the user's rating instead of the average rating)
+            $this->readInteger('userId');
+            $this->ownerId = $this->parameters['userId'];
+        } catch (Exception $ex) {
+            $this->ownerId = null;
+        }
         $this->game = new IgdbIntegrationGame($this->parameters['gameId']);
         if (!$this->game->getObjectID()) {
             throw new UserInputException('gameId');
@@ -176,13 +190,29 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
         }
 
         // Reload the game <-> user association for the game.
-        $sql = "SELECT rating FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE gameId = ?";
-        $statement = WCF::getDB()->prepare($sql);
-        $statement->execute([$gameId]);
-        $rows = $statement->fetchAll(\PDO::FETCH_COLUMN);
 
-        $ratingArray = array_filter($rows, "wcf\util\IgdbIntegrationUtil::validateRating");
-        $averageRating = count($ratingArray) ? array_sum($ratingArray) / count($ratingArray) : 0;
+        // Either calculate average rating and count users or get single rating of owner
+        if (is_null($this->ownerId)) {
+            $sql = "SELECT rating FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE gameId = ?";
+            $statement = WCF::getDB()->prepare($sql);
+            $statement->execute([$gameId]);
+            $owners = $statement->fetchAll(\PDO::FETCH_COLUMN);
+
+            $ratingArray = array_filter($owners, "wcf\util\IgdbIntegrationUtil::validateRating");
+            $averageRating = count($ratingArray) ? array_sum($ratingArray) / count($ratingArray) : 0;
+            $playerCount = count($owners);
+        } else {
+            $sql = "SELECT DISTINCT rating FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE gameId = ? AND userId = ?";
+            $statement = WCF::getDB()->prepare($sql);
+            $statement->execute([$gameId, $this->ownerId]);
+            $owner = $statement->fetchSingleRow();
+
+            // First check if owner still owns game
+            if ($owner) {
+                $ownerRating = $owner['rating'];
+                $playerCount = 1;
+            }
+        }
 
         // Get game count for user
         $sql = "SELECT DISTINCT COUNT(*) AS gameCount FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE userId = ?";
@@ -205,8 +235,41 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
         return [
             'gameId' => $gameId,
             'isOwned' => $isOwned,
-            'playerCount' => count($rows),
-            'averageRating' => $averageRating
+            'playerCount' => isset($playerCount) ? $playerCount : -1,
+            'averageRating' => isset($averageRating) ? $averageRating : -1,
+            'ownRating' => isset($ownerRating) ? $ownerRating : -1,
+            'ownerRating' => isset($ownerRating) ? $ownerRating : -1
+        ];
+    }
+
+    /**
+     * Returns the data to show the dialog to edit a relationship between a user and a game.
+     */
+    public function getGamePlayerListDialog()
+    {
+        WCF::getSession()->checkPermissions(['user.IgdbIntegration.canSeePlayerList']);
+
+        $sql = "SELECT gu.userId AS userId,username,rating FROM wcf" . WCF_N . "_igdb_integration_game_user gu LEFT JOIN wcf" . WCF_N . "_user u ON u.userID = gu.userId WHERE gameId = ? ORDER BY username ASC";
+        $statement = WCF::getDB()->prepare($sql);
+        $statement->execute([$this->game->gameId]);
+        $gameOwners = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+        $this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId);
+        $this->dialog->addDefaultButton(false);
+
+        $this->dialog->appendChildren([
+            TemplateFormNode::create('playerList')
+                ->templateName('__igdbIntegrationGamePlayerList')
+                ->variables([
+                    'gameOwners' => $gameOwners
+                ])
+        ]);
+
+        $this->dialog->build();
+
+        return [
+            'dialog' => $this->dialog->getHtml(),
+            'formId' => $this->dialog->getId(),
         ];
     }
 }

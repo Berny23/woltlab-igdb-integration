@@ -41,7 +41,7 @@ class IgdbIntegrationUtil
      */
     private static function isConnectionDataValid()
     {
-        return (!empty(IGDBINTEGRATION_AUTH_CLIENTID) && !empty(IGDBINTEGRATION_AUTH_CLIENTSECRET));
+        return (!empty(IGDBINTEGRATION_AUTH_CLIENTID) && !empty(IGDBINTEGRATION_AUTH_CLIENTSECRET) && !empty(IGDBINTEGRATION_GENERAL_RESULT_LIMIT));
     }
 
     /**
@@ -89,7 +89,7 @@ class IgdbIntegrationUtil
             'Client-ID' => IGDBINTEGRATION_AUTH_CLIENTID,
             'Authorization' => 'Bearer ' . $accessToken
         ];
-        $body = 'search "' . $name . '"; fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id; limit 30;';
+        $body = 'search "' . $name . '"; fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id; limit ' . IGDBINTEGRATION_GENERAL_RESULT_LIMIT . ';';
         $request = new Request('POST', self::URL_BASE . 'games', $headers, $body);
         return self::$client->send($request);
     }

@@ -28,5 +28,6 @@
         <instruction type="userOption" />
         <instruction type="objectType" />
         <instruction type="userGroupOption" />
+        <instruction type="userProfileMenu" />
     </instructions>
 </package>

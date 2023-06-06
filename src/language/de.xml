@@ -5,7 +5,7 @@
     <!-- Frontend pages -->
     <category name="wcf.IgdbIntegration.page">
         <item name="wcf.IgdbIntegration.page.game_list_title"><![CDATA[Spiele-Liste]]></item>
-        <item name="wcf.IgdbIntegration.page.game_list_igdb_error"><![CDATA[Verbindung zu IGDB fehlgeschlagen!<br>Bitte Zugangsdaten in den Einstellungen prüfen.]]></item>
+        <item name="wcf.IgdbIntegration.page.game_list_igdb_error"><![CDATA[<b>Verbindung zu IGDB fehlgeschlagen!</b><br>Bitte Zugangsdaten in den Einstellungen prüfen.]]></item>
         <item name="wcf.IgdbIntegration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen suchen.</b><br>Fehlende Spiele/Infos bitte direkt in die <a href="https://www.igdb.com/" target="_blank">IGDB</a> eintragen, Duplikate dort melden.]]></item>
         <item name="wcf.IgdbIntegration.page.game_edit_title"><![CDATA[Spiel bearbeiten]]></item>
         <item name="wcf.IgdbIntegration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23" target="_blank">Berny23</a>]]></item>
@@ -27,6 +27,7 @@
     <category name="wcf.IgdbIntegration.dialog">
         <item name="wcf.IgdbIntegration.dialog.game_user_edit_isOwned"><![CDATA[Im Besitz]]></item>
         <item name="wcf.IgdbIntegration.dialog.game_user_edit_title"><![CDATA[Spiel-Details]]></item>
+        <item name="wcf.IgdbIntegration.dialog.game_player_list_title"><![CDATA[Spieler-Liste]]></item>
     </category>
 
     <!-- ACP content menu -->
@@ -40,6 +41,11 @@
         <item name="wcf.user.condition.IgdbIntegrationGameCount"><![CDATA[Spiele im Besitz]]></item>
     </category>
 
+    <!-- User profile -->
+    <category name="wcf.user.profile">
+        <item name="wcf.user.profile.menu.IgdbIntegrationGameList"><![CDATA[Meine Spiele]]></item>
+    </category>
+
     <!-- User options -->
     <category name="wcf.user.option">
         <item name="wcf.user.option.IgdbIntegration_game_count"><![CDATA[Spiele im Besitz]]></item>
@@ -49,8 +55,10 @@
     <category name="wcf.acp.option">
         <item name="wcf.acp.option.category.IgdbIntegration"><![CDATA[IGDB-Integration]]></item>
         <item name="wcf.acp.option.category.IgdbIntegration_auth"><![CDATA[Authentifizierung]]></item>
+        <item name="wcf.acp.option.category.IgdbIntegration_general"><![CDATA[Sonstiges]]></item>
         <item name="wcf.acp.option.IgdbIntegration_auth_clientId"><![CDATA[Client-ID]]></item>
         <item name="wcf.acp.option.IgdbIntegration_auth_clientSecret"><![CDATA[Client-Geheimnis]]></item>
+        <item name="wcf.acp.option.IgdbIntegration_general_result_limit"><![CDATA[Max. Ergebnisse pro IGDB-Suche]]></item>
     </category>
 
     <!-- ACP guest/user/mod/admin group options menu -->
@@ -60,8 +68,7 @@
         <item name="wcf.acp.group.option.category.admin.IgdbIntegration"><![CDATA[IGDB-Integration]]></item>
         <item name="wcf.acp.group.option.admin.IgdbIntegration.canManageGames"><![CDATA[Kann alle Spiele editieren oder löschen.]]></item>
         <item name="wcf.acp.group.option.user.IgdbIntegration.canSearchIgdb"><![CDATA[Kann beim Suchen aktuelle Daten von IGDB abrufen.]]></item>
-        <item name="wcf.acp.group.option.admin.IgdbIntegration.canSearchIgdb"><![CDATA[Kann beim Suchen aktuelle Daten von IGDB abrufen.]]></item>
         <item name="wcf.acp.group.option.user.IgdbIntegration.canManageOwnGames"><![CDATA[Kann eigene Spiele-Bibliothek verwalten.]]></item>
-        <item name="wcf.acp.group.option.admin.IgdbIntegration.canManageOwnGames"><![CDATA[Kann eigene Spiele-Bibliothek verwalten.]]></item>
+        <item name="wcf.acp.group.option.user.IgdbIntegration.canSeePlayerList"><![CDATA[Kann alle Spieler eines Spiels auflisten.]]></item>
     </category>
 </language>
