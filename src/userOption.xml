@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data xmlns="http://www.woltlab.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/5.4/userOption.xsd">
+    <import>
+        <options>
+            <option name="IgdbIntegration_game_count">
+				<categoryname>profile.personal</categoryname>
+				<optiontype>integer</optiontype>
+				<visible>15</visible>
+				<editable>2</editable>
+            </option>
+        </options>
+    </import>
+</data>
