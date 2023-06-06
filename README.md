@@ -14,7 +14,9 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 - Supports automated Trophies
 - Supports system-wide image proxy
 - Supports permissions
-- Shows game count on user's profile page
+- Supports configuration options
+- Shows owned games and game count on profile pages
+- Users can view a list of all players of a game
 - Shows game titles in the current user's language, if available
 - Sortable by name, year, players and rating
 - Search allows for any part of the title to be in any order
