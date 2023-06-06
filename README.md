@@ -29,6 +29,18 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 
 Coming soon.
 
+## Tutorial
+
+To be able to access the IGDB API, you have to follow this short guide:
+1. Log in or sign up on Twitch: https://dev.twitch.tv/login
+2. Enable Two-Factor Authentication if you haven't already: https://www.twitch.tv/settings/security
+3. Register a new application here (Name: Your forum name, OAuth Redirect URL: Your forum address): https://dev.twitch.tv/console/apps/create
+4. Click on Manage next to your created application: https://dev.twitch.tv/console/apps
+5. Click on "New Secret".
+6. Paste your Client ID and Client Secret in the appropriate fields in the IGDB Integration settings inside your WoltLab Suite.
+
+![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/d3a4b332-2d63-4117-a2be-3b743f381406)
+
 ## Building
 
 1. On Windows, run build.bat in /tools.
