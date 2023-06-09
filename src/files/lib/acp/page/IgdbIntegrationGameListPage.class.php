@@ -25,12 +25,12 @@ class IgdbIntegrationGameListPage extends SortablePage
     /**
      * @inheritDoc
      */
-    public $activeMenuItem = 'wcf.acp.menu.link.IgdbIntegration.game_list';
+    public $activeMenuItem = 'wcf.acp.menu.link.igdb_integration.game_list';
 
     /**
      * @inheritDoc
      */
-    public $neededPermissions = ['admin.IgdbIntegration.canManageGames'];
+    public $neededPermissions = ['admin.igdb_integration.can_manage_games'];
 
     /**
      * @inheritDoc
@@ -45,7 +45,7 @@ class IgdbIntegrationGameListPage extends SortablePage
     /**
      * @inheritDoc
      */
-    public $validSortFields = ['gameId', 'name', 'firstReleaseDateYear', 'platforms'];
+    public $validSortFields = ['gameId', 'name', 'releaseYear', 'platforms'];
 
     /**
      * @inheritDoc

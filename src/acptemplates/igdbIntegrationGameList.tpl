@@ -1,17 +1,12 @@
-{include file='header' pageTitle='wcf.IgdbIntegration.page.game_list_title'}
+{include file='header' pageTitle='wcf.igdb_integration.page.game_list_title'}
 
 <header class="contentHeader">
     <div class="contentHeaderTitle">
-        <h1 class="contentTitle">{lang}wcf.IgdbIntegration.page.game_list_title{/lang}</h1>
+        <h1 class="contentTitle">{lang}wcf.igdb_integration.page.game_list_title{/lang}</h1>
     </div>
 
     <nav class="contentHeaderNavigation">
         <ul>
-            {*<li><a href="{link controller='IgdbIntegrationGameAdd'}{/link}" class="button">
-                    <span class="icon icon16 fa-plus"></span>
-                    <span>{lang}wcf.acp.menu.link.IgdbIntegration.game_add{/lang}</span>
-                </a>
-            </li>*}
             {event name='contentHeaderNavigation'}
         </ul>
     </nav>
@@ -33,13 +28,13 @@
                             href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=gameId&sortOrder={if $sortField == 'gameId' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.global.objectID{/lang}</a>
                     </th>
                     <th class="columnTitle columnName{if $sortField == 'name'} active {@$sortOrder}{/if}"><a
-                            href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=name&sortOrder={if $sortField == 'name' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.IgdbIntegration.game.name{/lang}</a>
+                            href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=name&sortOrder={if $sortField == 'name' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.name{/lang}</a>
                     </th>
-                    <th class="columnTitle columnYear{if $sortField == 'firstReleaseDateYear'} active {@$sortOrder}{/if}"><a
-                            href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=firstReleaseDateYear&sortOrder={if $sortField == 'firstReleaseDateYear' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.IgdbIntegration.game.year{/lang}</a>
+                    <th class="columnTitle columnYear{if $sortField == 'releaseYear'} active {@$sortOrder}{/if}"><a
+                            href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=releaseYear&sortOrder={if $sortField == 'releaseYear' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.year{/lang}</a>
                     </th>
                     <th class="columnTitle columnPlatforms{if $sortField == 'platforms'} active {@$sortOrder}{/if}"><a
-                            href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=platforms&sortOrder={if $sortField == 'platforms' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.IgdbIntegration.game.platforms{/lang}</a>
+                            href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=platforms&sortOrder={if $sortField == 'platforms' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.platforms{/lang}</a>
                     </th>
 
                     {event name='columnHeads'}
@@ -63,7 +58,7 @@
                                 href="{link controller='IgdbIntegrationGameEdit' object=$game}{/link}">{$game->displayName}</a>
                         </td>
                         <td class="columnTitle columnYear"><a
-                                href="{link controller='IgdbIntegrationGameEdit' object=$game}{/link}">{$game->firstReleaseDateYear}</a>
+                                href="{link controller='IgdbIntegrationGameEdit' object=$game}{/link}">{$game->releaseYear}</a>
                         </td>
                         <td class="columnTitle columnPlatforms"><a
                                 href="{link controller='IgdbIntegrationGameEdit' object=$game}{/link}">{$game->platforms}</a>
@@ -85,12 +80,6 @@
 
         <nav class="contentFooterNavigation">
             <ul>
-                {*<li>
-                    <a href="{link controller='IgdbIntegrationGameAdd'}{/link}" class="button">
-                        <span class="icon icon16 fa-plus"></span>
-                        <span>{lang}wcf.acp.menu.link.IgdbIntegration.game_add{/lang}</span>
-                    </a>
-                </li>*}
                 {event name='contentFooterNavigation'}
             </ul>
         </nav>

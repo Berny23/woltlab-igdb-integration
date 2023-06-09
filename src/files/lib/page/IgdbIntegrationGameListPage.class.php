@@ -34,7 +34,7 @@ class IgdbIntegrationGameListPage extends SortablePage
     /**
      * @inheritDoc
      */
-    public $validSortFields = ['displayName', 'firstReleaseDateYear', 'playerCount', 'averageRating'];
+    public $validSortFields = ['displayName', 'releaseYear', 'playerCount', 'averageRating'];
 
     /**
      * @inheritDoc
@@ -62,7 +62,7 @@ class IgdbIntegrationGameListPage extends SortablePage
         if (isset($_REQUEST['searchField'])) {
             $this->searchField = $_REQUEST['searchField'];
 
-            if (!isset($_REQUEST['pageNo']) && WCF::getSession()->getPermission('user.IgdbIntegration.canSearchIgdb')) {
+            if (!isset($_REQUEST['pageNo']) && WCF::getSession()->getPermission('user.igdb_integration.can_search_igdb')) {
                 // Search for games on IGDB and update local database
                 $result = IgdbIntegrationUtil::updateDatabaseGamesByName($this->searchField);
                 $this->showIgdbError = !$result;
@@ -76,6 +76,11 @@ class IgdbIntegrationGameListPage extends SortablePage
     public function assignVariables()
     {
         parent::assignVariables();
+
+		// Generate image proxy links, if enabled
+		foreach($this->objectList->getObjects() as &$game) {
+			$game->coverImageUrl = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $game->coverImageId . IgdbIntegrationUtil::COVER_URL_FILETYPE);
+		}
 
         WCF::getTPL()->assign([
             'searchField' => $this->searchField,
@@ -91,17 +96,36 @@ class IgdbIntegrationGameListPage extends SortablePage
         parent::initObjectList();
 
         $name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
-        $this->objectList->sqlSelects .= "DISTINCT CASE WHEN " . $name . " = '' THEN name ELSE " . $name . " END AS displayName,";
-        $this->objectList->sqlSelects .= "COUNT(gu.userId) OVER (PARTITION BY gu.gameId) AS playerCount,";
-        $this->objectList->sqlSelects .= "ROUND(AVG(rating) OVER (PARTITION BY gu.gameId), 0) AS averageRating,";
-        $this->objectList->sqlSelects .= "CASE WHEN EXISTS (SELECT userId FROM wcf" . WCF_N . "_igdb_integration_game_user guTemp WHERE guTemp.gameId = gu.gameId AND guTemp.userId = " . WCF::getUser()->userID . ") THEN 1 ELSE 0 END AS isOwned";
-        $this->objectList->sqlJoins .= "LEFT JOIN wcf" . WCF_N . "_igdb_integration_game_user gu ON gu.gameId = " . $this->objectList->getDatabaseTableAlias() . ".gameId";
+        $this->objectList->sqlSelects .= "DISTINCT CASE WHEN 
+											" . $name . " = '' 
+											THEN name ELSE " . $name . " END 
+											AS displayName,";
+        $this->objectList->sqlSelects .= "COUNT(gu.userId) 
+											OVER (PARTITION BY gu.gameId) 
+											AS playerCount,";
+        $this->objectList->sqlSelects .= "ROUND(AVG(rating) 
+											OVER (PARTITION BY gu.gameId), 0) 
+											AS averageRating,";
+        $this->objectList->sqlSelects .= "CASE WHEN 
+											EXISTS (
+												SELECT userId 
+												FROM wcf" . WCF_N . "_igdb_integration_game_user guTemp 
+												WHERE guTemp.gameId = gu.gameId 
+												AND guTemp.userId = " . WCF::getUser()->userID . ") 
+											THEN 1 ELSE 0 END 
+											AS isOwned";
+        $this->objectList->sqlJoins .= "LEFT JOIN wcf" . WCF_N . "_igdb_integration_game_user gu 
+										ON gu.gameId = " . $this->objectList->getDatabaseTableAlias() . ".gameId";
 
         if (!empty($this->searchField)) {
             // Search for all parts, separated with a space
             $parts = explode(' ', $this->searchField);
             foreach ($parts as $part) {
-                $this->objectList->getConditionBuilder()->add("CASE WHEN " . $name . " = '' THEN name ELSE " . $name . " END LIKE ?", ['%' . $part . '%']);
+                $this->objectList->getConditionBuilder()->add("CASE WHEN 
+																" . $name . " = '' 
+																THEN name ELSE " . $name . " END 
+																LIKE ?", 
+																['%' . $part . '%']);
             }
         }
     }

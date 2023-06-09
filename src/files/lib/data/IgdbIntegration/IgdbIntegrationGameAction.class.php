@@ -9,7 +9,6 @@ use wcf\system\WCF;
 use wcf\data\user\UserEditor;
 use wcf\data\AbstractDatabaseObjectAction;
 use wcf\system\event\EventHandler;
-use wcf\system\exception\PermissionDeniedException;
 use wcf\system\form\builder\DialogFormDocument;
 use wcf\system\form\builder\field\BooleanFormField;
 use wcf\system\form\builder\field\RatingFormField;
@@ -28,248 +27,290 @@ use wcf\system\form\builder\TemplateFormNode;
  */
 class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 {
-    /**
+	/**
+	 * @inheritDoc
+	 */
+	protected $permissionsCreate = ['admin.igdb_integration.can_manage_games'];
+
+	/**
+	 * @inheritDoc
+	 */
+	protected $permissionsUpdate = ['admin.igdb_integration.can_manage_games'];
+
+	/**
+	 * @inheritDoc
+	 */
+	protected $permissionsDelete = ['admin.igdb_integration.can_manage_games'];
+
+	/**
+	 * @inheritDoc
+	 */
+	protected $requireACP = ['create', 'delete', 'update'];
+
+	/**
      * @inheritDoc
      */
-    protected $permissionsCreate = ['admin.IgdbIntegration.canManageGames'];
+    protected $allowGuestAccess = ['getGameUserEditDialog', 'getGamePlayerListDialog'];
 
-    /**
-     * @inheritDoc
-     */
-    protected $permissionsUpdate = ['admin.IgdbIntegration.canManageGames'];
+	/**
+	 * @var DialogFormDocument
+	 */
+	protected $dialog;
 
-    /**
-     * @inheritDoc
-     */
-    protected $permissionsDelete = ['admin.IgdbIntegration.canManageGames'];
+	/**
+	 * @var IgdbIntegrationGame
+	 */
+	protected $game;
 
-    /**
-     * @inheritDoc
-     */
-    protected $requireACP = ['create', 'delete', 'update'];
+	/**
+	 * The user ID of the game owner, if sent in request.
+	 */
+	protected $ownerId;
 
-    /**
-     * @var DialogFormDocument
-     */
-    protected $dialog;
+	/**
+	 * Checks for permission to show the game user edit dialog.
+	 */
+	public function validateGetGameUserEditDialog()
+	{
+		$this->readInteger('gameId', true);
+		$this->readInteger('userId', true);
 
-    /**
-     * @var IgdbIntegrationGame
-     */
-    protected $game;
+		// If userId is present, use the user's rating instead of the average rating
+		$this->ownerId = !empty($this->parameters['userId']) ? $this->parameters['userId'] : null;
 
-    /**
-     * The user ID of the game owner, if sent in request.
-     */
-    protected $ownerId;
+		$this->game = new IgdbIntegrationGame($this->parameters['gameId']);
+		if (!$this->game->getObjectID()) {
+			throw new UserInputException('gameId');
+		}
+	}
 
-    /**
-     * Override default function because it always returns false, even for admins (I don't know why).
-     */
-    public function validateAction()
-    {
-        $this->readInteger('gameId');
-        try {
-            // Try reading userId (if it is present, use the user's rating instead of the average rating)
-            $this->readInteger('userId');
-            $this->ownerId = $this->parameters['userId'];
-        } catch (Exception $ex) {
-            $this->ownerId = null;
-        }
-        $this->game = new IgdbIntegrationGame($this->parameters['gameId']);
-        if (!$this->game->getObjectID()) {
-            throw new UserInputException('gameId');
-        }
+	/**
+	 * Returns the data to show the dialog to edit a relationship between a user and a game.
+	 */
+	public function getGameUserEditDialog()
+	{
+		$sql = "SELECT DISTINCT rating 
+				FROM wcf1_igdb_integration_game_user 
+				WHERE gameId = ? AND userId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$this->game->gameId, WCF::getUser()->userID]);
+		$gameUserRow = $statement->fetchSingleRow();
 
-        return true; // Always return true, because this form also shows general info. Permission is later checked.
-    }
+		$name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
+		$sql = "SELECT DISTINCT CASE WHEN 
+					" . $name . " = '' 
+					THEN name ELSE " . $name . " END 
+					AS displayName 
+				FROM wcf1_igdb_integration_game 
+				WHERE gameId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$this->game->gameId]);
+		$gameRow = $statement->fetchSingleRow();
 
-    /**
-     * Returns the data to show the dialog to edit a relationship between a user and a game.
-     */
-    public function getGameUserEditDialog()
-    {
-        $sql = "SELECT DISTINCT rating FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE gameId = ? AND userId = ?";
-        $statement = WCF::getDB()->prepare($sql);
-        $statement->execute([$this->game->gameId, WCF::getUser()->userID]);
-        $gameUserRow = $statement->fetchSingleRow();
+		$this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId)
+			->appendChildren([
+				TitleFormField::create('name')
+					->label('wcf.igdb_integration.game.name')
+					->value($gameRow['displayName'] ?? '')
+					->immutable(),
+				TextFormField::create('releaseYear')
+					->label('wcf.igdb_integration.game.year')
+					->value($this->game->releaseYear)
+					->immutable(),
+				TextFormField::create('platforms')
+					->label('wcf.igdb_integration.game.platforms')
+					->value($this->game->platforms)
+					->immutable(),
+				DescriptionFormField::create('summary')
+					->label('wcf.igdb_integration.game.summary')
+					->value($this->game->summary)
+					->immutable()
+			]);
+		if (WCF::getSession()->getPermission('user.igdb_integration.can_manage_own_games')) {
+			$this->dialog->appendChildren([
+				BooleanFormField::create('isOwned')
+					->label('wcf.igdb_integration.dialog.game_user_edit_is_owned')
+					->value(!empty($gameUserRow))
+					->required(),
+				RatingFormField::create('rating')
+					->label('wcf.form.field.rating')
+					->value($gameUserRow['rating'] ?? 0)
+			]);
+		} else {
+			$this->dialog->addDefaultButton(false);
+		}
 
-        $name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
-        $sql = "SELECT DISTINCT CASE WHEN " . $name . " = '' THEN name ELSE " . $name . " END AS displayName FROM wcf" . WCF_N . "_igdb_integration_game WHERE gameId = ?";
-        $statement = WCF::getDB()->prepare($sql);
-        $statement->execute([$this->game->gameId]);
-        $gameRow = $statement->fetchSingleRow();
+		EventHandler::getInstance()->fireAction($this, 'getGameUserEditDialog');
 
-        $this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId)
-            ->appendChildren([
-                TitleFormField::create('name')
-                    ->label('wcf.IgdbIntegration.game.name')
-                    ->value($gameRow['displayName'] ?? '')
-                    ->immutable(),
-                TextFormField::create('firstReleaseDateYear')
-                    ->label('wcf.IgdbIntegration.game.year')
-                    ->value($this->game->firstReleaseDateYear)
-                    ->immutable(),
-                TextFormField::create('platforms')
-                    ->label('wcf.IgdbIntegration.game.platforms')
-                    ->value($this->game->platforms)
-                    ->immutable(),
-                DescriptionFormField::create('summary')
-                    ->label('wcf.IgdbIntegration.game.summary')
-                    ->value($this->game->summary)
-                    ->immutable()
-            ]);
+		$this->dialog->build();
 
-        // These form fields should only be show to users with the right permission, guests can still see the general game info above.
-        try {
-            WCF::getSession()->checkPermissions(['user.IgdbIntegration.canManageOwnGames']); // This can throw a PermissionDeniedException
+		return [
+			'dialog' => $this->dialog->getHtml(),
+			'formId' => $this->dialog->getId(),
+		];
+	}
 
-            $this->dialog->appendChildren([
-                BooleanFormField::create('isOwned')
-                    ->label('wcf.IgdbIntegration.dialog.game_user_edit_isOwned')
-                    ->value(!($gameUserRow == NULL))
-                    ->required(),
-                RatingFormField::create('rating')
-                    ->label('wcf.form.field.rating')
-                    ->value($gameUserRow['rating'] ?? 0)
-            ]);
+	/**
+	 * Checks for permission to submit the game user edit dialog.
+	 */
+	public function validateSubmitGameUserEditDialog()
+	{
+		$this->validateGetGameUserEditDialog();
 
-            EventHandler::getInstance()->fireAction($this, 'getGameUserEditDialog');
-        } catch (PermissionDeniedException $ex) {
-            $this->dialog->addDefaultButton(false);
-        }
+		// If there are any validation errors, show the form again.
+		if (!isset($this->parameters['gameId']) || !isset($this->parameters['data']['isOwned'])) {
+			return $this->getGameUserEditDialog();
+		}
+	}
 
-        $this->dialog->build();
+	/**
+	 * Handles submitting the form.
+	 */
+	public function submitGameUserEditDialog()
+	{
+		$gameId = $this->parameters['gameId'];
+		$userId = WCF::getUser()->userID;
+		$isOwned = boolval($this->parameters['data']['isOwned']);
+		$rating = $this->parameters['data']['rating'] ?? 0;
 
-        return [
-            'dialog' => $this->dialog->getHtml(),
-            'formId' => $this->dialog->getId(),
-        ];
-    }
+		if ($isOwned) {
+			// Insert or update association data
 
-    /**
-     * Handles submitting the form.
-     */
-    public function submitGameUserEditDialog()
-    {
-        WCF::getSession()->checkPermissions(['user.IgdbIntegration.canManageOwnGames']);
+			$sql = "SELECT gameId,userId 
+					FROM wcf1_igdb_integration_game_user 
+					WHERE gameId = ? AND userId = ?";
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute([$gameId, $userId]);
+			$row = $statement->fetchSingleRow();
 
-        // If there are any validation errors, show the form again.
-        if (!isset($_REQUEST['parameters']['gameId']) || !isset($_REQUEST['parameters']['data']['isOwned'])) {
-            return $this->getGameUserEditDialog();
-        }
+			if (!empty($row)) {
+				$sql = "UPDATE wcf1_igdb_integration_game_user 
+						SET rating = ? 
+						WHERE gameId = ? AND userId = ?";
+				$statement = WCF::getDB()->prepare($sql);
+				$statement->execute([$rating, $gameId, $userId]);
+			} else {
+				$sql = "INSERT INTO wcf1_igdb_integration_game_user 
+						SET gameId = ?, userId = ?, rating = ?";
+				$statement = WCF::getDB()->prepare($sql);
+				$statement->execute([$gameId, $userId, $rating]);
+			}
+		} else {
+			// Remove association data
 
-        $gameId = $_REQUEST['parameters']['gameId'];
-        $userId = WCF::getUser()->userID;
-        $isOwned = boolval($_REQUEST['parameters']['data']['isOwned']);
-        $rating = $_REQUEST['parameters']['data']['rating'] ?? 0;
+			$sql = "DELETE FROM wcf1_igdb_integration_game_user 
+					WHERE gameId = ? AND userId = ?";
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute([$gameId, $userId]);
+		}
 
-        if ($isOwned) {
-            // Insert or update association data
+		// Reload the game <-> user association for the game.
 
-            $sql = "SELECT gameId,userId FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE gameId = ? AND userId = ?";
-            $statement = WCF::getDB()->prepare($sql);
-            $statement->execute([$gameId, $userId]);
-            $row = $statement->fetchSingleRow();
+		// Either calculate average rating and count users or get single rating of owner
+		if (is_null($this->ownerId)) {
+			$sql = "SELECT rating 
+					FROM wcf1_igdb_integration_game_user 
+					WHERE gameId = ?";
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute([$gameId]);
+			$owners = $statement->fetchAll(\PDO::FETCH_COLUMN);
 
-            if ($row != NULL) {
-                $sql = "UPDATE wcf" . WCF_N . "_igdb_integration_game_user SET rating = ? WHERE gameId = ? AND userId = ?";
-                $statement = WCF::getDB()->prepare($sql);
-                $statement->execute([$rating, $gameId, $userId]);
-            } else {
-                $sql = "INSERT INTO wcf" . WCF_N . "_igdb_integration_game_user SET gameId = ?, userId = ?, rating = ?";
-                $statement = WCF::getDB()->prepare($sql);
-                $statement->execute([$gameId, $userId, $rating]);
-            }
-        } else {
-            // Remove association data
+			$ratingArray = array_filter($owners, "wcf\util\IgdbIntegrationUtil::validateRating");
+			$averageRating = count($ratingArray) ? array_sum($ratingArray) / count($ratingArray) : 0;
+			$playerCount = count($owners);
+		} else {
+			$sql = "SELECT DISTINCT rating 
+					FROM wcf1_igdb_integration_game_user 
+					WHERE gameId = ? AND userId = ?";
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute([$gameId, $this->ownerId]);
+			$owner = $statement->fetchSingleRow();
 
-            $sql = "DELETE FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE gameId = ? AND userId = ?";
-            $statement = WCF::getDB()->prepare($sql);
-            $statement->execute([$gameId, $userId]);
-        }
+			// First check if owner still owns game
+			if ($owner) {
+				$ownerRating = $owner['rating'];
+				$playerCount = 1;
+			}
+		}
 
-        // Reload the game <-> user association for the game.
+		// Get game count for user
+		$sql = "SELECT DISTINCT COUNT(*) AS gameCount 
+				FROM wcf1_igdb_integration_game_user 
+				WHERE userId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$userId]);
+		$gameCount = $statement->fetchSingleRow();
 
-        // Either calculate average rating and count users or get single rating of owner
-        if (is_null($this->ownerId)) {
-            $sql = "SELECT rating FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE gameId = ?";
-            $statement = WCF::getDB()->prepare($sql);
-            $statement->execute([$gameId]);
-            $owners = $statement->fetchAll(\PDO::FETCH_COLUMN);
+		//update game count profile field used for display only
+		$userEditor = new UserEditor(WCF::getUser());
+		$userEditor->updateUserOptions([
+			WCF::getUser()->getUserOptionID('igdb_integration_game_count') => $gameCount['gameCount']
+		]);
 
-            $ratingArray = array_filter($owners, "wcf\util\IgdbIntegrationUtil::validateRating");
-            $averageRating = count($ratingArray) ? array_sum($ratingArray) / count($ratingArray) : 0;
-            $playerCount = count($owners);
-        } else {
-            $sql = "SELECT DISTINCT rating FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE gameId = ? AND userId = ?";
-            $statement = WCF::getDB()->prepare($sql);
-            $statement->execute([$gameId, $this->ownerId]);
-            $owner = $statement->fetchSingleRow();
+		// Update user database info used for trophies
+		$sql = "UPDATE wcf1_user 
+				SET IgdbIntegrationGameCount = ? 
+				WHERE userID = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$gameCount['gameCount'], $userId]);
 
-            // First check if owner still owns game
-            if ($owner) {
-                $ownerRating = $owner['rating'];
-                $playerCount = 1;
-            }
-        }
+		// Return data for displaying in HTML
+		return [
+			'gameId' => $gameId,
+			'isOwned' => $isOwned,
+			'playerCount' => isset($playerCount) ? $playerCount : -1,
+			'averageRating' => isset($averageRating) ? $averageRating : -1,
+			'ownRating' => isset($ownerRating) ? $ownerRating : -1,
+			'ownerRating' => isset($ownerRating) ? $ownerRating : -1
+		];
+	}
 
-        // Get game count for user
-        $sql = "SELECT DISTINCT COUNT(*) AS gameCount FROM wcf" . WCF_N . "_igdb_integration_game_user WHERE userId = ?";
-        $statement = WCF::getDB()->prepare($sql);
-        $statement->execute([$userId]);
-        $gameCount = $statement->fetchSingleRow();
+	/**
+	 * Checks for permission to show the player list dialog.
+	 */
+	public function validateGetGamePlayerListDialog()
+	{
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_see_player_list']);
 
-        //update game count profile field used for display only
-        $userEditor = new UserEditor(WCF::getUser());
-        $userEditor->updateUserOptions([
-            WCF::getUser()->getUserOptionID('IgdbIntegration_game_count') => $gameCount['gameCount']
-        ]);
+		$this->game = new IgdbIntegrationGame($this->parameters['gameId']);
+		if (!$this->game->getObjectID()) {
+			throw new UserInputException('gameId');
+		}
+	}
 
-        // Update user database info used for trophies
-        $sql = "UPDATE wcf" . WCF_N . "_user SET IgdbIntegrationGameCount = ? WHERE userID = ?";
-        $statement = WCF::getDB()->prepare($sql);
-        $statement->execute([$gameCount['gameCount'], $userId]);
+	/**
+	 * Returns the data to show the dialog to edit a relationship between a user and a game.
+	 */
+	public function getGamePlayerListDialog()
+	{
+		$sql = "SELECT gu.userId AS userId,username,rating 
+				FROM wcf1_igdb_integration_game_user gu 
+				LEFT JOIN wcf1_user u 
+				ON u.userID = gu.userId 
+				WHERE gameId = ? 
+				ORDER BY username ASC";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$this->game->gameId]);
+		$gameOwners = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
-        // Return data for displaying in HTML
-        return [
-            'gameId' => $gameId,
-            'isOwned' => $isOwned,
-            'playerCount' => isset($playerCount) ? $playerCount : -1,
-            'averageRating' => isset($averageRating) ? $averageRating : -1,
-            'ownRating' => isset($ownerRating) ? $ownerRating : -1,
-            'ownerRating' => isset($ownerRating) ? $ownerRating : -1
-        ];
-    }
+		$this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId);
+		$this->dialog->addDefaultButton(false);
 
-    /**
-     * Returns the data to show the dialog to edit a relationship between a user and a game.
-     */
-    public function getGamePlayerListDialog()
-    {
-        WCF::getSession()->checkPermissions(['user.IgdbIntegration.canSeePlayerList']);
+		$this->dialog->appendChildren([
+			TemplateFormNode::create('playerList')
+				->templateName('__igdbIntegrationGamePlayerList')
+				->variables([
+					'gameOwners' => $gameOwners
+				])
+		]);
 
-        $sql = "SELECT gu.userId AS userId,username,rating FROM wcf" . WCF_N . "_igdb_integration_game_user gu LEFT JOIN wcf" . WCF_N . "_user u ON u.userID = gu.userId WHERE gameId = ? ORDER BY username ASC";
-        $statement = WCF::getDB()->prepare($sql);
-        $statement->execute([$this->game->gameId]);
-        $gameOwners = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		EventHandler::getInstance()->fireAction($this, 'getGamePlayerListDialog');
 
-        $this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId);
-        $this->dialog->addDefaultButton(false);
+		$this->dialog->build();
 
-        $this->dialog->appendChildren([
-            TemplateFormNode::create('playerList')
-                ->templateName('__igdbIntegrationGamePlayerList')
-                ->variables([
-                    'gameOwners' => $gameOwners
-                ])
-        ]);
-
-        $this->dialog->build();
-
-        return [
-            'dialog' => $this->dialog->getHtml(),
-            'formId' => $this->dialog->getId(),
-        ];
-    }
+		return [
+			'dialog' => $this->dialog->getHtml(),
+			'formId' => $this->dialog->getId(),
+		];
+	}
 }

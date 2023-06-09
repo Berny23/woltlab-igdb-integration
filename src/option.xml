@@ -1,42 +1,42 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"	encoding="UTF-8"?>
 <data xmlns="http://www.woltlab.com"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/2019/option.xsd">
-    <import>
-        <categories>
-            <category name="IgdbIntegration">
-                <parent/>
-            </category>
-            <category name="IgdbIntegration_auth">
-                <parent>IgdbIntegration</parent>
-            </category>
-            <category name="IgdbIntegration_general">
-                <parent>IgdbIntegration</parent>
-            </category>
-        </categories>
-        <options>
-            <option name="IgdbIntegration_auth_clientId">
-                <categoryname>IgdbIntegration_auth</categoryname>
-                <optiontype>text</optiontype>
-                <defaultvalue></defaultvalue>
-            </option>
-            <option name="IgdbIntegration_auth_clientSecret">
-                <categoryname>IgdbIntegration_auth</categoryname>
-                <optiontype>password</optiontype>
-                <defaultvalue></defaultvalue>
-            </option>
-            <option name="IgdbIntegration_auth_accessToken">
-                <categoryname>IgdbIntegration_auth</categoryname>
-                <optiontype>password</optiontype>
-                <defaultvalue></defaultvalue>
-                <hidden>1</hidden>
-            </option>
-            <option name="IgdbIntegration_general_result_limit">
-                <categoryname>IgdbIntegration_general</categoryname>
-                <optiontype>integer</optiontype>
-                <defaultvalue>30</defaultvalue>
-                <minvalue>0</minvalue>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/2019/option.xsd">
+	<import>
+		<categories>
+			<category name="igdb_integration">
+				<parent/>
+			</category>
+			<category name="igdb_integration_auth">
+				<parent>igdb_integration</parent>
+			</category>
+			<category name="igdb_integration_general">
+				<parent>igdb_integration</parent>
+			</category>
+		</categories>
+		<options>
+			<option	name="igdb_integration_auth_client_id">
+				<categoryname>igdb_integration_auth</categoryname>
+				<optiontype>text</optiontype>
+				<defaultvalue></defaultvalue>
+			</option>
+			<option	name="igdb_integration_auth_client_secret">
+				<categoryname>igdb_integration_auth</categoryname>
+				<optiontype>password</optiontype>
+				<defaultvalue></defaultvalue>
+			</option>
+			<option	name="igdb_integration_auth_access_token">
+				<categoryname>igdb_integration_auth</categoryname>
+				<optiontype>password</optiontype>
+				<defaultvalue></defaultvalue>
+				<hidden>1</hidden>
+			</option>
+			<option	name="igdb_integration_general_result_limit">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>integer</optiontype>
+				<defaultvalue>30</defaultvalue>
+				<minvalue>0</minvalue>
 				<maxvalue>500</maxvalue>
-            </option>
-        </options>
-    </import>
+			</option>
+		</options>
+	</import>
 </data>

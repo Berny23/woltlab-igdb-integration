@@ -22,7 +22,7 @@ class IgdbIntegrationGameAddForm extends AbstractFormBuilderForm
     /**
      * @inheritDoc
      */
-    public $activeMenuItem = 'wcf.acp.menu.link.IgdbIntegration.add';
+    public $activeMenuItem = 'wcf.acp.menu.link.igdb_integration.add';
 
     /**
      * @inheritDoc
@@ -32,7 +32,7 @@ class IgdbIntegrationGameAddForm extends AbstractFormBuilderForm
     /**
      * @inheritDoc
      */
-    public $neededPermissions = ['admin.IgdbIntegration.canManageGames'];
+    public $neededPermissions = ['admin.igdb_integration.can_manage_games'];
 
     /**
      * @inheritDoc
@@ -56,29 +56,26 @@ class IgdbIntegrationGameAddForm extends AbstractFormBuilderForm
                 ->label('wcf.global.form.data')
                 ->appendChildren([
                     TextFormField::create('name')
-                        ->label('wcf.IgdbIntegration.game.name')
+                        ->label('wcf.igdb_integration.game.name')
                         ->required()
                         ->maximumLength(500),
                     TextFormField::create('germanName')
-                        ->label('wcf.IgdbIntegration.game.germanName')
+                        ->label('wcf.igdb_integration.game.german_name')
                         ->maximumLength(500),
-                    IntegerFormField::create('firstReleaseDateYear')
-                        ->label('wcf.IgdbIntegration.game.year')
+                    IntegerFormField::create('releaseYear')
+                        ->label('wcf.igdb_integration.game.year')
                         ->required()
                         ->minimum(0)
                         ->maximum(9999),
                     TextFormField::create('platforms')
-                        ->label('wcf.IgdbIntegration.game.platforms')
+                        ->label('wcf.igdb_integration.game.platforms')
                         ->maximumLength(500),
                     DescriptionFormField::create('summary')
-                        ->label('wcf.IgdbIntegration.game.summary')
+                        ->label('wcf.igdb_integration.game.summary')
                         ->maximumLength(5000),
                     TextFormField::create('coverImageId')
-                        ->label('wcf.IgdbIntegration.game.coverImageId')
-                        ->maximumLength(255),
-                    TextFormField::create('coverImageUrl')
-                        ->label('wcf.IgdbIntegration.game.coverImageUrl')
-                        ->maximumLength(2000),
+                        ->label('wcf.igdb_integration.game.cover_image_id')
+                        ->maximumLength(255)
                 ])
         );
     }

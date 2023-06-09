@@ -18,7 +18,7 @@ class IgdbIntegrationGameEditForm extends IgdbIntegrationGameAddForm
     /**
      * @inheritDoc
      */
-    public $activeMenuItem = 'wcf.acp.menu.link.IgdbIntegration.game_list';
+    public $activeMenuItem = 'wcf.acp.menu.link.igdb_integration.game_list';
 
     /**
      * @inheritDoc

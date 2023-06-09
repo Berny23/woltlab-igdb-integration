@@ -29,26 +29,40 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
      */
     public function getContent($userID)
     {
-
-        /*$eventList = new ViewableUserActivityEventList();
-
-        // load more items than necessary to avoid empty list if some items are invisible for current user
-        $eventList->sqlLimit = 60;
-
-        $eventList->getConditionBuilder()->add("user_activity_event.userID = ?", [$userID]);
-        $eventList->readObjects();
-
-        UserActivityEventHandler::validateEvents($eventList);
-
-        // remove unused items
-        $eventList->truncate(20);
-        */
-
         $name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
-        $sql = "SELECT DISTINCT g.gameId AS gameId, coverImageUrl, firstReleaseDateYear, rating AS ownRating, COUNT(gu.userId) OVER (PARTITION BY gu.gameId) AS playerCount, CASE WHEN EXISTS (SELECT userId FROM wcf" . WCF_N . "_igdb_integration_game_user guTemp WHERE guTemp.gameId = gu.gameId AND guTemp.userId = " . WCF::getUser()->userID . ") THEN 1 ELSE 0 END AS isOwned, CASE WHEN " . $name . " = '' THEN name ELSE " . $name . " END AS displayName FROM wcf" . WCF_N . "_igdb_integration_game g LEFT JOIN wcf" . WCF_N . "_igdb_integration_game_user gu ON gu.gameId = g.gameId WHERE gu.userId = ? ORDER BY ownRating DESC, displayName ASC";
+        $sql = "SELECT DISTINCT 
+					g.gameId AS gameId, 
+					coverImageId, 
+					releaseYear, 
+					rating AS ownRating, 
+					COUNT(gu.userId) 
+						OVER (PARTITION BY gu.gameId) 
+						AS playerCount, 
+					CASE WHEN 
+						EXISTS (
+							SELECT userId 
+							FROM wcf1_igdb_integration_game_user guTemp 
+							WHERE guTemp.gameId = gu.gameId 
+							AND guTemp.userId = " . WCF::getUser()->userID . 
+						") 
+						THEN 1 ELSE 0 END 
+						AS isOwned, 
+					CASE WHEN " . $name . " = '' 
+						THEN name ELSE " . $name . " END 
+						AS displayName 
+				FROM wcf1_igdb_integration_game g 
+				LEFT JOIN wcf1_igdb_integration_game_user gu 
+				ON gu.gameId = g.gameId 
+				WHERE gu.userId = ? 
+				ORDER BY ownRating DESC, displayName ASC";
         $statement = WCF::getDB()->prepare($sql);
         $statement->execute([$userID]);
         $userGames = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+		// Generate image proxy links, if enabled
+		foreach($userGames as &$game) {
+			$game['coverImageUrl'] = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $game['coverImageId'] . IgdbIntegrationUtil::COVER_URL_FILETYPE);
+		}
 
         WCF::getTPL()->assign([
             'userGames' => $userGames,

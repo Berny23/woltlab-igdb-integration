@@ -1,11 +1,11 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0"	encoding="UTF-8"?>
 <data xmlns="http://www.woltlab.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/2019/page.xsd">
-    <import>
-        <page identifier="de.Berny23.IgdbIntegration.IgdbIntegrationGameList">
-            <controller>wcf\page\IgdbIntegrationGameListPage</controller>
-            <name language="en">Game List</name>
-            <name language="de">Spiele-Liste</name>
-            <pageType>system</pageType>
-        </page>
-    </import>
+	<import>
+		<page identifier="de.berny23.igdb_integration.igdb_integration_game_list">
+			<controller>wcf\page\IgdbIntegrationGameListPage</controller>
+			<name language="en">Game List</name>
+			<name language="de">Spiele-Liste</name>
+			<pageType>system</pageType>
+		</page>
+	</import>
 </data>

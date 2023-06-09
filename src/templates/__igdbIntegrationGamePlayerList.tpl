@@ -2,12 +2,10 @@
     {foreach from=$gameOwners item=owner}
         <tr>
             <td style="padding-right: 1rem;">
-                <b><a href="/user/{$owner['userId']}">{$owner['username']}</a></b>
+                <b><a href="/user/{$owner['userId']}/#igdb_integration_game_list">{$owner['username']}</a></b>
             </td>
             <td>
-                {section name=ratingStars loop=$owner['rating']}
-                    <span class="icon icon16 fa-star orange"></span>
-                {/section}
+                {section name=ratingStars loop=$owner['rating']}<span class="icon icon16 fa-star orange"></span>{/section}
             </td>
         </tr>
     {/foreach}

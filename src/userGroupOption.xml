@@ -1,52 +1,52 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"	encoding="UTF-8"?>
 <data xmlns="http://www.woltlab.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/5.4/userGroupOption.xsd">
-    <import>
-        <categories>
-			<category name="user.IgdbIntegration">
+	<import>
+		<categories>
+			<category name="user.igdb_integration">
 				<parent>user</parent>
 			</category>
-			<category name="mod.IgdbIntegration">
+			<category name="mod.igdb_integration">
 				<parent>mod</parent>
 			</category>
-			<category name="admin.IgdbIntegration">
+			<category name="admin.igdb_integration">
 				<parent>admin</parent>
 			</category>
 		</categories>
-        <options>
-            <option name="admin.IgdbIntegration.canManageGames">
-                <categoryname>admin.IgdbIntegration</categoryname>
-                <optiontype>boolean</optiontype>
-                <admindefaultvalue>1</admindefaultvalue>
-                <moddefaultvalue>0</moddefaultvalue>
-                <userdefaultvalue>0</userdefaultvalue>
-                <usersonly>1</usersonly>
-            </option>
-            <option name="user.IgdbIntegration.canSearchIgdb">
-                <categoryname>user.IgdbIntegration</categoryname>
-                <optiontype>boolean</optiontype>
-                <defaultvalue>0</defaultvalue>
-                <admindefaultvalue>1</admindefaultvalue>
-                <moddefaultvalue>1</moddefaultvalue>
-                <userdefaultvalue>1</userdefaultvalue>
-                <usersonly>0</usersonly>
-            </option>
-            <option name="user.IgdbIntegration.canManageOwnGames">
-                <categoryname>user.IgdbIntegration</categoryname>
-                <optiontype>boolean</optiontype>
-                <admindefaultvalue>1</admindefaultvalue>
-                <moddefaultvalue>1</moddefaultvalue>
-                <userdefaultvalue>1</userdefaultvalue>
-                <usersonly>1</usersonly>
-            </option>
-            <option name="user.IgdbIntegration.canSeePlayerList">
-                <categoryname>user.IgdbIntegration</categoryname>
-                <optiontype>boolean</optiontype>
-                <defaultvalue>0</defaultvalue>
-                <admindefaultvalue>1</admindefaultvalue>
-                <moddefaultvalue>1</moddefaultvalue>
-                <userdefaultvalue>1</userdefaultvalue>
-                <usersonly>0</usersonly>
-            </option>
-        </options>
-    </import>
+		<options>
+			<option	name="admin.igdb_integration.can_manage_games">
+				<categoryname>admin.igdb_integration</categoryname>
+				<optiontype>boolean</optiontype>
+				<admindefaultvalue>1</admindefaultvalue>
+				<moddefaultvalue>0</moddefaultvalue>
+				<userdefaultvalue>0</userdefaultvalue>
+				<usersonly>1</usersonly>
+			</option>
+			<option	name="user.igdb_integration.can_search_igdb">
+				<categoryname>user.igdb_integration</categoryname>
+				<optiontype>boolean</optiontype>
+				<defaultvalue>0</defaultvalue>
+				<admindefaultvalue>1</admindefaultvalue>
+				<moddefaultvalue>1</moddefaultvalue>
+				<userdefaultvalue>1</userdefaultvalue>
+				<usersonly>0</usersonly>
+			</option>
+			<option	name="user.igdb_integration.can_manage_own_games">
+				<categoryname>user.igdb_integration</categoryname>
+				<optiontype>boolean</optiontype>
+				<admindefaultvalue>1</admindefaultvalue>
+				<moddefaultvalue>1</moddefaultvalue>
+				<userdefaultvalue>1</userdefaultvalue>
+				<usersonly>1</usersonly>
+			</option>
+			<option	name="user.igdb_integration.can_see_player_list">
+				<categoryname>user.igdb_integration</categoryname>
+				<optiontype>boolean</optiontype>
+				<defaultvalue>0</defaultvalue>
+				<admindefaultvalue>1</admindefaultvalue>
+				<moddefaultvalue>1</moddefaultvalue>
+				<userdefaultvalue>1</userdefaultvalue>
+				<usersonly>0</usersonly>
+			</option>
+		</options>
+	</import>
 </data>

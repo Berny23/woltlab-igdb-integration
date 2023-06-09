@@ -1,36 +1,36 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<package xmlns="http://www.woltlab.com" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/2019/package.xsd" name="de.Berny23.IgdbIntegration">
-    <packageinformation>
-        <!-- de.Berny23.IgdbIntegration -->
-        <packagename>IGDB Integration</packagename>
-        <packagedescription>Allows you to automatically import and manage all games from IGDB within the WoltLab Suite front-end.</packagedescription>
-        <version>1.0.0</version>
-        <date>2023-05-31</date>
-    </packageinformation>
-    <authorinformation>
-        <author>Berny23</author>
-        <authorurl>https://linktr.ee/berny23</authorurl>
-    </authorinformation>
-    <requiredpackages>
-        <requiredpackage minversion="5.5.0">com.woltlab.wcf</requiredpackage>
-    </requiredpackages>
-    <excludedpackages>
-        <excludedpackage version="6.0.0 Alpha 1">com.woltlab.wcf</excludedpackage>
-    </excludedpackages>
-    <instructions type="install">
-        <instruction type="acpTemplate" />
-        <instruction type="file" />
-        <instruction type="database">acp/database/install_de.Berny23.IgdbIntegration.php</instruction>
-        <instruction type="template" />
-        <instruction type="language" />
-        
-        <instruction type="acpMenu" />
-        <instruction type="page" />
-        <instruction type="menuItem" />
-        <instruction type="option" />
-        <instruction type="userOption" />
-        <instruction type="objectType" />
-        <instruction type="userGroupOption" />
-        <instruction type="userProfileMenu" />
-    </instructions>
+<?xml version="1.0"	encoding="UTF-8"?>
+<package xmlns="http://www.woltlab.com"	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/2019/package.xsd" name="de.berny23.igdb_integration">
+	<packageinformation>
+		<!-- de.berny23.igdb_integration -->
+		<packagename>IGDB Integration</packagename>
+		<packagedescription>Allows you to automatically	import and manage all games	from IGDB within the WoltLab Suite front-end.</packagedescription>
+		<version>1.0.1</version>
+		<date>2023-06-09</date>
+	</packageinformation>
+	<authorinformation>
+		<author>Berny23</author>
+		<authorurl>https://linktr.ee/berny23</authorurl>
+	</authorinformation>
+	<requiredpackages>
+		<requiredpackage minversion="5.5.0">com.woltlab.wcf</requiredpackage>
+	</requiredpackages>
+	<excludedpackages>
+		<excludedpackage version="6.0.0	Alpha 1">com.woltlab.wcf</excludedpackage>
+	</excludedpackages>
+	<instructions type="install">
+		<instruction type="acpTemplate"	/>
+		<instruction type="file" />
+		<instruction type="database">acp/database/install_de.berny23.igdb_integration.php</instruction>
+		<instruction type="template" />
+		<instruction type="language" />
+		
+		<instruction type="acpMenu"	/>
+		<instruction type="page" />
+		<instruction type="menuItem" />
+		<instruction type="option" />
+		<instruction type="userOption" />
+		<instruction type="objectType" />
+		<instruction type="userGroupOption"	/>
+		<instruction type="userProfileMenu"	/>
+	</instructions>
 </package>
