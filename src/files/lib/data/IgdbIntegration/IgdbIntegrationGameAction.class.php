@@ -2,11 +2,12 @@
 
 namespace wcf\data\IgdbIntegration;
 
-use Exception;
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
 use wcf\util\IgdbIntegrationUtil;
 use wcf\system\WCF;
 use wcf\data\user\UserEditor;
+use wcf\data\user\User;
+use wcf\data\user\UserProfile;
 use wcf\data\AbstractDatabaseObjectAction;
 use wcf\system\event\EventHandler;
 use wcf\system\form\builder\DialogFormDocument;
@@ -89,7 +90,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	public function getGameUserEditDialog()
 	{
-		$sql = "SELECT DISTINCT rating 
+		$sql = "SELECT rating 
 				FROM wcf1_igdb_integration_game_user 
 				WHERE gameId = ? AND userId = ?";
 		$statement = WCF::getDB()->prepare($sql);
@@ -97,7 +98,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$gameUserRow = $statement->fetchSingleRow();
 
 		$name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
-		$sql = "SELECT DISTINCT CASE WHEN 
+		$sql = "SELECT CASE WHEN 
 					" . $name . " = '' 
 					THEN name ELSE " . $name . " END 
 					AS displayName 
@@ -219,7 +220,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$averageRating = count($ratingArray) ? array_sum($ratingArray) / count($ratingArray) : 0;
 			$playerCount = count($owners);
 		} else {
-			$sql = "SELECT DISTINCT rating 
+			$sql = "SELECT rating 
 					FROM wcf1_igdb_integration_game_user 
 					WHERE gameId = ? AND userId = ?";
 			$statement = WCF::getDB()->prepare($sql);
@@ -234,7 +235,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		}
 
 		// Get game count for user
-		$sql = "SELECT DISTINCT COUNT(*) AS gameCount 
+		$sql = "SELECT COUNT(*) AS gameCount 
 				FROM wcf1_igdb_integration_game_user 
 				WHERE userId = ?";
 		$statement = WCF::getDB()->prepare($sql);
@@ -293,6 +294,11 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$statement->execute([$this->game->gameId]);
 		$gameOwners = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
+		$gameOwnerProfileLinks = array();
+		foreach ($gameOwners as $owner) {
+			$gameOwnerProfileLinks[$owner['userId']] = (new UserProfile(new User($owner['userId'])))->getAnchorTag();
+		}
+
 		$this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId);
 		$this->dialog->addDefaultButton(false);
 
@@ -300,7 +306,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			TemplateFormNode::create('playerList')
 				->templateName('__igdbIntegrationGamePlayerList')
 				->variables([
-					'gameOwners' => $gameOwners
+					'gameOwners' => $gameOwners,
+					'gameOwnerProfileLinks' => $gameOwnerProfileLinks
 				])
 		]);
 

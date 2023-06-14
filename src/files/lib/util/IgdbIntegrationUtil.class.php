@@ -54,11 +54,11 @@ class IgdbIntegrationUtil
 		if (self::$client === null) {
 			self::$client = HttpFactory::getDefaultClient();
 		}
-		$request = new Request('POST', self::TWITCH_URL_BASE . '?client_id=' . IGDB_INTEGRATION_AUTH_CLIENT_ID . '&client_secret=' . IGDB_INTEGRATION_AUTH_CLIENT_SECRET . '&grant_type=client_credentials');
+		$request = new Request('POST', self::TWITCH_URL_BASE . '?client_id=' . rawurlencode(IGDB_INTEGRATION_AUTH_CLIENT_ID) . '&client_secret=' . rawurlencode(IGDB_INTEGRATION_AUTH_CLIENT_SECRET) . '&grant_type=client_credentials');
 
 		try {
 			$response = self::$client->send($request);
-			self::$tempAccessToken = JSON::decode($response->getBody(), false)->access_token;
+			self::$tempAccessToken = JSON::decode($response->getBody())['access_token'];
 
 			// Update the option with the new token.
 			$optionId = Option::getOptionByName('igdb_integration_auth_access_token')->getObjectID();
@@ -88,8 +88,8 @@ class IgdbIntegrationUtil
 		}
 
 		$headers = [
-			'Client-ID' => rawurlencode(IGDB_INTEGRATION_AUTH_CLIENT_ID),
-			'Authorization' => 'Bearer ' . rawurlencode($accessToken)
+			'Client-ID' => IGDB_INTEGRATION_AUTH_CLIENT_ID,
+			'Authorization' => 'Bearer ' . $accessToken
 		];
 		$body = 'search "' . str_replace('"', '', $name) . '"; 
 				fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id; 

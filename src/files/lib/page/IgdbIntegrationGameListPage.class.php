@@ -78,13 +78,15 @@ class IgdbIntegrationGameListPage extends SortablePage
         parent::assignVariables();
 
 		// Generate image proxy links, if enabled
-		foreach($this->objectList->getObjects() as &$game) {
-			$game->coverImageUrl = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $game->coverImageId . IgdbIntegrationUtil::COVER_URL_FILETYPE);
+		$coverImageUrls = array();
+		foreach($this->objectList->getObjects() as $game) {
+			$coverImageUrls[$game->gameId] = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $game->coverImageId . IgdbIntegrationUtil::COVER_URL_FILETYPE);
 		}
 
         WCF::getTPL()->assign([
             'searchField' => $this->searchField,
-            'showIgdbError' => $this->showIgdbError
+            'showIgdbError' => $this->showIgdbError,
+			'coverImageUrls' => $coverImageUrls
         ]);
     }
 

@@ -4,8 +4,8 @@
 		<!-- de.berny23.igdb_integration -->
 		<packagename>IGDB Integration</packagename>
 		<packagedescription>Allows you to automatically	import and manage all games	from IGDB within the WoltLab Suite front-end.</packagedescription>
-		<version>1.0.1</version>
-		<date>2023-06-09</date>
+		<version>1.0.2</version>
+		<date>2023-06-14</date>
 	</packageinformation>
 	<authorinformation>
 		<author>Berny23</author>

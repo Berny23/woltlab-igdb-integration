@@ -1,0 +1,108 @@
+.igdbIntegrationGameListContainer {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.igdbIntegrationGameListContainer .gameBox {
+	display: flex;
+	flex-direction: column;
+	min-height: 18rem;
+	width: 132px;
+	margin: 0.25rem !important;
+	border-radius: 0.25rem;
+
+	@if $wcf_option_igdb_integration_general_dark_theme_enabled == 1 {
+		border: 1px solid rgb(33, 53, 77);
+		background-color: rgb(27, 29, 30);
+		color: #E6E4E1;
+	}
+
+	@else {
+		border: 1px solid #ecf1f7;
+		background-color: #FAFAFA;
+	}
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameCover {
+	height: 185px;
+	border-top-left-radius: 0.25rem;
+	border-top-right-radius: 0.25rem;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameCover .gameOverlay {
+	display: flex;
+	justify-content: center;
+	height: 100%;
+	align-items: center;
+	background: rgba(0, 0, 0, 0.5);
+	border-top-left-radius: 0.25rem;
+	border-top-right-radius: 0.25rem;
+	opacity: 0;
+	transition: 0.2s;
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameCover:hover .gameOverlay {
+	opacity: 1;
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameCover .gameOverlay .icon {
+	color: #F5F5F5;
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameInfo {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	text-align: center;
+	padding-top: 0.5rem;
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameInfo>h3 {
+	padding-left: 0.25rem;
+	padding-right: 0.25rem;
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo {
+	margin-top: auto;
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount {
+	padding: 0.25rem;
+	padding-right: 0.5rem;
+	text-align: end;
+	transition: filter 0.2s;
+
+	@if $wcf_option_igdb_integration_general_dark_theme_enabled == 1 {
+		background-color: rgb(84, 106, 115);
+		color: #F2F1F0;
+	}
+
+	@else {
+		background-color: #B0BEC5;
+	}
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount:hover {
+	filter: brightness(0.5);
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount.isOwned {
+	@if $wcf_option_igdb_integration_general_dark_theme_enabled == 1 {
+		background-color: rgb(59, 134, 80);
+	}
+
+	@else {
+		background-color: #A5D6A7;
+	}
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount>.icon {
+	padding-left: 0.25rem;
+	float: left;
+
+	@if $wcf_option_igdb_integration_general_dark_theme_enabled == 1 {
+		color: #F2F1F0;
+	}
+}

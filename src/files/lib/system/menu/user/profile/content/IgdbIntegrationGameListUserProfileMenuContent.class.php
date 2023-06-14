@@ -30,7 +30,7 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
     public function getContent($userID)
     {
         $name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
-        $sql = "SELECT DISTINCT 
+        $sql = "SELECT 
 					g.gameId AS gameId, 
 					coverImageId, 
 					releaseYear, 
@@ -43,8 +43,8 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
 							SELECT userId 
 							FROM wcf1_igdb_integration_game_user guTemp 
 							WHERE guTemp.gameId = gu.gameId 
-							AND guTemp.userId = " . WCF::getUser()->userID . 
-						") 
+							AND guTemp.userId = ? 
+						) 
 						THEN 1 ELSE 0 END 
 						AS isOwned, 
 					CASE WHEN " . $name . " = '' 
@@ -56,7 +56,7 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
 				WHERE gu.userId = ? 
 				ORDER BY ownRating DESC, displayName ASC";
         $statement = WCF::getDB()->prepare($sql);
-        $statement->execute([$userID]);
+        $statement->execute([WCF::getUser()->userID, $userID]);
         $userGames = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
 		// Generate image proxy links, if enabled

@@ -1,14 +1,14 @@
-<?xml version="1.0"	encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <language xmlns="http://www.woltlab.com"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/5.4/language.xsd" languagecode="en">
 
-	<!-- Frontend pages	-->
+	<!-- Frontend pages -->
 	<category name="wcf.igdb_integration.page">
 		<item name="wcf.igdb_integration.page.game_list_title"><![CDATA[Game List]]></item>
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>The connection to IGDB has failed!</b><br>Please check your credentials in the configuration menu of the IGDB Integration.]]></item>
 		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Search for games to add.</b><br>Please enter missing games or information directly into the <a href="https://www.igdb.com/"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>IGDB</a>.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Edit game]]></item>
-		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB	Integration	© 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>Berny23</a>]]></item>
 	</category>
 
 	<!-- Game data -->
@@ -19,21 +19,21 @@
 		<item name="wcf.igdb_integration.game.players"><![CDATA[Players]]></item>
 		<item name="wcf.igdb_integration.game.summary"><![CDATA[Summary]]></item>
 		<item name="wcf.igdb_integration.game.platforms"><![CDATA[Platforms]]></item>
-		<item name="wcf.igdb_integration.game.cover_image_id"><![CDATA[IGDB	Image ID]]></item>
+		<item name="wcf.igdb_integration.game.cover_image_id"><![CDATA[IGDB Image ID]]></item>
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Image URL]]></item>
 	</category>
 
-	<!-- Dialog	forms -->
+	<!-- Dialog forms -->
 	<category name="wcf.igdb_integration.dialog">
 		<item name="wcf.igdb_integration.dialog.game_user_edit_is_owned"><![CDATA[Owned]]></item>
-		<item name="wcf.igdb_integration.dialog.game_user_edit_title"><![CDATA[Game	Details]]></item>
-		<item name="wcf.igdb_integration.dialog.game_player_list_title"><![CDATA[Player	List]]></item>
+		<item name="wcf.igdb_integration.dialog.game_user_edit_title"><![CDATA[Game Details]]></item>
+		<item name="wcf.igdb_integration.dialog.game_player_list_title"><![CDATA[Player List]]></item>
 	</category>
 
 	<!-- ACP content menu -->
 	<category name="wcf.acp.menu">
 		<item name="wcf.acp.menu.link.igdb_integration"><![CDATA[IGDB Integration]]></item>
-		<item name="wcf.acp.menu.link.igdb_integration.game_list"><![CDATA[Game	List]]></item>
+		<item name="wcf.acp.menu.link.igdb_integration.game_list"><![CDATA[Game List]]></item>
 	</category>
 
 	<!-- User conditions (for trophy conditions) -->
@@ -48,26 +48,27 @@
 
 	<!-- User options -->
 	<category name="wcf.user.option">
-		<item name="wcf.user.option.igdb_integration_game_count"><![CDATA[Owned	Games]]></item>
+		<item name="wcf.user.option.igdb_integration_game_count"><![CDATA[Owned Games]]></item>
 	</category>
 
 	<!-- ACP options menu -->
 	<category name="wcf.acp.option">
-		<item name="wcf.acp.option.category.igdb_integration"><![CDATA[IGDB	Integration]]></item>
+		<item name="wcf.acp.option.category.igdb_integration"><![CDATA[IGDB Integration]]></item>
 		<item name="wcf.acp.option.category.igdb_integration_auth"><![CDATA[Authentication]]></item>
 		<item name="wcf.acp.option.category.igdb_integration_general"><![CDATA[Miscellaneous]]></item>
-		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client	ID]]></item>
-		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client	Secret]]></item>
-		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max.	results	per	IGDB search]]></item>
+		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client ID]]></item>
+		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client Secret]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. results per IGDB search]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_dark_theme_enabled"><![CDATA[Use dark theme]]></item>
 	</category>
 
-	<!-- ACP guest/user/mod/admin group	options	menu -->
+	<!-- ACP guest/user/mod/admin group options menu -->
 	<category name="wcf.acp.group">
 		<item name="wcf.acp.group.option.category.user.igdb_integration"><![CDATA[IGDB Integration]]></item>
 		<item name="wcf.acp.group.option.category.mod.igdb_integration"><![CDATA[IGDB Integration]]></item>
-		<item name="wcf.acp.group.option.category.admin.igdb_integration"><![CDATA[IGDB	Integration]]></item>
-		<item name="wcf.acp.group.option.admin.igdb_integration.can_manage_games"><![CDATA[Can edit	or delete all games]]></item>
-		<item name="wcf.acp.group.option.user.igdb_integration.can_search_igdb"><![CDATA[Can retrieve latest data from IGDB	when searching]]></item>
+		<item name="wcf.acp.group.option.category.admin.igdb_integration"><![CDATA[IGDB Integration]]></item>
+		<item name="wcf.acp.group.option.admin.igdb_integration.can_manage_games"><![CDATA[Can edit or delete all games]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_search_igdb"><![CDATA[Can retrieve latest data from IGDB when searching]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_manage_own_games"><![CDATA[Can manage own games library]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Can list all players of a game]]></item>
 	</category>

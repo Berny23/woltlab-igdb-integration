@@ -42,10 +42,8 @@ return [
 				->notNull()
 		])
 		->indices([
-			DatabaseTableIndex::create('gameId')
-				->columns(['gameId']),
-			DatabaseTableIndex::create('userId')
-				->columns(['userId'])
+			DatabaseTablePrimaryIndex::create()
+				->columns(['gameId', 'userId'])
 		])
 		->foreignKeys([
 			DatabaseTableForeignKey::create()

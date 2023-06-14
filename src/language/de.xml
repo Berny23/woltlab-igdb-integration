@@ -1,14 +1,14 @@
-<?xml version="1.0"	encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <language xmlns="http://www.woltlab.com"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/5.4/language.xsd" languagecode="de">
 
-	<!-- Frontend pages	-->
+	<!-- Frontend pages -->
 	<category name="wcf.igdb_integration.page">
 		<item name="wcf.igdb_integration.page.game_list_title"><![CDATA[Spiele-Liste]]></item>
-		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>Die Verbindung zu IGDB ist fehlgeschlagen!</b><br>Bitte	überprüfe{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Zugangsdaten im Konfigurationsmenü der IGDB-Integration.]]></item>
-		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen	suchen.</b><br>Trage{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} fehlende Spiele oder Informationen bitte direkt in die <a href="https://www.igdb.com/"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>IGDB</a> ein.]]></item>
+		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>Die Verbindung zu IGDB ist fehlgeschlagen!</b><br>Bitte überprüfe{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Zugangsdaten im Konfigurationsmenü der IGDB-Integration.]]></item>
+		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen suchen.</b><br>Trage{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} fehlende Spiele oder Informationen bitte direkt in die <a href="https://www.igdb.com/"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>IGDB</a> ein.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Spiel bearbeiten]]></item>
-		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB	Integration	© 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>Berny23</a>]]></item>
 	</category>
 
 	<!-- Game data -->
@@ -23,7 +23,7 @@
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Bild-URL]]></item>
 	</category>
 
-	<!-- Dialog	forms -->
+	<!-- Dialog forms -->
 	<category name="wcf.igdb_integration.dialog">
 		<item name="wcf.igdb_integration.dialog.game_user_edit_is_owned"><![CDATA[Im Besitz]]></item>
 		<item name="wcf.igdb_integration.dialog.game_user_edit_title"><![CDATA[Spiel-Details]]></item>
@@ -58,17 +58,18 @@
 		<item name="wcf.acp.option.category.igdb_integration_general"><![CDATA[Sonstiges]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client-ID]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client-Geheimnis]]></item>
-		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max.	Ergebnisse pro IGDB-Suche]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. Ergebnisse pro IGDB-Suche]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_dark_theme_enabled"><![CDATA[Dunkles Design verwenden]]></item>
 	</category>
 
-	<!-- ACP guest/user/mod/admin group	options	menu -->
+	<!-- ACP guest/user/mod/admin group options menu -->
 	<category name="wcf.acp.group">
 		<item name="wcf.acp.group.option.category.user.igdb_integration"><![CDATA[IGDB-Integration]]></item>
 		<item name="wcf.acp.group.option.category.mod.igdb_integration"><![CDATA[IGDB-Integration]]></item>
 		<item name="wcf.acp.group.option.category.admin.igdb_integration"><![CDATA[IGDB-Integration]]></item>
-		<item name="wcf.acp.group.option.admin.igdb_integration.can_manage_games"><![CDATA[Kann	alle Spiele	editieren oder löschen]]></item>
+		<item name="wcf.acp.group.option.admin.igdb_integration.can_manage_games"><![CDATA[Kann alle Spiele editieren oder löschen]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_search_igdb"><![CDATA[Kann beim Suchen aktuelle Daten von IGDB abrufen]]></item>
-		<item name="wcf.acp.group.option.user.igdb_integration.can_manage_own_games"><![CDATA[Kann eigene Spiele-Bibliothek	verwalten]]></item>
-		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Kann alle Spieler eines Spiels	auflisten]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_manage_own_games"><![CDATA[Kann eigene Spiele-Bibliothek verwalten]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Kann alle Spieler eines Spiels auflisten]]></item>
 	</category>
 </language>
