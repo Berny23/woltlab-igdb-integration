@@ -23,7 +23,9 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 
 ## Demo
 
-![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/12ac316e-9b18-40e5-acc2-db6ddced439c)
+![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/27ef300c-e1f9-43b3-b68d-66218108ca13)
+
+![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/12dc4c11-fe9c-4763-a194-5d75e07dbfe4)
 
 ## Download
 
