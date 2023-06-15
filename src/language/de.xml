@@ -6,9 +6,9 @@
 	<category name="wcf.igdb_integration.page">
 		<item name="wcf.igdb_integration.page.game_list_title"><![CDATA[Spiele-Liste]]></item>
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>Die Verbindung zu IGDB ist fehlgeschlagen!</b><br>Bitte überprüfe{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Zugangsdaten im Konfigurationsmenü der IGDB-Integration.]]></item>
-		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen suchen.</b><br>Trage{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} fehlende Spiele oder Informationen bitte direkt in die <a href="https://www.igdb.com/"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>IGDB</a> ein.]]></item>
+		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen suchen.</b><br>Trage{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} fehlende Spiele oder Informationen bitte direkt in die <a href="https://www.igdb.com/" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB</a> ein.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Spiel bearbeiten]]></item>
-		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Berny23</a>]]></item>
 	</category>
 
 	<!-- Game data -->
@@ -59,7 +59,6 @@
 		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client-ID]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client-Geheimnis]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. Ergebnisse pro IGDB-Suche]]></item>
-		<item name="wcf.acp.option.igdb_integration_general_dark_theme_enabled"><![CDATA[Dunkles Design verwenden]]></item>
 	</category>
 
 	<!-- ACP guest/user/mod/admin group options menu -->

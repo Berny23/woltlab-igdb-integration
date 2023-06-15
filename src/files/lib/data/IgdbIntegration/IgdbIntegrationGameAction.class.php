@@ -284,6 +284,17 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	public function getGamePlayerListDialog()
 	{
+		$name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
+		$sql = "SELECT CASE WHEN 
+					" . $name . " = '' 
+					THEN name ELSE " . $name . " END 
+					AS displayName 
+				FROM wcf1_igdb_integration_game 
+				WHERE gameId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$this->game->gameId]);
+		$gameRow = $statement->fetchSingleRow();
+
 		$sql = "SELECT gu.userId AS userId,username,rating 
 				FROM wcf1_igdb_integration_game_user gu 
 				LEFT JOIN wcf1_user u 
@@ -303,6 +314,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$this->dialog->addDefaultButton(false);
 
 		$this->dialog->appendChildren([
+			TitleFormField::create('name')
+				->label('wcf.igdb_integration.game.name')
+				->value($gameRow['displayName'] ?? '')
+				->immutable(),
 			TemplateFormNode::create('playerList')
 				->templateName('__igdbIntegrationGamePlayerList')
 				->variables([

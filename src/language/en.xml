@@ -6,9 +6,9 @@
 	<category name="wcf.igdb_integration.page">
 		<item name="wcf.igdb_integration.page.game_list_title"><![CDATA[Game List]]></item>
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>The connection to IGDB has failed!</b><br>Please check your credentials in the configuration menu of the IGDB Integration.]]></item>
-		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Search for games to add.</b><br>Please enter missing games or information directly into the <a href="https://www.igdb.com/"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>IGDB</a>.]]></item>
+		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Search for games to add.</b><br>Please enter missing games or information directly into the <a href="https://www.igdb.com/" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" {/if} rel="nofollow noopener">IGDB</a>.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Edit game]]></item>
-		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" rel="nofollow noopener"{/if}>Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" {/if} rel="nofollow noopener">Berny23</a>]]></item>
 	</category>
 
 	<!-- Game data -->
@@ -59,7 +59,6 @@
 		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client ID]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client Secret]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. results per IGDB search]]></item>
-		<item name="wcf.acp.option.igdb_integration_general_dark_theme_enabled"><![CDATA[Use dark theme]]></item>
 	</category>
 
 	<!-- ACP guest/user/mod/admin group options menu -->

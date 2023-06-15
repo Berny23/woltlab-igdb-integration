@@ -10,17 +10,9 @@
 	width: 132px;
 	margin: 0.25rem !important;
 	border-radius: 0.25rem;
-
-	@if $wcf_option_igdb_integration_general_dark_theme_enabled == 1 {
-		border: 1px solid rgb(33, 53, 77);
-		background-color: rgb(27, 29, 30);
-		color: #E6E4E1;
-	}
-
-	@else {
-		border: 1px solid #ecf1f7;
-		background-color: #FAFAFA;
-	}
+	background-color: #{$wcfInputBackground};
+	border: 1px solid #{$wcfInputDisabledBorder};
+	color: #{$wcfDropdownText};
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameCover {
@@ -73,15 +65,8 @@
 	padding-right: 0.5rem;
 	text-align: end;
 	transition: filter 0.2s;
-
-	@if $wcf_option_igdb_integration_general_dark_theme_enabled == 1 {
-		background-color: rgb(84, 106, 115);
-		color: #F2F1F0;
-	}
-
-	@else {
-		background-color: #B0BEC5;
-	}
+	color: #{$wcfButtonText};
+	background-color: #{$wcfButtonBackground};
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount:hover {
@@ -89,20 +74,21 @@
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount.isOwned {
-	@if $wcf_option_igdb_integration_general_dark_theme_enabled == 1 {
-		background-color: rgb(59, 134, 80);
-	}
-
-	@else {
-		background-color: #A5D6A7;
-	}
+	background-color: #{$wcfButtonPrimaryBackground};
+	color: #{$wcfButtonTextActive};
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount>.icon {
 	padding-left: 0.25rem;
 	float: left;
+	color: #{$wcfButtonText};
+}
 
-	@if $wcf_option_igdb_integration_general_dark_theme_enabled == 1 {
-		color: #F2F1F0;
-	}
+.igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount.isOwned>.icon {
+	color: #{$wcfButtonTextActive};
+}
+
+.igdbIntegrationPlayerListContainer table.playerList td {
+	padding-right: 1rem;
+	padding-bottom: 0.5rem;
 }

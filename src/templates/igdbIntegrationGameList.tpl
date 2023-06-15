@@ -27,7 +27,6 @@
 					<dd>
 						<input type="text" id="searchField" name="searchField" value="{$searchField}">
 						{event name='searchField'}
-						</select>
 					</dd>
 					<dt>{lang}wcf.global.sorting{/lang}</dt>
 					<dd>
