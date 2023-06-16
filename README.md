@@ -20,6 +20,7 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 - Shows game titles in the current user's language, if available
 - Sortable by name, year, players and rating
 - Search allows for any part of the title to be in any order
+- Compatible with light and dark Styles
 
 ## Demo
 
@@ -29,7 +30,7 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 
 ## Download
 
-Coming soon.
+https://www.woltlab.com/pluginstore/file/7473-igdb-integration/
 
 ## Tutorial
 
