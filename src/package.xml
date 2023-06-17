@@ -1,11 +1,12 @@
-<?xml version="1.0"	encoding="UTF-8"?>
-<package xmlns="http://www.woltlab.com"	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/2019/package.xsd" name="de.berny23.igdb_integration">
+<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.woltlab.com"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/2019/package.xsd" name="de.berny23.igdb_integration">
 	<packageinformation>
 		<!-- de.berny23.igdb_integration -->
 		<packagename>IGDB Integration</packagename>
 		<packagedescription>Allows you to automatically	import and manage all games	from IGDB within the WoltLab Suite front-end.</packagedescription>
-		<version>1.1.0</version>
-		<date>2023-06-15</date>
+		<version>1.2.0</version>
+		<date>2023-06-18</date>
 	</packageinformation>
 	<authorinformation>
 		<author>Berny23</author>
@@ -18,19 +19,25 @@
 		<excludedpackage version="6.0.0	Alpha 1">com.woltlab.wcf</excludedpackage>
 	</excludedpackages>
 	<instructions type="install">
-		<instruction type="acpTemplate"	/>
+		<instruction type="acpTemplate" />
 		<instruction type="file" />
 		<instruction type="database">acp/database/install_de.berny23.igdb_integration.php</instruction>
 		<instruction type="template" />
 		<instruction type="language" />
-		
-		<instruction type="acpMenu"	/>
+		<instruction type="acpMenu" />
 		<instruction type="page" />
 		<instruction type="menuItem" />
 		<instruction type="option" />
 		<instruction type="userOption" />
 		<instruction type="objectType" />
-		<instruction type="userGroupOption"	/>
-		<instruction type="userProfileMenu"	/>
+		<instruction type="userGroupOption" />
+		<instruction type="userProfileMenu" />
+	</instructions>
+	<instructions type="update" fromversion="1.1.0">
+		<instruction type="file" />
+		<instruction type="template" />
+		<instruction type="language" />
+		<instruction type="option" />
+		<instruction type="userOption" />
 	</instructions>
 </package>

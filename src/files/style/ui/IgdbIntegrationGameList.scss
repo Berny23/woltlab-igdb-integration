@@ -12,7 +12,7 @@
 	border-radius: 0.25rem;
 	background-color: #{$wcfInputBackground};
 	border: 1px solid #{$wcfInputDisabledBorder};
-	color: #{$wcfDropdownText};
+	color: #{$wcfInputText};
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameCover {
@@ -88,7 +88,43 @@
 	color: #{$wcfButtonTextActive};
 }
 
+#tpl_wcf_igdbIntegrationGameList .boxesSidebarRight {
+	.info::after {
+		display: none;
+	}
+
+	.info,
+	.info a {
+		color: #{$wcfSidebarText};
+	}
+
+	.error::after {
+		display: none;
+	}
+}
+
+#tpl_wcf_igdbIntegrationGameList .boxesSidebarRight #playerToplistBox table {
+	display: inline-block;
+	overflow: auto;
+    max-height: 20rem;
+    width: 100%;
+}
+
+#tpl_wcf_igdbIntegrationGameList .boxesSidebarRight #playerToplistBox table td {
+	padding-right: 1rem;
+}
+
 .igdbIntegrationPlayerListContainer table.playerList td {
 	padding-right: 1rem;
 	padding-bottom: 0.5rem;
+}
+
+.igdbIntegrationFooter {
+	display: flex;
+	flex-direction: column;
+}
+
+.igdbIntegrationFooter .igdbIntegrationCopyright {
+	align-self: center;
+	margin-top: 0.5rem;
 }

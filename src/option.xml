@@ -1,4 +1,4 @@
-<?xml version="1.0"	encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <data xmlns="http://www.woltlab.com"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/2019/option.xsd">
 	<import>
@@ -14,26 +14,60 @@
 			</category>
 		</categories>
 		<options>
-			<option	name="igdb_integration_auth_client_id">
+			<option name="igdb_integration_auth_client_id">
 				<categoryname>igdb_integration_auth</categoryname>
 				<optiontype>text</optiontype>
 				<defaultvalue></defaultvalue>
 			</option>
-			<option	name="igdb_integration_auth_client_secret">
+			<option name="igdb_integration_auth_client_secret">
 				<categoryname>igdb_integration_auth</categoryname>
 				<optiontype>password</optiontype>
 				<defaultvalue></defaultvalue>
 			</option>
-			<option	name="igdb_integration_auth_access_token">
+			<option name="igdb_integration_auth_access_token">
 				<categoryname>igdb_integration_auth</categoryname>
 				<optiontype>password</optiontype>
 				<defaultvalue></defaultvalue>
 				<hidden>1</hidden>
 			</option>
-			<option	name="igdb_integration_general_result_limit">
+			<option name="igdb_integration_general_result_limit">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>integer</optiontype>
 				<defaultvalue>30</defaultvalue>
+				<minvalue>0</minvalue>
+				<maxvalue>500</maxvalue>
+			</option>
+			<option name="igdb_integration_general_games_per_page">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>integer</optiontype>
+				<defaultvalue>21</defaultvalue>
+				<minvalue>0</minvalue>
+				<maxvalue>10000</maxvalue>
+			</option>
+			<option name="igdb_integration_general_game_sort_field">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>select</optiontype>
+				<defaultvalue>3</defaultvalue>
+				<selectoptions>
+					1:wcf.igdb_integration.game.name
+					2:wcf.igdb_integration.game.year
+					3:wcf.igdb_integration.game.players
+					4:wcf.form.field.rating
+				</selectoptions>
+			</option>
+			<option name="igdb_integration_general_game_sort_order">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>select</optiontype>
+				<defaultvalue>2</defaultvalue>
+				<selectoptions>
+					1:wcf.global.sortOrder.ascending
+					2:wcf.global.sortOrder.descending
+				</selectoptions>
+			</option>
+			<option name="igdb_integration_general_player_toplist_limit">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>integer</optiontype>
+				<defaultvalue>10</defaultvalue>
 				<minvalue>0</minvalue>
 				<maxvalue>500</maxvalue>
 			</option>

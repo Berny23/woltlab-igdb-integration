@@ -13,9 +13,15 @@
 
 {capture assign='sidebarRight'}
 	{if $showIgdbError}
-		<section id="messageBox" class="box error">{lang}wcf.igdb_integration.page.game_list_igdb_error{/lang}</section>
+		<section id="messageBox" class="box error">
+			<h2 class="boxTitle">{lang}wcf.acp.notice.cssClassName.error{/lang}</h2>
+			<div class="boxContent">{lang}wcf.igdb_integration.page.game_list_igdb_error{/lang}</div>
+		</section>
 	{else}
-		<section id="messageBox" class="box info">{lang}wcf.igdb_integration.page.game_list_info{/lang}</section>
+		<section id="messageBox" class="box info">
+			<h2 class="boxTitle">{lang}wcf.acp.notice.cssClassName.info{/lang}</h2>
+			<div class="boxContent">{lang}wcf.igdb_integration.page.game_list_info{/lang}</div>
+		</section>
 	{/if}
 	<section class="box">
 		<form id="gameSortForm" method="post" action="{link controller='IgdbIntegrationGameList'}{/link}">
@@ -56,50 +62,66 @@
 			</div>
 		</form>
 	</section>
-	<div class="box info">{lang}wcf.igdb_integration.page.copyright_info{/lang}</div>
+	<section id="playerToplistBox" class="box">
+		<h2 class="boxTitle">{lang}wcf.igdb_integration.page.player_toplist{/lang}</h2>
+		<div class="boxContent">
+			<table>
+				{foreach from=$topPlayers item=player}
+					<tr>
+						<td>
+							<b>{@$topPlayerProfileLinks[$player['userId']]}</b>
+						</td>
+						<td>
+							{$player['gameCount']} {lang}wcf.user.option.igdb_integration_game_count{/lang}
+						</td>
+					</tr>
+				{/foreach}
+			</table>
+		</div>
+	</section>
 {/capture}
 
 {include file='header'}
 
 {hascontent}
-	<div class="paginationTop">
-		{content}
-			{pages print=true assign=pagesLinks controller='IgdbIntegrationGameList' link="pageNo=%d&searchField=$searchField&sortField=$sortField&sortOrder=$sortOrder"}
-		{/content}
-	</div>
+<div class="paginationTop">
+	{content}
+	{pages print=true assign=pagesLinks controller='IgdbIntegrationGameList' link="pageNo=%d&searchField=$searchField&sortField=$sortField&sortOrder=$sortOrder"}
+	{/content}
+</div>
 {/hascontent}
 
 {if $items}
 	<div class="section igdbIntegrationGameListContainer">
 		{foreach from=$objects item=game}
-		<div class="gameBox" id="gameBox{$game->gameId}">
-			<div class="gameCover" style="background-image: url({$coverImageUrls[$game->gameId]});">
-				<ul class="gameOverlay pointer" id="gameOverlay{$game->gameId}">
-					<span class="icon icon64 pointer fa-plus"></span>
-				</ul>
-			</div>
-			<div class="gameInfo">
-				<h3>{$game->displayName}</h3>
-				<small>{if $game->releaseYear != 0}{$game->releaseYear}{/if}</small>
-				<div class="gameUserInfo">
-					<p class="gameAverageRating">
-						{section name=ratingStars loop=$game->averageRating}<span
-							class="icon icon16 fa-star orange"></span>{/section}
-					</p>
-					<p class="gamePlayerCount pointer{if $game->isOwned == 1} isOwned{/if}"
-						id="gamePlayerCount{$game->gameId}" {if $game->playerCount <= 0} style="display: none;" {/if}>
-						<span class="icon fa-user"></span> {$game->playerCount}
-					</p>
+			<div class="gameBox" id="gameBox{$game->gameId}">
+				<div class="gameCover" style="background-image: url({$coverImageUrls[$game->gameId]});">
+					<ul class="gameOverlay pointer" id="gameOverlay{$game->gameId}">
+						<span class="icon icon64 pointer fa-plus"></span>
+					</ul>
+				</div>
+				<div class="gameInfo">
+					<h3>{$game->displayName}</h3>
+					<small>{if $game->releaseYear != 0}{$game->releaseYear}{/if}</small>
+					<div class="gameUserInfo">
+						<p class="gameAverageRating">
+							{section name=ratingStars loop=$game->averageRating}<span
+								class="icon icon16 fa-star orange"></span>{/section}
+						</p>
+						<p class="gamePlayerCount pointer{if $game->isOwned == 1} isOwned{/if}"
+							id="gamePlayerCount{$game->gameId}" {if $game->playerCount <= 0} style="display: none;" {/if}>
+							<span class="icon fa-user"></span> {$game->playerCount}
+						</p>
+					</div>
 				</div>
 			</div>
-		</div>
 		{/foreach}
 	</div>
 {else}
-<p class="info">{lang}wcf.global.noItems{/lang}</p>
+	<p class="info">{lang}wcf.global.noItems{/lang}</p>
 {/if}
 
-<footer class="contentFooter">
+<footer class="contentFooter igdbIntegrationFooter">
 	{hascontent}
 	<div class="paginationBottom">
 		{content}{@$pagesLinks}{/content}
@@ -111,6 +133,8 @@
 		<ul>{content}{event name='contentFooterNavigation'}{/content}</ul>
 	</nav>
 	{/hascontent}
+
+	<div class="igdbIntegrationCopyright">{lang}wcf.igdb_integration.page.copyright_info{/lang}</div>
 </footer>
 
 <script data-relocate="true">

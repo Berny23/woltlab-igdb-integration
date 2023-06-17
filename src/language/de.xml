@@ -8,7 +8,8 @@
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>Die Verbindung zu IGDB ist fehlgeschlagen!</b><br>Bitte überprüfe{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Zugangsdaten im Konfigurationsmenü der IGDB-Integration.]]></item>
 		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen suchen.</b><br>Trage{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} fehlende Spiele oder Informationen bitte direkt in die <a href="https://www.igdb.com/" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB</a> ein.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Spiel bearbeiten]]></item>
-		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[<a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Integration</a> © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Spieler-Topliste]]></item>
 	</category>
 
 	<!-- Game data -->
@@ -49,6 +50,14 @@
 	<!-- User options -->
 	<category name="wcf.user.option">
 		<item name="wcf.user.option.igdb_integration_game_count"><![CDATA[Spiele im Besitz]]></item>
+		<item name="wcf.user.option.igdb_integration_games_per_page"><![CDATA[Spiele pro Seite]]></item>
+		<item name="wcf.user.option.igdb_integration_games_per_page.description"><![CDATA[Bei <b>0</b> wird der Standardwert verwendet.]]></item>
+		<item name="wcf.user.option.igdb_integration_default_game_sort_field"><![CDATA[Feld für Spielsortierung]]></item>
+		<item name="wcf.user.option.igdb_integration_default_game_sort_field.description"><![CDATA[Diese Einstellung bestimmt das standardmäßige Sortierfeld für die Spiele-Liste.]]></item>
+		<item name="wcf.user.option.igdb_integration_default_game_sort_order"><![CDATA[Reihenfolge der Spielsortierung]]></item>
+		<item name="wcf.user.option.igdb_integration_default_game_sort_order.description"><![CDATA[Diese Einstellung bestimmt die standardmäßige Sortierreihenfolge für die Spiele-Liste.]]></item>
+		<item name="wcf.user.option.igdb_integration_player_toplist_limit"><![CDATA[Größe der Spieler-Topliste]]></item>
+		<item name="wcf.user.option.igdb_integration_player_toplist_limit.description"><![CDATA[Bei <b>0</b> wird der Standardwert verwendet.]]></item>
 	</category>
 
 	<!-- ACP options menu -->
@@ -59,6 +68,14 @@
 		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client-ID]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client-Geheimnis]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. Ergebnisse pro IGDB-Suche]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_games_per_page"><![CDATA[Spiele pro Seite]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_games_per_page.description"><![CDATA[Dies ist der <b>Standardwert</b>. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_game_sort_field"><![CDATA[Feld für Spielsortierung]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_game_sort_field.description"><![CDATA[Dies ist das <b>standardmäßige Sortierfeld</b> für die Spiele-Liste. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_game_sort_order"><![CDATA[Reihenfolge der Spielsortierung]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_game_sort_order.description"><![CDATA[Dies ist die <b>standardmäßige Sortierreihenfolge</b> für die Spiele-Liste. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_player_toplist_limit"><![CDATA[Größe der Spieler-Topliste]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_player_toplist_limit.description"><![CDATA[Dies ist der <b>Standardwert</b>. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
 	</category>
 
 	<!-- ACP guest/user/mod/admin group options menu -->

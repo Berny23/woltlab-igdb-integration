@@ -131,8 +131,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$this->dialog->appendChildren([
 				BooleanFormField::create('isOwned')
 					->label('wcf.igdb_integration.dialog.game_user_edit_is_owned')
-					->value(!empty($gameUserRow))
-					->required(),
+					->value(!empty($gameUserRow)),
 				RatingFormField::create('rating')
 					->label('wcf.form.field.rating')
 					->value($gameUserRow['rating'] ?? 0)

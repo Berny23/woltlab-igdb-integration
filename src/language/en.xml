@@ -8,7 +8,8 @@
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>The connection to IGDB has failed!</b><br>Please check your credentials in the configuration menu of the IGDB Integration.]]></item>
 		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Search for games to add.</b><br>Please enter missing games or information directly into the <a href="https://www.igdb.com/" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" {/if} rel="nofollow noopener">IGDB</a>.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Edit game]]></item>
-		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[IGDB Integration © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" {/if} rel="nofollow noopener">Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[<a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB Integration</a> © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" {/if} rel="nofollow noopener">Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Player Toplist]]></item>
 	</category>
 
 	<!-- Game data -->
@@ -49,6 +50,14 @@
 	<!-- User options -->
 	<category name="wcf.user.option">
 		<item name="wcf.user.option.igdb_integration_game_count"><![CDATA[Owned Games]]></item>
+		<item name="wcf.user.option.igdb_integration_games_per_page"><![CDATA[Games per page]]></item>
+		<item name="wcf.user.option.igdb_integration_games_per_page.description"><![CDATA[If <b>0</b>, the default value is used.]]></item>
+		<item name="wcf.user.option.igdb_integration_default_game_sort_field"><![CDATA[Field for game sorting]]></item>
+		<item name="wcf.user.option.igdb_integration_default_game_sort_field.description"><![CDATA[This setting defines the default sorting field for the game list.]]></item>
+		<item name="wcf.user.option.igdb_integration_default_game_sort_order"><![CDATA[Order of game sorting]]></item>
+		<item name="wcf.user.option.igdb_integration_default_game_sort_order.description"><![CDATA[This setting defines the default sorting order for the game list.]]></item>
+		<item name="wcf.user.option.igdb_integration_player_toplist_limit"><![CDATA[Size of the player toplist]]></item>
+		<item name="wcf.user.option.igdb_integration_player_toplist_limit.description"><![CDATA[If <b>0</b>, the default value is used.]]></item>
 	</category>
 
 	<!-- ACP options menu -->
@@ -59,6 +68,14 @@
 		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client ID]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client Secret]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. results per IGDB search]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_games_per_page"><![CDATA[Games per page]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_games_per_page.description"><![CDATA[This is the <b>default value</b>. This setting can be personalized in the Account Management.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_game_sort_field"><![CDATA[Field for game sorting]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_game_sort_field.description"><![CDATA[This is the <b>default sort field</b> for the game list. This setting can be personalized in the Account Management.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_game_sort_order"><![CDATA[Order of game sorting]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_game_sort_order.description"><![CDATA[This is the <b>default sort order</b> for the game list. This setting can be personalized in the Account Management.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_player_toplist_limit"><![CDATA[Size of the player toplist]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_player_toplist_limit.description"><![CDATA[This is the <b>default value</b>. This setting can be personalized in the Account Management.]]></item>
 	</category>
 
 	<!-- ACP guest/user/mod/admin group options menu -->

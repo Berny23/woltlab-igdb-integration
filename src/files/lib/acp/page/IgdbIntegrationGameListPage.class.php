@@ -5,7 +5,6 @@ namespace wcf\acp\page;
 use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
 use wcf\util\IgdbIntegrationUtil;
 use wcf\page\SortablePage;
-use wcf\system\WCF;
 
 /**
  * Shows the list of games.

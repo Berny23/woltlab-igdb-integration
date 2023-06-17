@@ -9,12 +9,12 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 - Automatically imports all games from search results
 - Users can add games to their library
 - Users can rate games and see the average ratings
+- Players appear in a toplist, size configurable
 - Modern and user-friendly design
 - English and German interface
 - Supports automated Trophies
-- Supports system-wide image proxy
-- Supports permissions
-- Supports configuration options
+- Supports system-wide image proxy for privacy
+- Supports global options, user settings and permissions
 - Shows owned games and game count on profile pages
 - Users can view a list of all players of a game
 - Shows game titles in the current user's language, if available
@@ -46,9 +46,22 @@ To be able to access the IGDB API, you have to follow this short guide:
 
 ## Building
 
-1. On Windows, run build.bat in /tools.
-2. The built package is in /build.
-3. Done.
+1. (optional) Run ``npm install`` in **/src** and generate a JavaScript (.js) file from every TypeScript (.ts) file with ``tsc build``
+2. On Windows, run build.bat in **/tools**
+3. The installable package will be created in **/build**
+4. Install via WoltLab Suite package manager
+
+## Privacy notice
+
+This plugin sends all API requests to igdb.com only through the web server, not in the user's browser. This means that no user data is transmitted, except for the following:
+
+- Search terms
+
+For external cover images, the system-wide Image Proxy is used so that no user data is forwarded. If it is not enabled, the images will be loaded directly in the user's browser from igdb.com, sending any associated user data.
+
+## Feature requests & bug reports
+
+You can either create a **GitHub issue** in this repository (in German/English) or create a new post in the **[IGDB Integration support area on CompiWare](https://www.compiware-forum.de/forum/board/232-igdb-integration-f%C3%BCr-woltlab-suite/)** (in German only).
 
 ## Acknowledgements
 

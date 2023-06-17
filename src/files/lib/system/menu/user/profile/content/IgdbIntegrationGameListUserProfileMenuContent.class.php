@@ -64,9 +64,12 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
 			$game['coverImageUrl'] = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $game['coverImageId'] . IgdbIntegrationUtil::COVER_URL_FILETYPE);
 		}
 
+		$gameCount = count($userGames);
+
         WCF::getTPL()->assign([
             'userGames' => $userGames,
-            'userId' => $userID
+            'userId' => $userID,
+			'gameCount' => $gameCount
         ]);
 
         return WCF::getTPL()->fetch('igdbIntegrationGameListUserProfile');
