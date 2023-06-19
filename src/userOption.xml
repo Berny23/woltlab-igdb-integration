@@ -21,26 +21,22 @@
 			<option name="igdb_integration_default_game_sort_field">
 				<categoryname>settings.general.appearance</categoryname>
 				<optiontype>select</optiontype>
-				<defaultvalue>0</defaultvalue>
-				<selectoptions>
-					0:wcf.global.defaultValue
-					1:wcf.igdb_integration.game.name
-					2:wcf.igdb_integration.game.year
-					3:wcf.igdb_integration.game.players
-					4:wcf.form.field.rating
-				</selectoptions>
+				<defaultvalue>default</defaultvalue>
+				<selectoptions>default:wcf.global.defaultValue
+displayName:wcf.igdb_integration.game.name
+releaseYear:wcf.igdb_integration.game.year
+playerCount:wcf.igdb_integration.game.players
+averageRating:wcf.form.field.rating</selectoptions>
 				<visible>3</visible>
 				<editable>3</editable>
 			</option>
 			<option name="igdb_integration_default_game_sort_order">
 				<categoryname>settings.general.appearance</categoryname>
 				<optiontype>select</optiontype>
-				<defaultvalue>0</defaultvalue>
-				<selectoptions>
-					0:wcf.global.defaultValue
-					1:wcf.global.sortOrder.ascending
-					2:wcf.global.sortOrder.descending
-				</selectoptions>
+				<defaultvalue>default</defaultvalue>
+				<selectoptions>default:wcf.global.defaultValue
+ASC:wcf.global.sortOrder.ascending
+DESC:wcf.global.sortOrder.descending</selectoptions>
 				<visible>3</visible>
 				<editable>3</editable>
 			</option>

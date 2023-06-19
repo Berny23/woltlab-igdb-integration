@@ -66,36 +66,10 @@ class IgdbIntegrationGameListPage extends SortablePage
 		}
 
 		$userOptionGameSortField = WCF::getUser()->getUserOption('igdb_integration_default_game_sort_field');
-		if (is_null($userOptionGameSortField) || $userOptionGameSortField <= 0) {
-			$userOptionGameSortField = IGDB_INTEGRATION_GENERAL_GAME_SORT_FIELD;
-		}
-		switch ($userOptionGameSortField) {
-			case 1:
-				$this->defaultSortField = 'displayName';
-				break;
-			case 2:
-				$this->defaultSortField = 'releaseYear';
-				break;
-			case 3:
-				$this->defaultSortField = 'playerCount';
-				break;
-			case 4:
-				$this->defaultSortField = 'averageRating';
-				break;
-		}
+		$this->defaultSortField = $userOptionGameSortField !== 'default' ? $userOptionGameSortField : IGDB_INTEGRATION_GENERAL_GAME_SORT_FIELD;
 
 		$userOptionGameSortOrder = WCF::getUser()->getUserOption('igdb_integration_default_game_sort_order');
-		if (is_null($userOptionGameSortOrder) || $userOptionGameSortOrder <= 0) {
-			$userOptionGameSortOrder = IGDB_INTEGRATION_GENERAL_GAME_SORT_ORDER;
-		}
-		switch ($userOptionGameSortOrder) {
-			case 1:
-				$this->defaultSortOrder = 'ASC';
-				break;
-			case 2:
-				$this->defaultSortOrder = 'DESC';
-				break;
-		}
+		$this->defaultSortOrder = $userOptionGameSortOrder !== 'default' ? $userOptionGameSortOrder : IGDB_INTEGRATION_GENERAL_GAME_SORT_ORDER;
 
 		$this->searchField = '';
 		if (isset($_REQUEST['searchField'])) {
@@ -189,11 +163,9 @@ class IgdbIntegrationGameListPage extends SortablePage
 			$parts = explode(' ', $this->searchField);
 			foreach ($parts as $part) {
 				$this->objectList->getConditionBuilder()->add(
-					"CASE WHEN 
-						" . $name . " = '' 
-						THEN name ELSE " . $name . " END 
-						LIKE ?",
-					['%' . $part . '%']
+					"name LIKE ?
+					OR germanName LIKE ?",
+					['%' . $part . '%', '%' . $part . '%']
 				);
 			}
 		}

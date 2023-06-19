@@ -47,22 +47,18 @@
 			<option name="igdb_integration_general_game_sort_field">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>select</optiontype>
-				<defaultvalue>3</defaultvalue>
-				<selectoptions>
-					1:wcf.igdb_integration.game.name
-					2:wcf.igdb_integration.game.year
-					3:wcf.igdb_integration.game.players
-					4:wcf.form.field.rating
-				</selectoptions>
+				<defaultvalue>playerCount</defaultvalue>
+				<selectoptions>displayName:wcf.igdb_integration.game.name
+releaseYear:wcf.igdb_integration.game.year
+playerCount:wcf.igdb_integration.game.players
+averageRating:wcf.form.field.rating</selectoptions>
 			</option>
 			<option name="igdb_integration_general_game_sort_order">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>select</optiontype>
-				<defaultvalue>2</defaultvalue>
-				<selectoptions>
-					1:wcf.global.sortOrder.ascending
-					2:wcf.global.sortOrder.descending
-				</selectoptions>
+				<defaultvalue>DESC</defaultvalue>
+				<selectoptions>ASC:wcf.global.sortOrder.ascending
+DESC:wcf.global.sortOrder.descending</selectoptions>
 			</option>
 			<option name="igdb_integration_general_player_toplist_limit">
 				<categoryname>igdb_integration_general</categoryname>
