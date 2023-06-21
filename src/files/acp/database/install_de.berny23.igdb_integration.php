@@ -8,7 +8,6 @@ use	wcf\system\database\table\column\SmallintDatabaseTableColumn;
 use	wcf\system\database\table\column\YearDatabaseTableColumn;
 use	wcf\system\database\table\DatabaseTable;
 use	wcf\system\database\table\PartialDatabaseTable;
-use	wcf\system\database\table\index\DatabaseTableIndex;
 use	wcf\system\database\table\index\DatabaseTablePrimaryIndex;
 use	wcf\system\database\table\index\DatabaseTableForeignKey;
 
@@ -21,7 +20,7 @@ return [
 			TextDatabaseTableColumn::create('germanName')
 				->notNull(),
 			YearDatabaseTableColumn::create('releaseYear')
-				->notNull(),
+				->defaultValue(null),
 			TextDatabaseTableColumn::create('platforms')
 				->notNull(),
 			TextDatabaseTableColumn::create('summary')

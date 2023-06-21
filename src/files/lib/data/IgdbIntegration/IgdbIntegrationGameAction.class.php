@@ -116,7 +116,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 					->immutable(),
 				TextFormField::create('releaseYear')
 					->label('wcf.igdb_integration.game.year')
-					->value($this->game->releaseYear)
+					->value($this->game->releaseYear ?? '')
 					->immutable(),
 				TextFormField::create('platforms')
 					->label('wcf.igdb_integration.game.platforms')

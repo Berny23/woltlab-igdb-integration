@@ -165,7 +165,7 @@ class IgdbIntegrationUtil
 
 			$gameId = $game->id;
 			$gameName = $game->name ?? '';
-			$gameYear = isset($game->first_release_date) ? DateUtil::format(DateUtil::getDateTimeByTimestamp($game->first_release_date), 'Y') : 0;
+			$gameYear = isset($game->first_release_date) ? DateUtil::format(DateUtil::getDateTimeByTimestamp($game->first_release_date), 'Y') : null;
 			$gameSummary = $game->summary ?? '';
 			$gameCoverId = isset($game->cover) ? $game->cover->image_id : 'nocover';
 

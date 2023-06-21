@@ -102,7 +102,7 @@
 				</div>
 				<div class="gameInfo">
 					<h3>{$game->displayName}</h3>
-					<small>{if $game->releaseYear != 0}{$game->releaseYear}{/if}</small>
+					<small>{$game->releaseYear}</small>
 					<div class="gameUserInfo">
 						<p class="gameAverageRating">
 							{section name=ratingStars loop=$game->averageRating}<span

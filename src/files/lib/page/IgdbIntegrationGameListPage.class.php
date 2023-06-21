@@ -163,8 +163,8 @@ class IgdbIntegrationGameListPage extends SortablePage
 			$parts = explode(' ', $this->searchField);
 			foreach ($parts as $part) {
 				$this->objectList->getConditionBuilder()->add(
-					"name LIKE ?
-					OR germanName LIKE ?",
+					"(name LIKE ?
+					OR germanName LIKE ?)",
 					['%' . $part . '%', '%' . $part . '%']
 				);
 			}
