@@ -24,22 +24,25 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 
 ## Demo
 
-![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/27ef300c-e1f9-43b3-b68d-66218108ca13)
+![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/4e23a901-a5bc-4a15-aa3e-f36e2d29949a)
 
-![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/12dc4c11-fe9c-4763-a194-5d75e07dbfe4)
+![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/bf62b156-6cce-4cae-8d8b-9f2ce95d1461)
+
+
+Notice: As an example, the paid third-party style “[Nubia](https://www.woltlab.com/pluginstore/file/6705-nubia/)” was used for these screenshots, which is not related to this project.
 
 ## Download
 
 https://www.woltlab.com/pluginstore/file/7473-igdb-integration/
 
-## Tutorial
+## Initial setup
 
-To be able to access the IGDB API, you have to follow this short guide:
+In order for the plugin to access the IGDB API, you only need to follow these short instructions:
 1. Log in or sign up on Twitch: https://dev.twitch.tv/login
 2. Enable Two-Factor Authentication if you haven't already: https://www.twitch.tv/settings/security
 3. Register a new application here (Name: Your forum name, OAuth Redirect URL: Your forum address): https://dev.twitch.tv/console/apps/create
 4. Click on Manage next to your created application: https://dev.twitch.tv/console/apps
-5. Click on "New Secret".
+5. Click on “New Secret”.
 6. Paste your Client ID and Client Secret in the appropriate fields in the IGDB Integration settings inside your WoltLab Suite.
 
 ![image](https://github.com/Berny23/woltlab-igdb-integration/assets/36038743/d3a4b332-2d63-4117-a2be-3b743f381406)
