@@ -96,21 +96,20 @@
 		{foreach from=$objects item=game}
 			<div class="gameBox" id="gameBox{$game->gameId}">
 				<div class="gameCover" style="background-image: url({$coverImageUrls[$game->gameId]});">
-					<ul class="gameOverlay pointer" id="gameOverlay{$game->gameId}">
-						<span class="icon icon64 pointer fa-plus"></span>
+					<ul class="gameOverlay pointer" id="gameOverlay{$game->gameId}" data-url="{$game->endpointGameAction()}">
+						{icon size=64 name='plus' type='solid'}
 					</ul>
 				</div>
 				<div class="gameInfo">
 					<h3>{$game->displayName}</h3>
 					<small>{$game->releaseYear}</small>
 					<div class="gameUserInfo">
-						<p class="gameAverageRating">
-							{section name=ratingStars loop=$game->averageRating}<span
-								class="icon icon16 fa-star orange"></span>{/section}
+						<p class="gameAverageRating orange">
+							{section name=ratingStars loop=$game->averageRating}{icon size=16 name='star' type='solid'}{/section}
 						</p>
 						<p class="gamePlayerCount pointer{if $game->isOwned == 1} isOwned{/if}"
 							id="gamePlayerCount{$game->gameId}" {if $game->playerCount <= 0} style="display: none;" {/if}>
-							<span class="icon fa-user"></span> {$game->playerCount}
+							{icon size=16 name='user' type='solid'} {$game->playerCount}
 						</p>
 					</div>
 				</div>
@@ -145,7 +144,8 @@
 				'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
 				'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}'
 			})
-			ControllerIgdbIntegrationGameList.init({@$game->gameId});
+			let gameId = {@$game->gameId};
+			ControllerIgdbIntegrationGameList.init(gameId, document.getElementById('gameOverlay' + gameId), document.getElementById('gamePlayerCount' + gameId));
 		});
 	{/foreach}
 </script>

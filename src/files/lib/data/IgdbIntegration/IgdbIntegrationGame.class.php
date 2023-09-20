@@ -3,6 +3,8 @@
 namespace wcf\data\IgdbIntegration;
 
 use wcf\data\DatabaseObject;
+use wcf\system\request\LinkHandler;
+use wcf\system\request\IRouteController;
 
 /**
  * Represents a game.
@@ -12,28 +14,39 @@ use wcf\data\DatabaseObject;
  * @license     MIT License <https://choosealicense.com/licenses/mit/>
  * @package     WoltLabSuite\Core\Data\IgdbIntegration
  */
-class IgdbIntegrationGame extends DatabaseObject
+class IgdbIntegrationGame extends DatabaseObject implements IRouteController
 {
-    /**
-     * @inheritDoc
-     */
-    protected static $databaseTableIndexName = 'gameId';
+	/**
+	 * @inheritDoc
+	 */
+	protected static $databaseTableIndexName = 'gameId';
 
-    /**
-     * Returns the name of the game if a game object is treated as a string.
-     *
-     * @return  string
-     */
-    public function __toString()
-    {
-        return $this->getTitle();
-    }
+	/**
+	 * Returns the label's textual representation if a label is treated as a
+	 * string.
+	 */
+	public function __toString(): string
+	{
+		return $this->getTitle();
+	}
 
-    /**
-     * @inheritDoc
-     */
-    public function getTitle()
-    {
-        return $this->name;
-    }
+	/**
+	 * @inheritDoc
+	 */
+	public function getTitle(): string
+	{
+		return $this->name;
+	}
+
+	public function getLink() {
+		
+	}
+
+	/**
+	 * Get url for Game Action
+	 */
+	public function endpointGameAction(): string
+	{
+		return LinkHandler::getInstance()->getControllerLink(IgdbIntegrationGameAction::class, ['object' => $this]);
+	}
 }

@@ -13,7 +13,6 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
     Dialog_1 = tslib_1.__importDefault(Dialog_1);
     Language = tslib_1.__importStar(Language);
     function init(gameId, userId) {
-        var _a;
         var gameUserEditDialog = new Dialog_1.default('gameUserEditDialog' + gameId, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction', 'getGameUserEditDialog', {
             destroyOnClose: true,
             actionParameters: {
@@ -25,10 +24,9 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
             },
             submitActionName: 'submitGameUserEditDialog',
             successCallback(returnValues) {
-                var _a;
                 if (returnValues.playerCount <= 0) {
                     // Remove game from profile list
-                    (_a = document.getElementById('gameBox' + returnValues.gameId)) === null || _a === void 0 ? void 0 : _a.remove();
+                    document.getElementById('gameBox' + returnValues.gameId)?.remove();
                 }
                 else {
                     // Insert returned values into page
@@ -39,7 +37,11 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
                         ratingElement.innerHTML = '';
                         playersElement.style.display = returnValues.playerCount <= 0 ? 'none' : '';
                         for (let i = 0; i < returnValues.ownRating; i++) {
-                            ratingElement.innerHTML += '<span class="icon icon16 fa-star orange"></span>';
+                            // Add star icon
+                            const starIcon = document.createElement('fa-icon');
+                            starIcon.size = 16;
+                            starIcon.setIcon('star', true);
+                            ratingElement.appendChild(starIcon);
                         }
                         if (returnValues.isOwned) {
                             playersElement.classList.add('isOwned');
@@ -47,24 +49,11 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
                         else {
                             playersElement.classList.remove('isOwned');
                         }
-                        var html = '<p class="gameOwnRating">';
-                        for (let i = 0; i < returnValues.ownRating; i++) {
-                            html += '<span class="icon icon16 fa-star orange"></span>';
-                        }
-                        html += '</p><p class="gamePlayerCount pointer';
-                        if (returnValues.isOwned) {
-                            html += ' isOwned';
-                        }
-                        html += '" id="gamePlayerCount' + returnValues.gameId + '"></p>';
-                        let gameUserInfoElement = document.querySelector('#gameBox' + returnValues.gameId + ' .gameUserInfo');
-                        if (gameUserInfoElement !== null) {
-                            gameUserInfoElement.innerHTML = html;
-                        }
                     }
                 }
             }
         });
-        (_a = document.getElementById('gameOverlay' + gameId)) === null || _a === void 0 ? void 0 : _a.addEventListener('click', function () {
+        document.getElementById('gameOverlay' + gameId)?.addEventListener('click', function () {
             gameUserEditDialog.open();
         });
     }

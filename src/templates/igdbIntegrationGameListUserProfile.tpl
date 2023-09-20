@@ -6,16 +6,15 @@
 			<div class="gameBox" id="gameBox{$game['gameId']}">
 				<div class="gameCover" style="background-image: url({$game['coverImageUrl']});">
 					<ul class="gameOverlay pointer" id="gameOverlay{$game['gameId']}">
-						<span class="icon icon64 pointer fa-plus"></span>
+					{icon size=64 name='plus' type='solid'}
 					</ul>
 				</div>
 				<div class="gameInfo">
 					<h3>{$game['displayName']}</h3>
 					<small>{$game['releaseYear']}</small>
 					<div class="gameUserInfo">
-						<p class="gameOwnRating">
-							{section name=ratingStars loop=$game['ownRating']}<span
-								class="icon icon16 fa-star orange"></span>{/section}
+						<p class="gameOwnRating orange">
+							{section name=ratingStars loop=$game['ownRating']}{icon size=16 name='star' type='solid'}{/section}
 						</p>
 						<p class="gamePlayerCount {if $game['isOwned'] == 1} isOwned{/if}" id="gamePlayerCount{$game['gameId']}"
 							{if $game['playerCount'] <= 0} style="display: none;" {/if}>

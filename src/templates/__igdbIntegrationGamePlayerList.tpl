@@ -11,7 +11,7 @@
 					</td>
 					<td>
 						{section name=ratingStars loop=$owner['rating']}<span
-							class="icon icon16 fa-star orange"></span>{/section}
+							class="orange">{icon size=16 name='star' type='solid'}</span>{/section}
 					</td>
 				</tr>
 			{/foreach}

@@ -51,30 +51,17 @@ export function init(gameId: number, userId: number) {
 					playersElement.style.display = returnValues.playerCount <= 0 ? 'none' : '';
 
 					for (let i = 0; i < returnValues.ownRating; i++) {
-						ratingElement.innerHTML += '<span class="icon icon16 fa-star orange"></span>';
+						// Add star icon
+						const starIcon = document.createElement('fa-icon');
+						starIcon.size = 16;
+						starIcon.setIcon('star', true);
+						ratingElement.appendChild(starIcon);
 					}
 
 					if (returnValues.isOwned) {
 						playersElement.classList.add('isOwned');
 					} else {
 						playersElement.classList.remove('isOwned');
-					}
-
-					var html = '<p class="gameOwnRating">';
-
-					for (let i = 0; i < returnValues.ownRating; i++) {
-						html += '<span class="icon icon16 fa-star orange"></span>';
-					}
-
-					html += '</p><p class="gamePlayerCount pointer';
-					if (returnValues.isOwned) {
-						html += ' isOwned';
-					}
-					html += '" id="gamePlayerCount' + returnValues.gameId + '"></p>';
-
-					let gameUserInfoElement = document.querySelector('#gameBox' + returnValues.gameId + ' .gameUserInfo');
-					if (gameUserInfoElement !== null) {
-						gameUserInfoElement.innerHTML = html;
 					}
 				}
 			}
