@@ -7,7 +7,8 @@
  * @module		WoltLabSuite/Core/Controller/IgdbIntegrationGameList
  */
 
-import { dialogFactory } from "WoltLabSuite/Core/Component/Dialog";
+import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
+import * as Language from "WoltLabSuite/Core/Language";
 import { show as showNotification } from "WoltLabSuite/Core/Ui/Notification";
 
 interface Response {
@@ -17,59 +18,79 @@ interface Response {
 	isOwned: boolean;
 }
 
-async function showGameUserEditDialog(url: string): Promise<void> {
+async function showGameUserEditDialog(gameId: number) {
 	// Call dialog form 
-	const { ok, result } = await dialogFactory().usingFormBuilder().fromEndpoint<Response>(url);
+	let form = new FormBuilderDialog(
+		'gameUserEditDialog' + gameId,
+		'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction',
+		'getGameUserEditDialog', {
+		destroyOnClose: true,
+		actionParameters: {
+			gameId: gameId,
+		},
+		dialog: {
+			title: Language.get('wcf.igdb_integration.dialog.game_user_edit_title')
+		},
+		submitActionName: 'submitGameUserEditDialog',
+		successCallback(response: Response) {
+			// Insert returned values into page
+			var ratingElement = document.querySelector('#gameBox' + response.gameId + ' .gameAverageRating');
+			var playersElement = document.getElementById('gamePlayerCount' + response.gameId);
 
-	if (ok) {
-		// Insert returned values into page
+			if (ratingElement !== null && playersElement !== null) {
+				ratingElement.innerHTML = '';
+				playersElement.innerHTML = '';
+				playersElement.style.display = response.playerCount <= 0 ? 'none' : '';
+				// Add user icon
+				const userIcon = document.createElement('fa-icon');
+				userIcon.size = 16;
+				userIcon.setIcon('user', true);
+				playersElement.appendChild(userIcon);
+				playersElement.innerHTML += ' ' + response.playerCount;
 
-		var ratingElement = document.querySelector('#gameBox' + result.gameId + ' .gameAverageRating');
-		var playersElement = document.getElementById('gamePlayerCount' + result.gameId);
+				for (let i = 0; i < response.averageRating; i++) {
+					// Add star icon
+					const starIcon = document.createElement('fa-icon');
+					starIcon.size = 16;
+					starIcon.setIcon('star', true);
+					ratingElement.appendChild(starIcon);
+				}
 
-		if (ratingElement !== null && playersElement !== null) {
-			ratingElement.innerHTML = '';
-			playersElement.innerHTML = '';
-			playersElement.style.display = result.playerCount <= 0 ? 'none' : '';
-			// Add user icon
-			const userIcon = document.createElement('fa-icon');
-			userIcon.size = 16;
-			userIcon.setIcon('user', true);
-			playersElement.appendChild(userIcon);
-			playersElement.innerHTML += ' ' + result.playerCount;
-
-			for (let i = 0; i < result.averageRating; i++) {
-				// Add star icon
-				const starIcon = document.createElement('fa-icon');
-				starIcon.size = 16;
-				starIcon.setIcon('star', true);
-				ratingElement.appendChild(starIcon);
+				if (response.isOwned) {
+					playersElement.classList.add('isOwned');
+				} else {
+					playersElement.classList.remove('isOwned');
+				}
 			}
-
-			if (result.isOwned) {
-				playersElement.classList.add('isOwned');
-			} else {
-				playersElement.classList.remove('isOwned');
-			}
+			showNotification();
 		}
-
-		showNotification();
-	}
-}
-
-async function showGamePlayerListDialog(url: string): Promise<void> {
-	const { ok, result } = await dialogFactory().usingFormBuilder().fromEndpoint<Response>(url);
-
-	if (ok) {
-		showNotification();
-	}
-}
-
-export function init(gameId: number, gameOverlayElement: HTMLElement, gamePlayerCountElement: HTMLElement) {
-	gameOverlayElement.addEventListener('click', function () {
-		void showGameUserEditDialog(gameOverlayElement.dataset.url!);
 	});
-	gamePlayerCountElement.addEventListener('click', function () {
-		void showGamePlayerListDialog(gamePlayerCountElement.dataset.url!);
+
+	form.open();
+}
+
+async function showGamePlayerListDialog(gameId: number) {
+	let form = new FormBuilderDialog(
+		'gamePlayerListDialog' + gameId,
+		'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction',
+		'getGamePlayerListDialog', {
+		destroyOnClose: true,
+		actionParameters: {
+			gameId: gameId,
+		},
+		dialog: {
+			title: Language.get('wcf.igdb_integration.dialog.game_player_list_title')
+		}
+	});
+
+	form.open();
+}
+
+export function init(gameId: number) {
+	document.getElementById('gameOverlay' + gameId)?.addEventListener('click', function () {
+		showGameUserEditDialog(gameId);
+	});
+	document.getElementById('gamePlayerCount' + gameId)?.addEventListener('click', function () {
+		showGamePlayerListDialog(gameId);
 	});
 }

@@ -38,15 +38,10 @@ class IgdbIntegrationGame extends DatabaseObject implements IRouteController
 		return $this->name;
 	}
 
-	public function getLink() {
-		
-	}
-
 	/**
-	 * Get url for Game Action
+	 * @inheritDoc
 	 */
-	public function endpointGameAction(): string
-	{
-		return LinkHandler::getInstance()->getControllerLink(IgdbIntegrationGameAction::class, ['object' => $this]);
+	public function getObjectID() {
+		return $this->gameId;
 	}
 }

@@ -96,7 +96,7 @@
 		{foreach from=$objects item=game}
 			<div class="gameBox" id="gameBox{$game->gameId}">
 				<div class="gameCover" style="background-image: url({$coverImageUrls[$game->gameId]});">
-					<ul class="gameOverlay pointer" id="gameOverlay{$game->gameId}" data-url="{$game->endpointGameAction()}">
+					<ul class="gameOverlay pointer" id="gameOverlay{$game->gameId}">
 						{icon size=64 name='plus' type='solid'}
 					</ul>
 				</div>
@@ -145,7 +145,7 @@
 				'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}'
 			})
 			let gameId = {@$game->gameId};
-			ControllerIgdbIntegrationGameList.init(gameId, document.getElementById('gameOverlay' + gameId), document.getElementById('gamePlayerCount' + gameId));
+			ControllerIgdbIntegrationGameList.init(gameId);
 		});
 	{/foreach}
 </script>

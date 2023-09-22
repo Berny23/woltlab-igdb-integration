@@ -115,6 +115,10 @@
 	padding-bottom: 0.5rem;
 }
 
+.igdbIntegrationGameListContainer~.dialogOverlay {
+	z-index: 350;
+}
+
 .igdbIntegrationFooter {
 	display: flex;
 	flex-direction: column;
