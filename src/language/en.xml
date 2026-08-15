@@ -60,6 +60,7 @@
 
 	<!-- User options -->
 	<category name="wcf.user.option">
+		<item name="wcf.user.option.category.settings.general.games"><![CDATA[Games]]></item>
 		<item name="wcf.user.option.igdb_integration_game_count"><![CDATA[Owned Games]]></item>
 		<item name="wcf.user.option.igdb_integration_games_per_page"><![CDATA[Games per page]]></item>
 		<item name="wcf.user.option.igdb_integration_games_per_page.description"><![CDATA[If <b>0</b>, the default value is used.]]></item>
