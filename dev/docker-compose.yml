@@ -7,6 +7,8 @@ services:
     volumes:
       - woltlab:/var/www/html
       - ./php/woltlab.ini:/usr/local/etc/php/conf.d/woltlab.ini:ro
+      # Plugin source for the ACP developer tools
+      - ../src:/var/www/plugin-src:ro
     depends_on:
       db:
         condition: service_healthy

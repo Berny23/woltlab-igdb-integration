@@ -77,6 +77,16 @@ podman compose up -d --build
 Then open http://localhost/install.php (database: host `db`, user/password/database `woltlab`). WoltLab files and the database are stored in named volumes.
 Use `podman compose down -v` to reset everything.
 
+### Plugin reload via developer tools (Projects)
+
+The plugin's **/src** directory is mounted read-only into the php container at `/var/www/plugin-src`.
+
+1. In the ACP, open **Configuration → Modules → Development** and turn on **Enable developer tools**.
+2. Open **Configuration → Developer Tools → Projects** and add a project with path `/var/www/plugin-src`.
+3. If the plugin is not installed yet, install it from the project list. Otherwise, open the project's **Sync** tab and synchronize all files.
+
+Note: TypeScript is not compiled automatically, run `tsc` in **/src** first if you changed anything in **/src/ts**.
+
 ## Privacy notice
 
 This plugin sends all API requests to igdb.com only through the web server, not in the user's browser. This means that no user data is transmitted, except for the following:
