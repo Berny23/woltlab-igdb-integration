@@ -34,7 +34,9 @@
 		<instruction type="userProfileMenu" />
 	</instructions>
 	<instructions type="update" fromversion="1.2.3">
+		<instruction type="acpTemplate" />
 		<instruction type="file" />
+		<instruction type="template" />
 		<instruction type="language" />
 		<instruction type="option" />
 	</instructions>

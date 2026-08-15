@@ -7,7 +7,7 @@
 			{foreach from=$gameOwners item=owner}
 				<tr>
 					<td>
-						<b>{@$gameOwnerProfileLinks[$owner['userId']]}</b>
+						<b>{unsafe:$gameOwnerProfileLinks[$owner['userId']]}</b>
 					</td>
 					<td>
 						{section name=ratingStars loop=$owner['rating']}<span

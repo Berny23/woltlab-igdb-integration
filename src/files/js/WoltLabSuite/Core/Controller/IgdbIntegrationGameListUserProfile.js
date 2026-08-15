@@ -6,12 +6,11 @@
  * @license		MIT License <https://choosealicense.com/licenses/mit/>
  * @module		WoltLabSuite/Core/Controller/IgdbIntegrationGameListUserProfile
  */
-define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", "WoltLabSuite/Core/Language"], function (require, exports, tslib_1, Dialog_1, Language) {
+define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", "WoltLabSuite/Core/Language"], function (require, exports, tslib_1, Dialog_1, Language_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.init = void 0;
+    exports.init = init;
     Dialog_1 = tslib_1.__importDefault(Dialog_1);
-    Language = tslib_1.__importStar(Language);
     function init(gameId, userId) {
         var gameUserEditDialog = new Dialog_1.default('gameUserEditDialog' + gameId, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction', 'getGameUserEditDialog', {
             destroyOnClose: true,
@@ -20,10 +19,11 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
                 userId: userId
             },
             dialog: {
-                title: Language.get('wcf.igdb_integration.dialog.game_user_edit_title')
+                title: (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_user_edit_title')
             },
             submitActionName: 'submitGameUserEditDialog',
-            successCallback(returnValues) {
+            successCallback(rawReturnValues) {
+                const returnValues = rawReturnValues;
                 if (returnValues.playerCount <= 0) {
                     // Remove game from profile list
                     document.getElementById('gameBox' + returnValues.gameId)?.remove();
@@ -57,5 +57,4 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
             gameUserEditDialog.open();
         });
     }
-    exports.init = init;
 });

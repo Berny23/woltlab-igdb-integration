@@ -24,17 +24,17 @@
 			data-object-action-class-name="wcf\data\IgdbIntegration\IgdbIntegrationGameAction">
 			<thead>
 				<tr>
-					<th class="columnID columnGameId{if $sortField == 'gameId'} active {@$sortOrder}{/if}" colspan="2"><a
-							href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=gameId&sortOrder={if $sortField == 'gameId' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.global.objectID{/lang}</a>
+					<th class="columnID columnGameId{if $sortField == 'gameId'} active {unsafe:$sortOrder}{/if}" colspan="2"><a
+							href="{link controller='IgdbIntegrationGameList'}pageNo={unsafe:$pageNo}&sortField=gameId&sortOrder={if $sortField == 'gameId' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.global.objectID{/lang}</a>
 					</th>
-					<th class="columnTitle columnName{if $sortField == 'name'} active {@$sortOrder}{/if}"><a
-							href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=name&sortOrder={if $sortField == 'name' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.name{/lang}</a>
+					<th class="columnTitle columnName{if $sortField == 'name'} active {unsafe:$sortOrder}{/if}"><a
+							href="{link controller='IgdbIntegrationGameList'}pageNo={unsafe:$pageNo}&sortField=name&sortOrder={if $sortField == 'name' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.name{/lang}</a>
 					</th>
-					<th class="columnTitle columnYear{if $sortField == 'releaseYear'} active {@$sortOrder}{/if}"><a
-							href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=releaseYear&sortOrder={if $sortField == 'releaseYear' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.year{/lang}</a>
+					<th class="columnTitle columnYear{if $sortField == 'releaseYear'} active {unsafe:$sortOrder}{/if}"><a
+							href="{link controller='IgdbIntegrationGameList'}pageNo={unsafe:$pageNo}&sortField=releaseYear&sortOrder={if $sortField == 'releaseYear' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.year{/lang}</a>
 					</th>
-					<th class="columnTitle columnPlatforms{if $sortField == 'platforms'} active {@$sortOrder}{/if}"><a
-							href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo}&sortField=platforms&sortOrder={if $sortField == 'platforms' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.platforms{/lang}</a>
+					<th class="columnTitle columnPlatforms{if $sortField == 'platforms'} active {unsafe:$sortOrder}{/if}"><a
+							href="{link controller='IgdbIntegrationGameList'}pageNo={unsafe:$pageNo}&sortField=platforms&sortOrder={if $sortField == 'platforms' && $sortOrder == 'ASC'}DESC{else}ASC{/if}{/link}">{lang}wcf.igdb_integration.game.platforms{/lang}</a>
 					</th>
 
 					{event name='columnHeads'}
@@ -43,7 +43,7 @@
 
 			<tbody class="jsReloadPageWhenEmpty">
 				{foreach from=$objects item=game}
-					<tr class="jsObjectActionObject" data-object-id="{@$game->getObjectID()}">
+					<tr class="jsObjectActionObject" data-object-id="{unsafe:$game->getObjectID()}">
 						<td class="columnIcon">
 							<a href="{link controller='IgdbIntegrationGameEdit' object=$game}{/link}"
 								title="{lang}wcf.global.button.edit{/lang}" class="jsTooltip">
@@ -74,7 +74,7 @@
 	<footer class="contentFooter">
 		{hascontent}
 		<div class="paginationBottom">
-			{content}{@$pagesLinks}{/content}
+			{content}{unsafe:$pagesLinks}{/content}
 		</div>
 		{/hascontent}
 

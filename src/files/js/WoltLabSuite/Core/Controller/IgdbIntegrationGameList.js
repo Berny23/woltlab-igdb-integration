@@ -6,12 +6,11 @@
  * @license		MIT License <https://choosealicense.com/licenses/mit/>
  * @module		WoltLabSuite/Core/Controller/IgdbIntegrationGameList
  */
-define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", "WoltLabSuite/Core/Language", "WoltLabSuite/Core/Ui/Notification"], function (require, exports, tslib_1, Dialog_1, Language, Notification_1) {
+define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", "WoltLabSuite/Core/Language", "WoltLabSuite/Core/Ui/Notification"], function (require, exports, tslib_1, Dialog_1, Language_1, Notification_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.init = void 0;
+    exports.init = init;
     Dialog_1 = tslib_1.__importDefault(Dialog_1);
-    Language = tslib_1.__importStar(Language);
     async function showGameUserEditDialog(gameId) {
         // Call dialog form 
         let form = new Dialog_1.default('gameUserEditDialog' + gameId, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction', 'getGameUserEditDialog', {
@@ -20,10 +19,11 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
                 gameId: gameId,
             },
             dialog: {
-                title: Language.get('wcf.igdb_integration.dialog.game_user_edit_title')
+                title: (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_user_edit_title')
             },
             submitActionName: 'submitGameUserEditDialog',
-            successCallback(response) {
+            successCallback(returnValues) {
+                const response = returnValues;
                 // Insert returned values into page
                 var ratingElement = document.querySelector('#gameBox' + response.gameId + ' .gameAverageRating');
                 var playersElement = document.getElementById('gamePlayerCount' + response.gameId);
@@ -63,7 +63,7 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
                 gameId: gameId,
             },
             dialog: {
-                title: Language.get('wcf.igdb_integration.dialog.game_player_list_title')
+                title: (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_player_list_title')
             }
         });
         form.open();
@@ -76,5 +76,4 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Form/Builder/Dialog", 
             showGamePlayerListDialog(gameId);
         });
     }
-    exports.init = init;
 });

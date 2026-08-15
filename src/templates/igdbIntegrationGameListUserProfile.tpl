@@ -40,7 +40,7 @@
 				'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}'
 			});
 
-			ControllerIgdbIntegrationGameListUserProfile.init({@$game['gameId']}, {$userId});
+			ControllerIgdbIntegrationGameListUserProfile.init({unsafe:$game['gameId']}, {$userId});
 		});
 	{/foreach}
 </script>

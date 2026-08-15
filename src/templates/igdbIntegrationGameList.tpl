@@ -3,12 +3,12 @@
 
 {capture assign='headContent'}
 	{if $pageNo < $pages}
-		<link rel="next" href="{link controller='IgdbIntegrationGameList'}pageNo={@$pageNo+1}{/link}">
+		<link rel="next" href="{link controller='IgdbIntegrationGameList'}pageNo={unsafe:$pageNo+1}{/link}">
 	{/if}
 	{if $pageNo > 1}
-		<link rel="prev" href="{link controller='IgdbIntegrationGameList'}{if $pageNo > 2}pageNo={@$pageNo-1}{/if}{/link}">
+		<link rel="prev" href="{link controller='IgdbIntegrationGameList'}{if $pageNo > 2}pageNo={unsafe:$pageNo-1}{/if}{/link}">
 	{/if}
-	<link rel="canonical" href="{link controller='IgdbIntegrationGameList'}{if $pageNo > 1}pageNo={@$pageNo}{/if}{/link}">
+	<link rel="canonical" href="{link controller='IgdbIntegrationGameList'}{if $pageNo > 1}pageNo={unsafe:$pageNo}{/if}{/link}">
 {/capture}
 
 {capture assign='sidebarRight'}
@@ -69,7 +69,7 @@
 				{foreach from=$topPlayers item=player}
 					<tr>
 						<td>
-							<b>{@$topPlayerProfileLinks[$player['userId']]}</b>
+							<b>{unsafe:$topPlayerProfileLinks[$player['userId']]}</b>
 						</td>
 						<td>
 							{$player['gameCount']} {lang}wcf.user.option.igdb_integration_game_count{/lang}
@@ -123,7 +123,7 @@
 <footer class="contentFooter igdbIntegrationFooter">
 	{hascontent}
 	<div class="paginationBottom">
-		{content}{@$pagesLinks}{/content}
+		{content}{unsafe:$pagesLinks}{/content}
 	</div>
 	{/hascontent}
 
@@ -144,7 +144,7 @@
 				'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
 				'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}'
 			})
-			let gameId = {@$game->gameId};
+			let gameId = {unsafe:$game->gameId};
 			ControllerIgdbIntegrationGameList.init(gameId);
 		});
 	{/foreach}

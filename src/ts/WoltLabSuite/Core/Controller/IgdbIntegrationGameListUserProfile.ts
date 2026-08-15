@@ -8,8 +8,7 @@
  */
 
 import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
-import * as Language from "WoltLabSuite/Core/Language";
-import * as UiNotification from "WoltLabSuite/Core/Ui/Notification";
+import { getPhrase } from "WoltLabSuite/Core/Language";
 
 //let gameUserEditDialog: FormBuilderDialog;
 
@@ -31,10 +30,11 @@ export function init(gameId: number, userId: number) {
 			userId: userId
 		},
 		dialog: {
-			title: Language.get('wcf.igdb_integration.dialog.game_user_edit_title')
+			title: getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
 		},
 		submitActionName: 'submitGameUserEditDialog',
-		successCallback(returnValues: ReturnValues) {
+		successCallback(rawReturnValues) {
+			const returnValues = rawReturnValues as ReturnValues;
 			if (returnValues.playerCount <= 0) {
 				// Remove game from profile list
 

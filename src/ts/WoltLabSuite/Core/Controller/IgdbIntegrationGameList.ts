@@ -8,7 +8,7 @@
  */
 
 import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
-import * as Language from "WoltLabSuite/Core/Language";
+import { getPhrase } from "WoltLabSuite/Core/Language";
 import { show as showNotification } from "WoltLabSuite/Core/Ui/Notification";
 
 interface Response {
@@ -29,10 +29,11 @@ async function showGameUserEditDialog(gameId: number) {
 			gameId: gameId,
 		},
 		dialog: {
-			title: Language.get('wcf.igdb_integration.dialog.game_user_edit_title')
+			title: getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
 		},
 		submitActionName: 'submitGameUserEditDialog',
-		successCallback(response: Response) {
+		successCallback(returnValues) {
+			const response = returnValues as Response;
 			// Insert returned values into page
 			var ratingElement = document.querySelector('#gameBox' + response.gameId + ' .gameAverageRating');
 			var playersElement = document.getElementById('gamePlayerCount' + response.gameId);
@@ -79,7 +80,7 @@ async function showGamePlayerListDialog(gameId: number) {
 			gameId: gameId,
 		},
 		dialog: {
-			title: Language.get('wcf.igdb_integration.dialog.game_player_list_title')
+			title: getPhrase('wcf.igdb_integration.dialog.game_player_list_title')
 		}
 	});
 
