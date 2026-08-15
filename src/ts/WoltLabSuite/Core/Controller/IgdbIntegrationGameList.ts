@@ -72,6 +72,38 @@ function getGameDialogTitle(gameId: number): string {
 	return releaseYear ? gameName + ' (' + releaseYear + ')' : gameName;
 }
 
+function initGameUserEditDialogEvents(content: HTMLElement) {
+	const ownedYes = content.querySelector('#isOwned') as HTMLInputElement | null;
+	const ownedNo = content.querySelector('#isOwned_no') as HTMLInputElement | null;
+	const ratingContainer = content.querySelector('#ratingContainer');
+	if (ownedYes === null || ownedNo === null || ratingContainer === null || content.dataset.igdbEventsBound === '1') {
+		return;
+	}
+	content.dataset.igdbEventsBound = '1';
+
+	// Enable the owned toggle when a rating is selected
+	ratingContainer.querySelectorAll('.ratingList > li:not(.ratingMetaButton)').forEach((listItem) => {
+		listItem.addEventListener('click', function () {
+			ownedYes.checked = true;
+		});
+	});
+
+	// Reset the rating when the owned toggle is turned off
+	ownedNo.addEventListener('change', function () {
+		if (!ownedNo.checked) {
+			return;
+		}
+
+		const ratingInput = content.querySelector('#rating') as HTMLInputElement | null;
+		if (ratingInput !== null) {
+			ratingInput.value = '0';
+		}
+		ratingContainer.querySelectorAll('.ratingList > li:not(.ratingMetaButton)').forEach((listItem) => {
+			listItem.querySelector('fa-icon')?.setIcon('star', false);
+		});
+	});
+}
+
 async function showGameUserEditDialog(gameId: number) {
 	// Call dialog form
 	let form = new FormBuilderDialog(
@@ -83,7 +115,8 @@ async function showGameUserEditDialog(gameId: number) {
 			gameId: gameId,
 		},
 		dialog: {
-			title: getGameDialogTitle(gameId) || getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
+			title: getGameDialogTitle(gameId) || getPhrase('wcf.igdb_integration.dialog.game_user_edit_title'),
+			onShow: (content) => initGameUserEditDialogEvents(content)
 		},
 		submitActionName: 'submitGameUserEditDialog',
 		successCallback(returnValues) {

@@ -34,6 +34,15 @@
 						<input type="text" id="searchField" name="searchField" value="{$searchField}">
 						{event name='searchField'}
 					</dd>
+					<dt>{lang}wcf.igdb_integration.game.platforms{/lang}</dt>
+					<dd>
+						<select id="platformFilter" name="platforms[]" multiple size="6">
+							{foreach from=$availablePlatforms item=platform}
+								<option value="{$platform}"{if $platform|in_array:$platformFilter} selected{/if}>{$platform}</option>
+							{/foreach}
+						</select>
+						{event name='platformFilter'}
+					</dd>
 					<dt>{lang}wcf.global.sorting{/lang}</dt>
 					<dd>
 						<select id="sortField" name="sortField">
@@ -57,6 +66,7 @@
 				</dl>
 
 				<div class="formSubmit">
+					<a href="{link controller='IgdbIntegrationGameList'}{/link}" class="button">{lang}wcf.global.button.reset{/lang}</a>
 					<input type="submit" value="{lang}wcf.global.button.submit{/lang}" accesskey="s">
 				</div>
 			</div>
@@ -86,7 +96,7 @@
 {hascontent}
 <div class="paginationTop">
 	{content}
-	{pages print=true assign=pagesLinks controller='IgdbIntegrationGameList' link="pageNo=%d&searchField=$searchField&sortField=$sortField&sortOrder=$sortOrder"}
+	{pages print=true assign=pagesLinks controller='IgdbIntegrationGameList' link="pageNo=%d&searchField=$searchField&sortField=$sortField&sortOrder=$sortOrder$platformFilterParams"}
 	{/content}
 </div>
 {/hascontent}

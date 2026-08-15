@@ -3,7 +3,10 @@
 namespace wcf\page;
 
 use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
+use wcf\util\ArrayUtil;
+use wcf\util\HeaderUtil;
 use wcf\util\IgdbIntegrationUtil;
+use wcf\system\request\LinkHandler;
 use wcf\system\WCF;
 use wcf\data\user\User;
 use wcf\data\user\UserProfile;
@@ -49,6 +52,11 @@ class IgdbIntegrationGameListPage extends SortablePage
 	private $searchField = '';
 
 	/**
+	 * The platforms selected in the platform filter.
+	 */
+	private $platformFilter = [];
+
+	/**
 	 * Show error message if retreiving IGDB data resulted in an error.
 	 */
 	private $showIgdbError = false;
@@ -74,12 +82,32 @@ class IgdbIntegrationGameListPage extends SortablePage
 		$this->searchField = '';
 		if (isset($_REQUEST['searchField'])) {
 			$this->searchField = $_REQUEST['searchField'];
+		}
 
-			if (!isset($_REQUEST['pageNo']) && WCF::getSession()->getPermission('user.igdb_integration.can_search_igdb')) {
-				// Search for games on IGDB and update local database
-				$result = IgdbIntegrationUtil::updateDatabaseGamesByName($this->searchField);
-				$this->showIgdbError = !$result;
+		$this->platformFilter = [];
+		if (isset($_REQUEST['platforms']) && is_array($_REQUEST['platforms'])) {
+			$this->platformFilter = array_filter(ArrayUtil::trim($_REQUEST['platforms']));
+		}
+
+		if (!empty($_POST)) {
+			// Redirect the form submit to a GET request so that all search
+			// parameters are visible in the URL
+			$parameters = 'searchField=' . rawurlencode($this->searchField)
+				. '&sortField=' . rawurlencode($this->sortField)
+				. '&sortOrder=' . rawurlencode($this->sortOrder);
+			foreach ($this->platformFilter as $platform) {
+				$parameters .= '&platforms[]=' . rawurlencode($platform);
 			}
+
+			HeaderUtil::redirect(LinkHandler::getInstance()->getLink('IgdbIntegrationGameList', [], $parameters));
+
+			exit;
+		}
+
+		if (isset($_REQUEST['searchField']) && !isset($_REQUEST['pageNo']) && WCF::getSession()->getPermission('user.igdb_integration.can_search_igdb')) {
+			// Search for games on IGDB and update local database
+			$result = IgdbIntegrationUtil::updateDatabaseGamesByName($this->searchField);
+			$this->showIgdbError = !$result;
 		}
 	}
 
@@ -116,12 +144,35 @@ class IgdbIntegrationGameListPage extends SortablePage
 			$topPlayerProfileLinks[$player['userId']] = (new UserProfile(new User($player['userId'])))->getAnchorTag();
 		}
 
+		// Collect all distinct platforms for the platform filter
+		$availablePlatforms = IgdbIntegrationUtil::getAvailablePlatforms();
+
+		// The game list itself is unfiltered on a fresh visit, but the default
+		// platforms are pre-selected in the filter form for the next submit
+		$platformPreselection = $this->platformFilter;
+		if (!isset($_REQUEST['searchField'])) {
+			$defaultPlatformFilter = WCF::getUser()->getUserOption('igdb_integration_default_platform_filter');
+			if (empty($defaultPlatformFilter)) {
+				$defaultPlatformFilter = IGDB_INTEGRATION_GENERAL_DEFAULT_PLATFORM_FILTER;
+			}
+			$platformPreselection = array_filter(ArrayUtil::trim(explode("\n", $defaultPlatformFilter)));
+		}
+
+		// Preserve the platform filter in pagination links
+		$platformFilterParams = '';
+		foreach ($this->platformFilter as $platform) {
+			$platformFilterParams .= '&platforms[]=' . rawurlencode($platform);
+		}
+
 		WCF::getTPL()->assign([
 			'searchField' => $this->searchField,
 			'showIgdbError' => $this->showIgdbError,
 			'coverImageUrls' => $coverImageUrls,
 			'topPlayers' => $topPlayers,
-			'topPlayerProfileLinks' => $topPlayerProfileLinks
+			'topPlayerProfileLinks' => $topPlayerProfileLinks,
+			'availablePlatforms' => $availablePlatforms,
+			'platformFilter' => $platformPreselection,
+			'platformFilterParams' => $platformFilterParams
 		]);
 	}
 
@@ -168,6 +219,17 @@ class IgdbIntegrationGameListPage extends SortablePage
 					['%' . $part . '%', '%' . $part . '%']
 				);
 			}
+		}
+
+		if (!empty($this->platformFilter)) {
+			// Match games that are available on any of the selected platforms
+			$conditions = [];
+			$parameters = [];
+			foreach ($this->platformFilter as $platform) {
+				$conditions[] = "FIND_IN_SET(?, REPLACE(platforms, ', ', ','))";
+				$parameters[] = $platform;
+			}
+			$this->objectList->getConditionBuilder()->add('(' . implode(' OR ', $conditions) . ')', $parameters);
 		}
 	}
 }

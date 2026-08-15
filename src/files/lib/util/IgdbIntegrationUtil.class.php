@@ -187,6 +187,27 @@ class IgdbIntegrationUtil
 	}
 
 	/**
+	 * Returns all distinct platform names of the games in the database.
+	 */
+	public static function getAvailablePlatforms(): array
+	{
+		$sql = "SELECT DISTINCT platforms
+				FROM wcf1_igdb_integration_game
+				WHERE platforms <> ''";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute();
+		$availablePlatforms = [];
+		while ($platforms = $statement->fetchColumn()) {
+			foreach (ArrayUtil::trim(explode(',', $platforms)) as $platform) {
+				$availablePlatforms[$platform] = $platform;
+			}
+		}
+		natcasesort($availablePlatforms);
+
+		return $availablePlatforms;
+	}
+
+	/**
 	 * Returns the link to a given image url via image proxy
 	 * @see https://www.woltlab.com/community/thread/297027-image-proxy-fehlerhaft/?postID=1903894#post1903894
 	 */

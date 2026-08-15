@@ -69,6 +69,11 @@ DESC:wcf.global.sortOrder.descending</selectoptions>
 				<minvalue>0</minvalue>
 				<maxvalue>500</maxvalue>
 			</option>
+			<option name="igdb_integration_general_default_platform_filter">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>igdbIntegrationPlatforms</optiontype>
+				<defaultvalue></defaultvalue>
+			</option>
 			<option name="igdb_integration_general_show_branding">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>boolean</optiontype>

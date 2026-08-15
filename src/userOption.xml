@@ -40,6 +40,13 @@ DESC:wcf.global.sortOrder.descending</selectoptions>
 				<visible>3</visible>
 				<editable>3</editable>
 			</option>
+			<option name="igdb_integration_default_platform_filter">
+				<categoryname>settings.general.appearance</categoryname>
+				<optiontype>igdbIntegrationPlatforms</optiontype>
+				<defaultvalue></defaultvalue>
+				<visible>3</visible>
+				<editable>3</editable>
+			</option>
 			<option name="igdb_integration_player_toplist_limit">
 				<categoryname>settings.general.appearance</categoryname>
 				<optiontype>integer</optiontype>

@@ -39,6 +39,34 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
         const releaseYear = document.querySelector('#gameBox' + gameId + ' .gameInfo > small')?.textContent?.trim();
         return releaseYear ? gameName + ' (' + releaseYear + ')' : gameName;
     }
+    function initGameUserEditDialogEvents(content) {
+        const ownedYes = content.querySelector('#isOwned');
+        const ownedNo = content.querySelector('#isOwned_no');
+        const ratingContainer = content.querySelector('#ratingContainer');
+        if (ownedYes === null || ownedNo === null || ratingContainer === null || content.dataset.igdbEventsBound === '1') {
+            return;
+        }
+        content.dataset.igdbEventsBound = '1';
+        // Enable the owned toggle when a rating is selected
+        ratingContainer.querySelectorAll('.ratingList > li:not(.ratingMetaButton)').forEach((listItem) => {
+            listItem.addEventListener('click', function () {
+                ownedYes.checked = true;
+            });
+        });
+        // Reset the rating when the owned toggle is turned off
+        ownedNo.addEventListener('change', function () {
+            if (!ownedNo.checked) {
+                return;
+            }
+            const ratingInput = content.querySelector('#rating');
+            if (ratingInput !== null) {
+                ratingInput.value = '0';
+            }
+            ratingContainer.querySelectorAll('.ratingList > li:not(.ratingMetaButton)').forEach((listItem) => {
+                listItem.querySelector('fa-icon')?.setIcon('star', false);
+            });
+        });
+    }
     function init(gameId, userId) {
         var gameUserEditDialog = new Dialog_1.default('gameUserEditDialog' + gameId, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction', 'getGameUserEditDialog', {
             destroyOnClose: true,
@@ -47,7 +75,8 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
                 userId: userId
             },
             dialog: {
-                title: getGameDialogTitle(gameId) || (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_user_edit_title')
+                title: getGameDialogTitle(gameId) || (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_user_edit_title'),
+                onShow: (content) => initGameUserEditDialogEvents(content)
             },
             submitActionName: 'submitGameUserEditDialog',
             successCallback(rawReturnValues) {
