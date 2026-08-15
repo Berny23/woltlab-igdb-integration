@@ -47,6 +47,17 @@ DESC:wcf.global.sortOrder.descending</selectoptions>
 				<visible>3</visible>
 				<editable>3</editable>
 			</option>
+			<option name="igdb_integration_preferred_region">
+				<categoryname>settings.general.appearance</categoryname>
+				<optiontype>select</optiontype>
+				<defaultvalue>default</defaultvalue>
+				<selectoptions>default:wcf.global.defaultValue
+4:wcf.igdb_integration.region.europe
+3:wcf.igdb_integration.region.japan
+2:wcf.igdb_integration.region.korea</selectoptions>
+				<visible>3</visible>
+				<editable>3</editable>
+			</option>
 			<option name="igdb_integration_player_toplist_limit">
 				<categoryname>settings.general.appearance</categoryname>
 				<optiontype>integer</optiontype>

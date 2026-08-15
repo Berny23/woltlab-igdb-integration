@@ -26,6 +26,14 @@
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Bild-URL]]></item>
 	</category>
 
+	<!-- IGDB cover regions -->
+	<category name="wcf.igdb_integration.region">
+		<item name="wcf.igdb_integration.region.none"><![CDATA[Standard]]></item>
+		<item name="wcf.igdb_integration.region.europe"><![CDATA[Europa]]></item>
+		<item name="wcf.igdb_integration.region.japan"><![CDATA[Japan]]></item>
+		<item name="wcf.igdb_integration.region.korea"><![CDATA[Korea]]></item>
+	</category>
+
 	<!-- Dialog forms -->
 	<category name="wcf.igdb_integration.dialog">
 		<item name="wcf.igdb_integration.dialog.game_user_edit_is_owned"><![CDATA[Im Besitz]]></item>
@@ -61,6 +69,8 @@
 		<item name="wcf.user.option.igdb_integration_default_game_sort_order.description"><![CDATA[Diese Einstellung bestimmt die standardmäßige Sortierreihenfolge für die Spiele-Liste.]]></item>
 		<item name="wcf.user.option.igdb_integration_default_platform_filter"><![CDATA[Standard-Vorauswahl der Plattformen]]></item>
 		<item name="wcf.user.option.igdb_integration_default_platform_filter.description"><![CDATA[Diese Plattformen sind im Plattform-Filter der Spiele-Liste vorausgewählt. Wenn nichts ausgewählt ist, wird der Standardwert verwendet.]]></item>
+		<item name="wcf.user.option.igdb_integration_preferred_region"><![CDATA[Bevorzugte Region für Cover]]></item>
+		<item name="wcf.user.option.igdb_integration_preferred_region.description"><![CDATA[Zeigt regionsspezifische Spiele-Cover an, sofern auf IGDB verfügbar.]]></item>
 		<item name="wcf.user.option.igdb_integration_player_toplist_limit"><![CDATA[Größe der Spieler-Topliste]]></item>
 		<item name="wcf.user.option.igdb_integration_player_toplist_limit.description"><![CDATA[Bei <b>0</b> wird der Standardwert verwendet.]]></item>
 	</category>
@@ -82,6 +92,8 @@
 		<item name="wcf.acp.option.igdb_integration_general_game_sort_order.description"><![CDATA[Dies ist die <b>standardmäßige Sortierreihenfolge</b> für die Spiele-Liste. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_player_toplist_limit"><![CDATA[Größe der Spieler-Topliste]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_player_toplist_limit.description"><![CDATA[Dies ist der <b>Standardwert</b>. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_preferred_region"><![CDATA[Bevorzugte Region für Cover]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_preferred_region.description"><![CDATA[Zeigt regionsspezifische Spiele-Cover an, sofern auf IGDB verfügbar. Dies ist der <b>Standardwert</b>. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_default_platform_filter"><![CDATA[Standard-Vorauswahl der Plattformen]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_default_platform_filter.description"><![CDATA[Diese Plattformen sind beim Öffnen der Spiele-Liste im Plattform-Filter vorausgewählt.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_show_branding"><![CDATA[Branding anzeigen]]></item>

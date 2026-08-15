@@ -92,7 +92,7 @@ class IgdbIntegrationUtil
 			'Authorization' => 'Bearer ' . $accessToken
 		];
 		$body = 'search "' . str_replace('"', '', $name) . '";
-				fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id,slug;
+				fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id,slug,game_localizations.cover.image_id,game_localizations.region;
 				limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
 		$request = new Request('POST', self::URL_BASE . 'games', $headers, $body);
 		return self::$client->send($request);
@@ -130,7 +130,8 @@ class IgdbIntegrationUtil
 					platforms = ?,
 					summary = ?,
 					coverImageId = ?,
-					slug = ?
+					slug = ?,
+					localizedCovers = ?
 				ON DUPLICATE KEY UPDATE
 					name = ?,
 					germanName = ?,
@@ -138,7 +139,8 @@ class IgdbIntegrationUtil
 					platforms = ?,
 					summary = ?,
 					coverImageId = ?,
-					slug = ?";
+					slug = ?,
+					localizedCovers = ?";
 		$statement = WCF::getDB()->prepare($sql);
 		foreach ($gamesJson as $game) {
 			$gamePlatforms = '';
@@ -165,16 +167,27 @@ class IgdbIntegrationUtil
 				}
 			}
 
+			// Collect region-specific covers, indexed by IGDB region id
+			$gameLocalizedCovers = [];
+			if (isset($game->game_localizations)) {
+				foreach ($game->game_localizations as $localization) {
+					if (isset($localization->region) && isset($localization->cover->image_id)) {
+						$gameLocalizedCovers[$localization->region] = $localization->cover->image_id;
+					}
+				}
+			}
+
 			$gameId = $game->id;
 			$gameName = $game->name ?? '';
 			$gameYear = isset($game->first_release_date) ? gmdate('Y', $game->first_release_date) : null;
 			$gameSummary = $game->summary ?? '';
 			$gameCoverId = isset($game->cover) ? $game->cover->image_id : 'nocover';
 			$gameSlug = $game->slug ?? '';
+			$gameLocalizedCoversJson = JSON::encode($gameLocalizedCovers);
 
-			$statement->execute([$gameId, $gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug,
+			$statement->execute([$gameId, $gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson,
 								/* UPDATE starts here */
-								$gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug]);
+								$gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson]);
 		}
 		WCF::getDB()->commitTransaction();
 
@@ -184,6 +197,39 @@ class IgdbIntegrationUtil
 	public static function validateRating($value)
 	{
 		return $value != 0;
+	}
+
+	/**
+	 * Returns the preferred IGDB region id for region-specific covers, or 0 if disabled.
+	 */
+	public static function getPreferredRegionId(): int
+	{
+		$region = WCF::getUser()->getUserOption('igdb_integration_preferred_region');
+		if ($region === null || $region === '' || $region === 'default') {
+			$region = IGDB_INTEGRATION_GENERAL_PREFERRED_REGION;
+		}
+
+		return intval($region);
+	}
+
+	/**
+	 * Returns the cover image id of the preferred region, falling back to the default cover.
+	 */
+	public static function getLocalizedCoverImageId($coverImageId, $localizedCovers): string
+	{
+		$regionId = self::getPreferredRegionId();
+		if ($regionId && !empty($localizedCovers)) {
+			try {
+				$covers = JSON::decode($localizedCovers);
+				if (!empty($covers[$regionId])) {
+					return $covers[$regionId];
+				}
+			} catch (Exception $ex) {
+				// Ignore invalid data
+			}
+		}
+
+		return $coverImageId;
 	}
 
 	/**

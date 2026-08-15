@@ -121,7 +121,8 @@ class IgdbIntegrationGameListPage extends SortablePage
 		// Generate image proxy links, if enabled
 		$coverImageUrls = array();
 		foreach ($this->objectList->getObjects() as $game) {
-			$coverImageUrls[$game->gameId] = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $game->coverImageId . IgdbIntegrationUtil::COVER_URL_FILETYPE);
+			$coverImageId = IgdbIntegrationUtil::getLocalizedCoverImageId($game->coverImageId, $game->localizedCovers);
+			$coverImageUrls[$game->gameId] = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $coverImageId . IgdbIntegrationUtil::COVER_URL_FILETYPE);
 		}
 
 		// Get game count for player toplist

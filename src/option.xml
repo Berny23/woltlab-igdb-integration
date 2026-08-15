@@ -69,6 +69,15 @@ DESC:wcf.global.sortOrder.descending</selectoptions>
 				<minvalue>0</minvalue>
 				<maxvalue>500</maxvalue>
 			</option>
+			<option name="igdb_integration_general_preferred_region">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>select</optiontype>
+				<defaultvalue>0</defaultvalue>
+				<selectoptions>0:wcf.igdb_integration.region.none
+4:wcf.igdb_integration.region.europe
+3:wcf.igdb_integration.region.japan
+2:wcf.igdb_integration.region.korea</selectoptions>
+			</option>
 			<option name="igdb_integration_general_default_platform_filter">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>igdbIntegrationPlatforms</optiontype>

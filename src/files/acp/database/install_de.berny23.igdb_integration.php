@@ -27,7 +27,8 @@ return [
 				->notNull(),
 			NotNullVarchar255DatabaseTableColumn::create('coverImageId'),
 			NotNullVarchar255DatabaseTableColumn::create('slug')
-				->defaultValue('')
+				->defaultValue(''),
+			TextDatabaseTableColumn::create('localizedCovers')
 		])
 		->indices([
 			DatabaseTablePrimaryIndex::create()

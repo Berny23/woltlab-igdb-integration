@@ -30,10 +30,11 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
     public function getContent($userID)
     {
         $name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
-        $sql = "SELECT 
-					g.gameId AS gameId, 
-					coverImageId, 
-					releaseYear, 
+        $sql = "SELECT
+					g.gameId AS gameId,
+					coverImageId,
+					localizedCovers,
+					releaseYear,
 					rating AS ownRating, 
 					COUNT(gu.userId) 
 						OVER (PARTITION BY gu.gameId) 
@@ -61,7 +62,8 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
 
 		// Generate image proxy links, if enabled
 		foreach($userGames as &$game) {
-			$game['coverImageUrl'] = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $game['coverImageId'] . IgdbIntegrationUtil::COVER_URL_FILETYPE);
+			$coverImageId = IgdbIntegrationUtil::getLocalizedCoverImageId($game['coverImageId'], $game['localizedCovers']);
+			$game['coverImageUrl'] = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $coverImageId . IgdbIntegrationUtil::COVER_URL_FILETYPE);
 		}
 
 		$gameCount = count($userGames);
