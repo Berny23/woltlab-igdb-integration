@@ -4,10 +4,15 @@ namespace wcf\acp\form;
 
 use wcf\data\IgdbIntegration\IgdbIntegrationGameAction;
 use wcf\form\AbstractFormBuilderForm;
+use wcf\system\exception\SystemException;
 use wcf\system\form\builder\container\FormContainer;
 use wcf\system\form\builder\field\TextFormField;
 use wcf\system\form\builder\field\IntegerFormField;
 use wcf\system\form\builder\field\DescriptionFormField;
+use wcf\system\form\builder\field\MultilineTextFormField;
+use wcf\system\form\builder\field\validation\FormFieldValidationError;
+use wcf\system\form\builder\field\validation\FormFieldValidator;
+use wcf\util\JSON;
 
 /**
  * Shows the form to create a new game.
@@ -75,7 +80,31 @@ class IgdbIntegrationGameAddForm extends AbstractFormBuilderForm
 						->maximumLength(5000),
 					TextFormField::create('coverImageId')
 						->label('wcf.igdb_integration.game.cover_image_id')
-						->maximumLength(255)
+						->maximumLength(255),
+					TextFormField::create('slug')
+						->label('wcf.igdb_integration.game.slug')
+						->description('wcf.igdb_integration.game.slug.description')
+						->maximumLength(255),
+					MultilineTextFormField::create('localizedCovers')
+						->label('wcf.igdb_integration.game.localized_covers')
+						->description('wcf.igdb_integration.game.localized_covers.description')
+						->rows(3)
+						->maximumLength(5000)
+						->addValidator(new FormFieldValidator('jsonFormat', function (MultilineTextFormField $formField) {
+							$value = $formField->getSaveValue();
+							if ($value === '' || $value === null) {
+								return;
+							}
+
+							try {
+								JSON::decode($value);
+							} catch (SystemException $ex) {
+								$formField->addValidationError(new FormFieldValidationError(
+									'invalid',
+									'wcf.igdb_integration.game.localized_covers.error.invalid'
+								));
+							}
+						}))
 				])
 		);
 	}

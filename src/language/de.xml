@@ -8,6 +8,7 @@
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>Die Verbindung zu IGDB ist fehlgeschlagen!</b><br>Bitte überprüfe{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Zugangsdaten im Konfigurationsmenü der IGDB-Integration.]]></item>
 		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen suchen.</b><br>Trage{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} fehlende Spiele oder Informationen bitte direkt in die <a href="https://www.igdb.com/" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB</a> ein.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Spiel bearbeiten]]></item>
+		<item name="wcf.igdb_integration.page.acp_game_list_subtitle"><![CDATA[Änderungen an Spielen werden durch Aktualisierungen von IGDB überschrieben und sind daher wahrscheinlich nicht dauerhaft.]]></item>
 		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[<a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Integration</a> © 2026 <a href="https://berny23.de"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Berny23</a>]]></item>
 		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Spieler-Topliste]]></item>
 		<item name="wcf.igdb_integration.page.game_quick_add"><![CDATA[Zu meinen Spielen hinzufügen]]></item>
@@ -23,6 +24,11 @@
 		<item name="wcf.igdb_integration.game.summary"><![CDATA[Zusammenfassung]]></item>
 		<item name="wcf.igdb_integration.game.platforms"><![CDATA[Plattformen]]></item>
 		<item name="wcf.igdb_integration.game.cover_image_id"><![CDATA[IGDB-Bild-ID]]></item>
+		<item name="wcf.igdb_integration.game.slug"><![CDATA[IGDB-Slug]]></item>
+		<item name="wcf.igdb_integration.game.slug.description"><![CDATA[Name in der URL der IGDB-Seite des Spiels.]]></item>
+		<item name="wcf.igdb_integration.game.localized_covers"><![CDATA[Regionale Cover-Bild-IDs]]></item>
+		<item name="wcf.igdb_integration.game.localized_covers.description"><![CDATA[IGDB-Region-IDs mit zugeordneten Cover-Bild-IDs im JSON-Format, z. B. <code>{ldelim}"4":"co7ksw"{rdelim}</code> für ein europäisches Cover.]]></item>
+		<item name="wcf.igdb_integration.game.localized_covers.error.invalid"><![CDATA[Der eingegebene Wert ist kein gültiges JSON.]]></item>
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Bild-URL]]></item>
 	</category>
 

@@ -8,6 +8,7 @@
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>The connection to IGDB has failed!</b><br>Please check your credentials in the configuration menu of the IGDB Integration.]]></item>
 		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Search for games to add.</b><br>Please enter missing games or information directly into the <a href="https://www.igdb.com/" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" {/if} rel="nofollow noopener">IGDB</a>.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Edit game]]></item>
+		<item name="wcf.igdb_integration.page.acp_game_list_subtitle"><![CDATA[Changes to games will be overwritten by updates from IGDB and are likely not persistent.]]></item>
 		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[<a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB Integration</a> © 2026 <a href="https://berny23.de"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank" {/if} rel="nofollow noopener">Berny23</a>]]></item>
 		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Player Toplist]]></item>
 		<item name="wcf.igdb_integration.page.game_quick_add"><![CDATA[Add to my games]]></item>
@@ -23,6 +24,11 @@
 		<item name="wcf.igdb_integration.game.summary"><![CDATA[Summary]]></item>
 		<item name="wcf.igdb_integration.game.platforms"><![CDATA[Platforms]]></item>
 		<item name="wcf.igdb_integration.game.cover_image_id"><![CDATA[IGDB Image ID]]></item>
+		<item name="wcf.igdb_integration.game.slug"><![CDATA[IGDB Slug]]></item>
+		<item name="wcf.igdb_integration.game.slug.description"><![CDATA[Name in the URL of the game's IGDB page.]]></item>
+		<item name="wcf.igdb_integration.game.localized_covers"><![CDATA[Regional Cover Image IDs]]></item>
+		<item name="wcf.igdb_integration.game.localized_covers.description"><![CDATA[IGDB region IDs mapped to cover image IDs in JSON format, e.g. <code>{ldelim}"4":"co7ksw"{rdelim}</code> for a European cover.]]></item>
+		<item name="wcf.igdb_integration.game.localized_covers.error.invalid"><![CDATA[The entered value is not valid JSON.]]></item>
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Image URL]]></item>
 	</category>
 

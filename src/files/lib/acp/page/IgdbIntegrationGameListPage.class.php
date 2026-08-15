@@ -2,9 +2,8 @@
 
 namespace wcf\acp\page;
 
-use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
-use wcf\util\IgdbIntegrationUtil;
-use wcf\page\SortablePage;
+use wcf\page\AbstractGridViewPage;
+use wcf\system\gridView\admin\IgdbIntegrationGameGridView;
 
 /**
  * Shows the list of games.
@@ -13,14 +12,11 @@ use wcf\page\SortablePage;
  * @copyright   2026 Berny23
  * @license     MIT License <https://choosealicense.com/licenses/mit/>
  * @package     WoltLabSuite\Core\Acp\Page
+ *
+ * @extends AbstractGridViewPage<IgdbIntegrationGameGridView>
  */
-class IgdbIntegrationGameListPage extends SortablePage
+class IgdbIntegrationGameListPage extends AbstractGridViewPage
 {
-    /**
-     * @inheritDoc
-     */
-    public $objectListClassName = IgdbIntegrationGameList::class;
-
     /**
      * @inheritDoc
      */
@@ -34,26 +30,8 @@ class IgdbIntegrationGameListPage extends SortablePage
     /**
      * @inheritDoc
      */
-    public $defaultSortField = 'gameId';
-
-    /**
-     * @inheritDoc
-     */
-    public $defaultSortOrder = 'ASC';
-
-    /**
-     * @inheritDoc
-     */
-    public $validSortFields = ['gameId', 'name', 'releaseYear', 'platforms'];
-
-    /**
-     * @inheritDoc
-     */
-    public function initObjectList()
+    protected function createGridView(): IgdbIntegrationGameGridView
     {
-        parent::initObjectList();
-        
-        $name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
-        $this->objectList->sqlSelects .= "CASE WHEN " . $name . " = '' THEN name ELSE " . $name . " END AS displayName";
+        return new IgdbIntegrationGameGridView();
     }
 }
