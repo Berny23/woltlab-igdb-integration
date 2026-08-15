@@ -112,6 +112,20 @@
 	}
 }
 
+#gameSortForm .igdbIntegrationSearchInfo {
+	margin-bottom: 10px;
+	color: var(--wcfContentDimmedText);
+}
+
+#gameSortForm .igdbIntegrationSearchInfo a {
+	color: inherit;
+	font-weight: 600;
+}
+
+#gameSortForm .igdbIntegrationSearchInfo a:hover {
+	text-decoration: underline;
+}
+
 #tpl_wcf_igdbIntegrationGameList .boxesSidebarRight #playerToplistBox table {
 	display: inline-block;
 	overflow: auto;

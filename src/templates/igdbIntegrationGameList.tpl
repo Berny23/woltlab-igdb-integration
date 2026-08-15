@@ -12,24 +12,20 @@
 {/capture}
 
 {capture assign='sidebarRight'}
-	{if $showIgdbError}
-		<section id="messageBox" class="box error">
-			<h2 class="boxTitle">{lang}wcf.acp.notice.cssClassName.error{/lang}</h2>
-			<div class="boxContent">{lang}wcf.igdb_integration.page.game_list_igdb_error{/lang}</div>
-		</section>
-	{else}
-		<section id="messageBox" class="box info">
-			<h2 class="boxTitle">{lang}wcf.acp.notice.cssClassName.info{/lang}</h2>
-			<div class="boxContent">{lang}wcf.igdb_integration.page.game_list_info{/lang}</div>
-		</section>
-	{/if}
 	<section class="box">
 		<form id="gameSortForm" method="post" action="{link controller='IgdbIntegrationGameList'}{/link}">
 			<h2 class="boxTitle">{lang}wcf.global.search{/lang}</h2>
 
 			<div class="boxContent">
+				<div class="igdbIntegrationSearchInfo">
+					{if $showIgdbError}
+						<p class="error">{lang}wcf.igdb_integration.page.game_list_igdb_error{/lang}</p>
+					{else}
+						{lang}wcf.igdb_integration.page.game_list_info{/lang}
+					{/if}
+				</div>
 				<dl>
-					<dt>{lang}wcf.global.name{/lang}</dt>
+					<dt>{lang}wcf.global.title{/lang}</dt>
 					<dd>
 						<input type="text" id="searchField" name="searchField" value="{$searchField}">
 						{event name='searchField'}
