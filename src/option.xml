@@ -6,11 +6,13 @@
 			<category name="igdb_integration">
 				<parent/>
 			</category>
-			<category name="igdb_integration_auth">
-				<parent>igdb_integration</parent>
-			</category>
 			<category name="igdb_integration_general">
 				<parent>igdb_integration</parent>
+				<showorder>1</showorder>
+			</category>
+			<category name="igdb_integration_auth">
+				<parent>igdb_integration</parent>
+				<showorder>2</showorder>
 			</category>
 		</categories>
 		<options>
