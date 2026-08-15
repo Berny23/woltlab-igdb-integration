@@ -50,9 +50,32 @@ In order for the plugin to access the IGDB API, you only need to follow these sh
 ## Building
 
 1. (optional) Run ``npm install`` in **/src** and generate a JavaScript (.js) file from every TypeScript (.ts) file with ``tsc build``
-2. On Windows, run build.bat in **/tools**
+2. On Linux, run build.sh in **/tools** (build.bat on Windows)
 3. The installable package will be created in **/build**
 4. Install via WoltLab Suite package manager
+
+## Development environment
+
+A Podman compose stack (nginx, PHP, MariaDB) is included in **/dev**. Requires `podman-compose` and a downloaded zip file of **[WoltLab Suite Core](https://www.woltlab.com/en/woltlab-suite-download/)**.
+
+One-time preparation:
+```sh
+# Allow rootless Podman using port 80 and above
+echo 'net.ipv4.ip_unprivileged_port_start=80' | sudo tee /etc/sysctl.d/50-unprivileged-ports.conf
+sudo sysctl --system
+# Make script executable
+chmod +x ./setup-woltlab.sh
+```
+
+Build and start environment:
+```sh
+cd dev
+podman compose up -d --build
+./setup-woltlab.sh ~/Downloads/woltlab-suite-*.zip
+```
+
+Then open http://localhost/install.php (database: host `db`, user/password/database `woltlab`). WoltLab files and the database are stored in named volumes.
+Use `podman compose down -v` to reset everything.
 
 ## Privacy notice
 

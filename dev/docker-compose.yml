@@ -1,0 +1,47 @@
+name: woltlab-dev
+
+services:
+  php:
+    build: ./php
+    restart: unless-stopped
+    volumes:
+      - woltlab:/var/www/html
+      - ./php/woltlab.ini:/usr/local/etc/php/conf.d/woltlab.ini:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: docker.io/library/nginx:alpine
+    restart: unless-stopped
+    ports:
+      # Rootless podman needs:
+      # net.ipv4.ip_unprivileged_port_start=80
+      - "127.0.0.1:80:80"
+    volumes:
+      - woltlab:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+
+  db:
+    image: docker.io/library/mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: woltlab
+      MARIADB_USER: woltlab
+      MARIADB_PASSWORD: woltlab
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  woltlab:
+  db:
