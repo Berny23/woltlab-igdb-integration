@@ -98,10 +98,6 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 		$this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId)
 			->appendChildren([
-				TextFormField::create('releaseYear')
-					->label('wcf.igdb_integration.game.year')
-					->value($this->game->releaseYear ?? '')
-					->immutable(),
 				TextFormField::create('platforms')
 					->label('wcf.igdb_integration.game.platforms')
 					->value($this->game->platforms)
@@ -109,8 +105,13 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 				DescriptionFormField::create('summary')
 					->label('wcf.igdb_integration.game.summary')
 					->value($this->game->summary)
-					->rows(5)
-					->immutable()
+					->rows(4)
+					->immutable(),
+				TemplateFormNode::create('igdbLink')
+					->templateName('__igdbIntegrationGameLink')
+					->variables([
+						'gameUrl' => $this->game->slug ? 'https://www.igdb.com/games/' . rawurlencode($this->game->slug) : ''
+					])
 			]);
 		if (WCF::getSession()->getPermission('user.igdb_integration.can_manage_own_games')) {
 			$this->dialog->appendChildren([

@@ -30,9 +30,16 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
         updateGameCount(returnValues.gameCount);
         (0, Notification_1.show)();
     }
-    function init(gameId, userId) {
-        // Use the game name as the dialog title
+    function getGameDialogTitle(gameId) {
+        // Use the game name and release year as the dialog title: "NAME (YEAR)"
         const gameName = document.querySelector('#gameBox' + gameId + ' .gameInfo > h3')?.textContent?.trim();
+        if (!gameName) {
+            return '';
+        }
+        const releaseYear = document.querySelector('#gameBox' + gameId + ' .gameInfo > small')?.textContent?.trim();
+        return releaseYear ? gameName + ' (' + releaseYear + ')' : gameName;
+    }
+    function init(gameId, userId) {
         var gameUserEditDialog = new Dialog_1.default('gameUserEditDialog' + gameId, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction', 'getGameUserEditDialog', {
             destroyOnClose: true,
             actionParameters: {
@@ -40,7 +47,7 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
                 userId: userId
             },
             dialog: {
-                title: gameName || (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_user_edit_title')
+                title: getGameDialogTitle(gameId) || (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_user_edit_title')
             },
             submitActionName: 'submitGameUserEditDialog',
             successCallback(rawReturnValues) {

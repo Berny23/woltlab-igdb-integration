@@ -31,6 +31,7 @@
 		<item name="wcf.igdb_integration.dialog.game_user_edit_is_owned"><![CDATA[Im Besitz]]></item>
 		<item name="wcf.igdb_integration.dialog.game_user_edit_title"><![CDATA[Spiel-Details]]></item>
 		<item name="wcf.igdb_integration.dialog.game_player_list_title"><![CDATA[Spieler-Liste]]></item>
+		<item name="wcf.igdb_integration.dialog.game_igdb_link"><![CDATA[Auf IGDB ansehen]]></item>
 	</category>
 
 	<!-- ACP content menu -->

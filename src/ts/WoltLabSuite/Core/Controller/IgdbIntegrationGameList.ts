@@ -61,10 +61,18 @@ function updateGameBox(response: Response) {
 	}
 }
 
-async function showGameUserEditDialog(gameId: number) {
-	// Use the game name as the dialog title
+function getGameDialogTitle(gameId: number): string {
+	// Use the game name and release year as the dialog title: "NAME (YEAR)"
 	const gameName = document.querySelector('#gameBox' + gameId + ' .gameInfo > h3')?.textContent?.trim();
+	if (!gameName) {
+		return '';
+	}
 
+	const releaseYear = document.querySelector('#gameBox' + gameId + ' .gameInfo > small')?.textContent?.trim();
+	return releaseYear ? gameName + ' (' + releaseYear + ')' : gameName;
+}
+
+async function showGameUserEditDialog(gameId: number) {
 	// Call dialog form
 	let form = new FormBuilderDialog(
 		'gameUserEditDialog' + gameId,
@@ -75,7 +83,7 @@ async function showGameUserEditDialog(gameId: number) {
 			gameId: gameId,
 		},
 		dialog: {
-			title: gameName || getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
+			title: getGameDialogTitle(gameId) || getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
 		},
 		submitActionName: 'submitGameUserEditDialog',
 		successCallback(returnValues) {
@@ -105,9 +113,6 @@ async function quickToggleGame(gameId: number) {
 }
 
 async function showGamePlayerListDialog(gameId: number) {
-	// Use the game name as the dialog title
-	const gameName = document.querySelector('#gameBox' + gameId + ' .gameInfo > h3')?.textContent?.trim();
-
 	let form = new FormBuilderDialog(
 		'gamePlayerListDialog' + gameId,
 		'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction',
@@ -117,7 +122,7 @@ async function showGamePlayerListDialog(gameId: number) {
 			gameId: gameId,
 		},
 		dialog: {
-			title: gameName || getPhrase('wcf.igdb_integration.dialog.game_player_list_title')
+			title: getGameDialogTitle(gameId) || getPhrase('wcf.igdb_integration.dialog.game_player_list_title')
 		}
 	});
 

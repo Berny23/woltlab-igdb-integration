@@ -45,10 +45,18 @@ async function quickRemoveGame(gameId: number, userId: number) {
 	showNotification();
 }
 
-export function init(gameId: number, userId: number) {
-	// Use the game name as the dialog title
+function getGameDialogTitle(gameId: number): string {
+	// Use the game name and release year as the dialog title: "NAME (YEAR)"
 	const gameName = document.querySelector('#gameBox' + gameId + ' .gameInfo > h3')?.textContent?.trim();
+	if (!gameName) {
+		return '';
+	}
 
+	const releaseYear = document.querySelector('#gameBox' + gameId + ' .gameInfo > small')?.textContent?.trim();
+	return releaseYear ? gameName + ' (' + releaseYear + ')' : gameName;
+}
+
+export function init(gameId: number, userId: number) {
 	var gameUserEditDialog = new FormBuilderDialog(
 		'gameUserEditDialog' + gameId,
 		'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction',
@@ -59,7 +67,7 @@ export function init(gameId: number, userId: number) {
 			userId: userId
 		},
 		dialog: {
-			title: gameName || getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
+			title: getGameDialogTitle(gameId) || getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
 		},
 		submitActionName: 'submitGameUserEditDialog',
 		successCallback(rawReturnValues) {

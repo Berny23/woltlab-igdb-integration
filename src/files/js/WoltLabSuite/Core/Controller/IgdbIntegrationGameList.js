@@ -49,9 +49,16 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
             quickAddButton.querySelector('fa-icon')?.setIcon(response.isOwned ? 'minus' : 'plus', true);
         }
     }
-    async function showGameUserEditDialog(gameId) {
-        // Use the game name as the dialog title
+    function getGameDialogTitle(gameId) {
+        // Use the game name and release year as the dialog title: "NAME (YEAR)"
         const gameName = document.querySelector('#gameBox' + gameId + ' .gameInfo > h3')?.textContent?.trim();
+        if (!gameName) {
+            return '';
+        }
+        const releaseYear = document.querySelector('#gameBox' + gameId + ' .gameInfo > small')?.textContent?.trim();
+        return releaseYear ? gameName + ' (' + releaseYear + ')' : gameName;
+    }
+    async function showGameUserEditDialog(gameId) {
         // Call dialog form
         let form = new Dialog_1.default('gameUserEditDialog' + gameId, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction', 'getGameUserEditDialog', {
             destroyOnClose: true,
@@ -59,7 +66,7 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
                 gameId: gameId,
             },
             dialog: {
-                title: gameName || (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_user_edit_title')
+                title: getGameDialogTitle(gameId) || (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_user_edit_title')
             },
             submitActionName: 'submitGameUserEditDialog',
             successCallback(returnValues) {
@@ -84,15 +91,13 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
         (0, Notification_1.show)();
     }
     async function showGamePlayerListDialog(gameId) {
-        // Use the game name as the dialog title
-        const gameName = document.querySelector('#gameBox' + gameId + ' .gameInfo > h3')?.textContent?.trim();
         let form = new Dialog_1.default('gamePlayerListDialog' + gameId, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction', 'getGamePlayerListDialog', {
             destroyOnClose: true,
             actionParameters: {
                 gameId: gameId,
             },
             dialog: {
-                title: gameName || (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_player_list_title')
+                title: getGameDialogTitle(gameId) || (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_player_list_title')
             }
         });
         form.open();

@@ -25,7 +25,9 @@ return [
 				->notNull(),
 			TextDatabaseTableColumn::create('summary')
 				->notNull(),
-			NotNullVarchar255DatabaseTableColumn::create('coverImageId')
+			NotNullVarchar255DatabaseTableColumn::create('coverImageId'),
+			NotNullVarchar255DatabaseTableColumn::create('slug')
+				->defaultValue('')
 		])
 		->indices([
 			DatabaseTablePrimaryIndex::create()

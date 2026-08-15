@@ -91,8 +91,8 @@ class IgdbIntegrationUtil
 			'Client-ID' => IGDB_INTEGRATION_AUTH_CLIENT_ID,
 			'Authorization' => 'Bearer ' . $accessToken
 		];
-		$body = 'search "' . str_replace('"', '', $name) . '"; 
-				fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id; 
+		$body = 'search "' . str_replace('"', '', $name) . '";
+				fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id,slug;
 				limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
 		$request = new Request('POST', self::URL_BASE . 'games', $headers, $body);
 		return self::$client->send($request);
@@ -122,21 +122,23 @@ class IgdbIntegrationUtil
 
 		// Insert into games database
 		$gamesJson = JSON::decode($response->getBody(), false);
-		$sql = "INSERT INTO wcf1_igdb_integration_game 
-				SET gameId = ?, 
-					name = ?, 
-					germanName = ?, 
-					releaseYear = ?, 
-					platforms = ?, 
-					summary = ?, 
-					coverImageId = ? 
-				ON DUPLICATE KEY UPDATE 
-					name = ?, 
-					germanName = ?, 
-					releaseYear = ?, 
-					platforms = ?, 
-					summary = ?, 
-					coverImageId = ?";
+		$sql = "INSERT INTO wcf1_igdb_integration_game
+				SET gameId = ?,
+					name = ?,
+					germanName = ?,
+					releaseYear = ?,
+					platforms = ?,
+					summary = ?,
+					coverImageId = ?,
+					slug = ?
+				ON DUPLICATE KEY UPDATE
+					name = ?,
+					germanName = ?,
+					releaseYear = ?,
+					platforms = ?,
+					summary = ?,
+					coverImageId = ?,
+					slug = ?";
 		$statement = WCF::getDB()->prepare($sql);
 		foreach ($gamesJson as $game) {
 			$gamePlatforms = '';
@@ -168,10 +170,11 @@ class IgdbIntegrationUtil
 			$gameYear = isset($game->first_release_date) ? gmdate('Y', $game->first_release_date) : null;
 			$gameSummary = $game->summary ?? '';
 			$gameCoverId = isset($game->cover) ? $game->cover->image_id : 'nocover';
+			$gameSlug = $game->slug ?? '';
 
-			$statement->execute([$gameId, $gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, 
-								/* UPDATE starts here */ 
-								$gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId]);
+			$statement->execute([$gameId, $gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug,
+								/* UPDATE starts here */
+								$gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug]);
 		}
 		WCF::getDB()->commitTransaction();
 
