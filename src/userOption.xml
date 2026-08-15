@@ -7,7 +7,7 @@
 				<categoryname>profile.personal</categoryname>
 				<optiontype>integer</optiontype>
 				<visible>15</visible>
-				<editable>2</editable>
+				<editable>0</editable>
 			</option>
 			<option name="igdb_integration_games_per_page">
 				<categoryname>settings.general.appearance</categoryname>
