@@ -28,9 +28,11 @@
 	<p class="info">{lang}wcf.global.noItems{/lang}</p>
 {/if}
 
-<footer class="contentFooter igdbIntegrationFooter">
-	<div class="igdbIntegrationCopyright">{lang}wcf.igdb_integration.page.copyright_info{/lang}</div>
-</footer>
+{if IGDB_INTEGRATION_GENERAL_SHOW_BRANDING}
+	<footer class="contentFooter igdbIntegrationFooter">
+		<div class="igdbIntegrationCopyright">{lang}wcf.igdb_integration.page.copyright_info{/lang}</div>
+	</footer>
+{/if}
 
 <script data-relocate="true">
 	{foreach from=$userGames item=game}

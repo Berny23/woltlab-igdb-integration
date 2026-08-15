@@ -10,7 +10,7 @@ use wcf\page\SortablePage;
  * Shows the list of games.
  *
  * @author      Berny23
- * @copyright   2023 Berny23
+ * @copyright   2026 Berny23
  * @license     MIT License <https://choosealicense.com/licenses/mit/>
  * @package     WoltLabSuite\Core\Acp\Page
  */

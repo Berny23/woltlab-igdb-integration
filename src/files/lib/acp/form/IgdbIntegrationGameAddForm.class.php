@@ -13,7 +13,7 @@ use wcf\system\form\builder\field\DescriptionFormField;
  * Shows the form to create a new game.
  *
  * @author      Berny23
- * @copyright   2023 Berny23
+ * @copyright   2026 Berny23
  * @license     MIT License <https://choosealicense.com/licenses/mit/>
  * @package     WoltLabSuite\Core\Acp\Form
  */

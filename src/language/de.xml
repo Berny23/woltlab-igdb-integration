@@ -8,7 +8,7 @@
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>Die Verbindung zu IGDB ist fehlgeschlagen!</b><br>Bitte überprüfe{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Zugangsdaten im Konfigurationsmenü der IGDB-Integration.]]></item>
 		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen suchen.</b><br>Trage{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} fehlende Spiele oder Informationen bitte direkt in die <a href="https://www.igdb.com/" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB</a> ein.]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Spiel bearbeiten]]></item>
-		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[<a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Integration</a> © 2023 <a href="https://linktr.ee/berny23"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Berny23</a>]]></item>
+		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[<a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Integration</a> © 2026 <a href="https://berny23.de"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Berny23</a>]]></item>
 		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Spieler-Topliste]]></item>
 	</category>
 
@@ -77,6 +77,8 @@
 		<item name="wcf.acp.option.igdb_integration_general_game_sort_order.description"><![CDATA[Dies ist die <b>standardmäßige Sortierreihenfolge</b> für die Spiele-Liste. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_player_toplist_limit"><![CDATA[Größe der Spieler-Topliste]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_player_toplist_limit.description"><![CDATA[Dies ist der <b>Standardwert</b>. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_show_branding"><![CDATA[Branding anzeigen]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_show_branding.description"><![CDATA[Zeigt den Copyright-Hinweis dieses Plugins unterhalb der Spiele-Listen an. Es gibt keine kostenpflichtige Version dieses Plugins, daher {if !LANGUAGE_USE_INFORMAL_VARIANT}können Sie{else}kannst du{/if} das Branding kostenlos deaktivieren.]]></item>
 	</category>
 
 	<!-- ACP guest/user/mod/admin group options menu -->

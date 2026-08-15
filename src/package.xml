@@ -10,7 +10,7 @@
 	</packageinformation>
 	<authorinformation>
 		<author>Berny23</author>
-		<authorurl>https://linktr.ee/berny23</authorurl>
+		<authorurl>https://berny23.de</authorurl>
 	</authorinformation>
 	<requiredpackages>
 		<requiredpackage minversion="6.2.0">com.woltlab.wcf</requiredpackage>

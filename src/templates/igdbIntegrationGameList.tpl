@@ -133,7 +133,9 @@
 	</nav>
 	{/hascontent}
 
-	<div class="igdbIntegrationCopyright">{lang}wcf.igdb_integration.page.copyright_info{/lang}</div>
+	{if IGDB_INTEGRATION_GENERAL_SHOW_BRANDING}
+		<div class="igdbIntegrationCopyright">{lang}wcf.igdb_integration.page.copyright_info{/lang}</div>
+	{/if}
 </footer>
 
 <script data-relocate="true">

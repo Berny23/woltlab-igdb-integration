@@ -16,7 +16,7 @@ use \wcf\data\option\Option;
  * A utility class for API interactions with IGDB.
  *
  * @author      Berny23
- * @copyright   2023 Berny23
+ * @copyright   2026 Berny23
  * @license     MIT License <https://choosealicense.com/licenses/mit/>
  * @package     WoltLabSuite\Core\Util
  * @see         https://api-docs.igdb.com/

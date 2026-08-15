@@ -10,7 +10,7 @@ use wcf\system\WCF;
  * Shows the list of owned games on user profiles.
  *
  * @author      Berny23
- * @copyright   2023 Berny23
+ * @copyright   2026 Berny23
  * @license     MIT License <https://choosealicense.com/licenses/mit/>
  * @package     WoltLabSuite\Core\System\Menu\User\Profile\Content
  */
