@@ -1,9 +1,12 @@
 REM This script requires Windows 10 (17063) or later
 ECHO OFF
 
-REM Compile TypeScript to JavaScript (requires "npm install" in \src once)
+REM Install dependencies and compile TypeScript to JavaScript
 CD /d "%0\..\..\src\"
-CALL npx tsc
+CALL npm install
+IF ERRORLEVEL 1 EXIT /B 1
+CALL npx tsc --pretty
+IF ERRORLEVEL 1 EXIT /B 1
 
 REM Compress content of acptemplates directory
 CD /d "%0\..\..\src\acptemplates\"

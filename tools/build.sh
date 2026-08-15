@@ -8,8 +8,8 @@ DIST_DIR="$SCRIPT_DIR/../dist"
 
 mkdir -p "$DIST_DIR"
 
-# Compile TypeScript to JavaScript (requires "npm install" in /src once)
-(cd "$SRC_DIR" && npx tsc)
+# Install dependencies and compile TypeScript to JavaScript
+(cd "$SRC_DIR" && npm install && npx tsc --pretty)
 
 # Compress content of acptemplates directory
 (cd "$SRC_DIR/acptemplates" && tar -cf "$DIST_DIR/acptemplates.tar" -- *)

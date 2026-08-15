@@ -18,10 +18,12 @@
 		"esModuleInterop": true,
 		"noImplicitThis": true,
 		"strictBindCallApply": true,
-		"baseUrl": ".",
+		"ignoreDeprecations": "6.0",
+		"noUncheckedSideEffectImports": false,
+		"skipLibCheck": true,
 		"paths": {
 			"*": [
-				"node_modules/@woltlab/d.ts/*"
+				"./node_modules/@woltlab/d.ts/*"
 			]
 		},
 		"importHelpers": true,

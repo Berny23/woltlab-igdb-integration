@@ -49,10 +49,9 @@ In order for the plugin to access the IGDB API, you only need to follow these sh
 
 ## Building
 
-1. Run ``npm install`` in **/src** (only needed once)
-2. On Linux, run build.sh in **/tools** (build.bat on Windows) to create the package and compile TypeScript to JavaScript
-3. The installable package will be in **/dist**
-4. Install via WoltLab Suite package manager
+1. On Linux, run build.sh in **/tools** (build.bat on Windows) to install dependencies, compile TypeScript to JavaScript and create the package
+2. The installable package will be in **/dist**
+3. Install via WoltLab Suite package manager
 
 ## Development environment
 

@@ -1,13 +1,16 @@
 {
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^6.5.0",
-		"@typescript-eslint/parser": "^6.5.0",
-		"eslint": "^8.48.0",
-		"eslint-config-prettier": "^9.0.0",
-		"prettier": "^3.0.3",
-		"typescript": "^5.2.2"
+		"@typescript-eslint/eslint-plugin": "^8.65.0",
+		"@typescript-eslint/parser": "^8.65.0",
+		"eslint": "^10.7.0",
+		"eslint-config-prettier": "^10.1.8",
+		"prettier": "^3.9.6",
+		"typescript": "6.0.3"
 	},
 	"dependencies": {
-		"@woltlab/d.ts": "https://github.com/WoltLab/d.ts.git#51281749962192683d2b9d6a17388fb2298b4b62"
+		"@woltlab/d.ts": "https://github.com/WoltLab/d.ts.git#f45e8fa275305b43b3cbd7d38e5597f42f6e5ba4"
+	},
+	"allowScripts": {
+		"exifreader": false
 	}
 }
