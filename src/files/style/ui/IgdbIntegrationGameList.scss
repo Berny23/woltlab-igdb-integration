@@ -25,22 +25,35 @@
 
 .igdbIntegrationGameListContainer .gameBox .gameCover .gameOverlay {
 	display: flex;
-	justify-content: center;
+	flex-direction: column;
 	height: 100%;
-	align-items: center;
 	background: rgba(0, 0, 0, 0.5);
 	border-top-left-radius: 0.25rem;
 	border-top-right-radius: 0.25rem;
+	overflow: hidden;
 	opacity: 0;
 	transition: 0.2s;
+	color: #F5F5F5;
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameCover:hover .gameOverlay {
 	opacity: 1;
 }
 
-.igdbIntegrationGameListContainer .gameBox .gameCover .gameOverlay {
-	color: #F5F5F5;
+.igdbIntegrationGameListContainer .gameBox .gameCover .gameOverlay .gameOverlayButton {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	transition: background-color 0.2s;
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameCover .gameOverlay .gameOverlayButton:hover {
+	background-color: rgba(245, 245, 245, 0.25);
+}
+
+.igdbIntegrationGameListContainer .gameBox .gameCover .gameOverlay .gameOverlayButton+.gameOverlayButton {
+	border-top: 1px solid rgba(245, 245, 245, 0.5);
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameInfo {

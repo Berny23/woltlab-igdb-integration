@@ -7,8 +7,11 @@
  * @module		WoltLabSuite/Core/Controller/IgdbIntegrationGameListUserProfile
  */
 
+import { dboAction } from "WoltLabSuite/Core/Ajax";
 import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
 import { getPhrase } from "WoltLabSuite/Core/Language";
+import { show as showNotification } from "WoltLabSuite/Core/Ui/Notification";
+import User from "WoltLabSuite/Core/User";
 
 //let gameUserEditDialog: FormBuilderDialog;
 
@@ -17,9 +20,35 @@ interface ReturnValues {
 	playerCount: number;
 	ownRating: number;
 	isOwned: boolean;
+	gameCount: number;
+}
+
+function updateGameCount(gameCount: number) {
+	const countElement = document.getElementById('igdbIntegrationGameCount');
+	if (countElement !== null) {
+		countElement.textContent = getPhrase('wcf.user.option.igdb_integration_game_count') + ': ' + gameCount;
+	}
+}
+
+async function quickRemoveGame(gameId: number, userId: number) {
+	const returnValues = await dboAction('quickRemoveGame', 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
+		.payload({
+			gameId: gameId,
+			userId: userId,
+		})
+		.dispatch() as ReturnValues;
+
+	// Remove game from profile list and update the owned games count
+	document.getElementById('gameBox' + gameId)?.remove();
+	updateGameCount(returnValues.gameCount);
+
+	showNotification();
 }
 
 export function init(gameId: number, userId: number) {
+	// Use the game name as the dialog title
+	const gameName = document.querySelector('#gameBox' + gameId + ' .gameInfo > h3')?.textContent?.trim();
+
 	var gameUserEditDialog = new FormBuilderDialog(
 		'gameUserEditDialog' + gameId,
 		'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction',
@@ -30,11 +59,18 @@ export function init(gameId: number, userId: number) {
 			userId: userId
 		},
 		dialog: {
-			title: getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
+			title: gameName || getPhrase('wcf.igdb_integration.dialog.game_user_edit_title')
 		},
 		submitActionName: 'submitGameUserEditDialog',
 		successCallback(rawReturnValues) {
 			const returnValues = rawReturnValues as ReturnValues;
+
+			// The returned game count belongs to the current user, so only
+			// update the counter when viewing the own profile
+			if (userId === User.userId) {
+				updateGameCount(returnValues.gameCount);
+			}
+
 			if (returnValues.playerCount <= 0) {
 				// Remove game from profile list
 
@@ -69,7 +105,10 @@ export function init(gameId: number, userId: number) {
 	}
 	);
 
-	document.getElementById('gameOverlay' + gameId)?.addEventListener('click', function () {
+	document.getElementById('gameOverlayEdit' + gameId)?.addEventListener('click', function () {
 		gameUserEditDialog.open();
+	});
+	document.getElementById('gameOverlayQuickRemove' + gameId)?.addEventListener('click', function () {
+		void quickRemoveGame(gameId, userId);
 	});
 }

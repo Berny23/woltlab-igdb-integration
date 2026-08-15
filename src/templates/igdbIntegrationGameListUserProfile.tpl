@@ -1,13 +1,22 @@
 {if $userGames}
-	<div class="status info">{lang}wcf.user.option.igdb_integration_game_count{/lang}: {$gameCount}</div>
+	<div class="status info" id="igdbIntegrationGameCount">{lang}wcf.user.option.igdb_integration_game_count{/lang}: {$gameCount}</div>
 	<br />
 	<div class="section igdbIntegrationGameListContainer">
 		{foreach from=$userGames item=game}
 			<div class="gameBox" id="gameBox{$game['gameId']}">
 				<div class="gameCover" style="background-image: url({$game['coverImageUrl']});">
-					<ul class="gameOverlay pointer" id="gameOverlay{$game['gameId']}">
-					{icon size=64 name='plus' type='solid'}
-					</ul>
+					<div class="gameOverlay" id="gameOverlay{$game['gameId']}">
+						<span class="gameOverlayButton pointer" id="gameOverlayEdit{$game['gameId']}"
+							title="{lang}wcf.igdb_integration.dialog.game_user_edit_title{/lang}">
+							{icon size=48 name='pen-to-square' type='solid'}
+						</span>
+						{if $__wcf->user->userID == $userId && $__wcf->session->getPermission('user.igdb_integration.can_manage_own_games')}
+							<span class="gameOverlayButton pointer" id="gameOverlayQuickRemove{$game['gameId']}"
+								title="{lang}wcf.igdb_integration.page.game_quick_remove{/lang}">
+								{icon size=48 name='minus' type='solid'}
+							</span>
+						{/if}
+					</div>
 				</div>
 				<div class="gameInfo">
 					<h3>{$game['displayName']}</h3>
@@ -39,7 +48,8 @@
 		require(['Language', 'WoltLabSuite/Core/Controller/IgdbIntegrationGameListUserProfile'], (Language,
 			ControllerIgdbIntegrationGameListUserProfile) => {
 			Language.addObject({
-				'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}'
+				'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
+				'wcf.user.option.igdb_integration_game_count': '{jslang}wcf.user.option.igdb_integration_game_count{/jslang}'
 			});
 
 			ControllerIgdbIntegrationGameListUserProfile.init({unsafe:$game['gameId']}, {$userId});

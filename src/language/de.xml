@@ -10,6 +10,8 @@
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Spiel bearbeiten]]></item>
 		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[<a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Integration</a> © 2026 <a href="https://berny23.de"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Berny23</a>]]></item>
 		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Spieler-Topliste]]></item>
+		<item name="wcf.igdb_integration.page.game_quick_add"><![CDATA[Zu meinen Spielen hinzufügen]]></item>
+		<item name="wcf.igdb_integration.page.game_quick_remove"><![CDATA[Aus meinen Spielen entfernen]]></item>
 	</category>
 
 	<!-- Game data -->

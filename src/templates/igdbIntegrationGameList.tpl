@@ -96,9 +96,28 @@
 		{foreach from=$objects item=game}
 			<div class="gameBox" id="gameBox{$game->gameId}">
 				<div class="gameCover" style="background-image: url({$coverImageUrls[$game->gameId]});">
-					<ul class="gameOverlay pointer" id="gameOverlay{$game->gameId}">
-						{icon size=64 name='plus' type='solid'}
-					</ul>
+					<div class="gameOverlay" id="gameOverlay{$game->gameId}">
+						{if $__wcf->user->userID && $__wcf->session->getPermission('user.igdb_integration.can_manage_own_games')}
+							<span class="gameOverlayButton pointer" id="gameOverlayEdit{$game->gameId}"
+								title="{lang}wcf.igdb_integration.dialog.game_user_edit_title{/lang}">
+								{icon size=48 name='pen-to-square' type='solid'}
+							</span>
+							<span class="gameOverlayButton pointer" id="gameOverlayQuickAdd{$game->gameId}"
+								data-is-owned="{if $game->isOwned == 1}1{else}0{/if}"
+								title="{if $game->isOwned == 1}{lang}wcf.igdb_integration.page.game_quick_remove{/lang}{else}{lang}wcf.igdb_integration.page.game_quick_add{/lang}{/if}">
+								{if $game->isOwned == 1}
+									{icon size=48 name='minus' type='solid'}
+								{else}
+									{icon size=48 name='plus' type='solid'}
+								{/if}
+							</span>
+						{else}
+							<span class="gameOverlayButton pointer" id="gameOverlayEdit{$game->gameId}"
+								title="{lang}wcf.igdb_integration.dialog.game_user_edit_title{/lang}">
+								{icon size=48 name='circle-info' type='solid'}
+							</span>
+						{/if}
+					</div>
 				</div>
 				<div class="gameInfo">
 					<h3>{$game->displayName}</h3>
@@ -144,7 +163,9 @@
 			ControllerIgdbIntegrationGameList) => {
 			Language.addObject({
 				'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
-				'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}'
+				'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}',
+				'wcf.igdb_integration.page.game_quick_add': '{jslang}wcf.igdb_integration.page.game_quick_add{/jslang}',
+				'wcf.igdb_integration.page.game_quick_remove': '{jslang}wcf.igdb_integration.page.game_quick_remove{/jslang}'
 			})
 			let gameId = {unsafe:$game->gameId};
 			ControllerIgdbIntegrationGameList.init(gameId);
