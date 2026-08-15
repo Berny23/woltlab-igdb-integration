@@ -10,9 +10,9 @@
 	width: 132px;
 	margin: 0.25rem !important;
 	border-radius: 0.25rem;
-	background-color: #{$wcfInputBackground};
-	border: 1px solid #{$wcfInputDisabledBorder};
-	color: #{$wcfInputText};
+	background-color: var(--wcfInputBackground);
+	border: 1px solid var(--wcfInputDisabledBorder);
+	color: var(--wcfInputText);
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameCover {
@@ -65,8 +65,8 @@
 	padding-right: 0.5rem;
 	text-align: end;
 	transition: filter 0.2s;
-	color: #{$wcfButtonText};
-	background-color: #{$wcfButtonBackground};
+	color: var(--wcfButtonText);
+	background-color: var(--wcfButtonBackground);
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount:hover {
@@ -74,19 +74,19 @@
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount.isOwned {
-	background-color: #{$wcfButtonPrimaryBackground};
-	color: #{$wcfButtonTextActive};
+	background-color: var(--wcfButtonPrimaryBackground);
+	color: var(--wcfButtonTextActive);
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount>fa-icon {
 	padding-left: 0.25rem;
 	padding-top: 0.25rem;
 	float: left;
-	color: #{$wcfButtonText};
+	color: var(--wcfButtonText);
 }
 
 .igdbIntegrationGameListContainer .gameBox .gameInfo .gameUserInfo .gamePlayerCount.isOwned>fa-icon {
-	color: #{$wcfButtonTextActive};
+	color: var(--wcfButtonTextActive);
 }
 
 #tpl_wcf_igdbIntegrationGameList .boxesSidebarRight {
