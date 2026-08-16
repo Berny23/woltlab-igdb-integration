@@ -156,7 +156,9 @@ class IgdbIntegrationGameListPage extends SortablePage
 		if (!isset($_REQUEST['searchField'])) {
 			$defaultPlatformFilter = WCF::getUser()->getUserOption('igdb_integration_default_platform_filter');
 			if (empty($defaultPlatformFilter)) {
-				$defaultPlatformFilter = IGDB_INTEGRATION_GENERAL_DEFAULT_PLATFORM_FILTER;
+				$defaultPlatformFilter = defined('IGDB_INTEGRATION_GENERAL_DEFAULT_PLATFORM_FILTER')
+					? IGDB_INTEGRATION_GENERAL_DEFAULT_PLATFORM_FILTER
+					: '';
 			}
 			$platformPreselection = array_filter(ArrayUtil::trim(explode("\n", $defaultPlatformFilter)));
 		}
@@ -186,27 +188,18 @@ class IgdbIntegrationGameListPage extends SortablePage
 	{
 		parent::initObjectList();
 
-		$this->objectList->sqlSelects .= "DISTINCT " . IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName,";
-		$this->objectList->sqlSelects .= "COUNT(gu.userId)
-											OVER (PARTITION BY gu.gameId)
-											AS playerCount,";
-		$this->objectList->sqlSelects .= "(
-												SELECT DISTINCT ROUND(AVG(rating)
-												OVER (PARTITION BY guTempA.gameId), 0)
-												FROM wcf" . WCF_N . "_igdb_integration_game_user guTempA
-												WHERE guTempA.gameId = gu.gameId
-												AND guTempA.rating > 0
-											) AS averageRating,";
+		// playerCount and averageRating are computed columns of the game table
+		// that are kept in sync on every change, so sorting by them needs no
+		// join or aggregation here
+		$this->objectList->sqlSelects .= IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName,";
 		$this->objectList->sqlSelects .= "CASE WHEN
 											EXISTS (
 												SELECT userId
-												FROM wcf" . WCF_N . "_igdb_integration_game_user guTempB
-												WHERE guTempB.gameId = gu.gameId
-												AND guTempB.userId = " . intval(WCF::getUser()->userID) . ")
+												FROM wcf1_igdb_integration_game_user gu
+												WHERE gu.gameId = " . $this->objectList->getDatabaseTableAlias() . ".gameId
+												AND gu.userId = " . intval(WCF::getUser()->userID) . ")
 											THEN 1 ELSE 0 END
 											AS isOwned";
-		$this->objectList->sqlJoins .= "LEFT JOIN wcf" . WCF_N . "_igdb_integration_game_user gu 
-										ON gu.gameId = " . $this->objectList->getDatabaseTableAlias() . ".gameId";
 
 		if (!empty($this->searchField)) {
 			// Search for all parts, separated with a space

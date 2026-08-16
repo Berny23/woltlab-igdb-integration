@@ -268,13 +268,36 @@ class IgdbIntegrationUtil
 	}
 
 	/**
+	 * Recomputes the playerCount and averageRating columns of all games from
+	 * the game <-> user association rows. Used to fix drift caused by changes
+	 * that bypass the game actions, e.g. deleted user accounts
+	 */
+	public static function updateAllGameStats()
+	{
+		$sql = "UPDATE wcf1_igdb_integration_game game
+				LEFT JOIN (
+					SELECT gameId,
+						COUNT(*) AS playerCount,
+						ROUND(AVG(CASE WHEN rating > 0 THEN rating END)) AS averageRating
+					FROM wcf1_igdb_integration_game_user
+					GROUP BY gameId
+				) stats ON stats.gameId = game.gameId
+				SET game.playerCount = COALESCE(stats.playerCount, 0),
+					game.averageRating = COALESCE(stats.averageRating, 0)";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute();
+	}
+
+	/**
 	 * Returns the preferred IGDB region id for region-specific covers, or 0 if disabled.
 	 */
 	public static function getPreferredRegionId(): int
 	{
 		$region = WCF::getUser()->getUserOption('igdb_integration_preferred_region');
 		if ($region === null || $region === '' || $region === 'default') {
-			$region = IGDB_INTEGRATION_GENERAL_PREFERRED_REGION;
+			$region = defined('IGDB_INTEGRATION_GENERAL_PREFERRED_REGION')
+				? IGDB_INTEGRATION_GENERAL_PREFERRED_REGION
+				: 0;
 		}
 
 		return intval($region);

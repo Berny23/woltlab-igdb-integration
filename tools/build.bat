@@ -23,6 +23,7 @@ TAR -cf "%0\..\..\dist\templates.tar" *
 REM Compress all prepared archives and the remaining files/folders from the root directory
 CD /d "%0\..\..\dist\"
 COPY "%0\..\..\src\acpMenu.xml" .
+COPY "%0\..\..\src\cronjob.xml" .
 COPY "%0\..\..\src\menuItem.xml" .
 COPY "%0\..\..\src\objectType.xml" .
 COPY "%0\..\..\src\option.xml" .
@@ -33,10 +34,10 @@ COPY "%0\..\..\src\userOption.xml" .
 COPY "%0\..\..\src\userProfileMenu.xml" .
 MKDIR "language" & XCOPY "%0\..\..\src\language" "language" /s /e
 
-TAR -cf "%0\..\..\dist\de.berny23.igdb-integration.tar" "acptemplates.tar" "files.tar" "language" "templates.tar" "acpMenu.xml" "menuItem.xml" "objectType.xml" "option.xml" "package.xml" "page.xml" "userGroupOption.xml" "userOption.xml" "userProfileMenu.xml"
+TAR -cf "%0\..\..\dist\de.berny23.igdb-integration.tar" "acptemplates.tar" "files.tar" "language" "templates.tar" "acpMenu.xml" "cronjob.xml" "menuItem.xml" "objectType.xml" "option.xml" "package.xml" "page.xml" "userGroupOption.xml" "userOption.xml" "userProfileMenu.xml"
 
 REM Remove temporary files and folders
-DEL "acptemplates.tar" "files.tar" "templates.tar" "acpMenu.xml" "menuItem.xml" "objectType.xml" "option.xml" "package.xml" "page.xml" "userGroupOption.xml" "userOption.xml" "userProfileMenu.xml"
+DEL "acptemplates.tar" "files.tar" "templates.tar" "acpMenu.xml" "cronjob.xml" "menuItem.xml" "objectType.xml" "option.xml" "package.xml" "page.xml" "userGroupOption.xml" "userOption.xml" "userProfileMenu.xml"
 RMDIR /s /q "language"
 
 ECHO Build finished.

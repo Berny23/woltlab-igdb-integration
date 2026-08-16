@@ -5,8 +5,8 @@
 		<!-- de.berny23.igdb_integration -->
 		<packagename>IGDB Integration</packagename>
 		<packagedescription>Allows you to automatically	import and manage all games	from IGDB within the WoltLab Suite front-end.</packagedescription>
-		<version>2.0.0</version>
-		<date>2026-08-15</date>
+		<version>2.0.1</version>
+		<date>2026-08-16</date>
 	</packageinformation>
 	<authorinformation>
 		<author>Berny23</author>
@@ -30,6 +30,7 @@
 		<instruction type="option" />
 		<instruction type="userOption" />
 		<instruction type="objectType" />
+		<instruction type="cronjob" />
 		<instruction type="userGroupOption" />
 		<instruction type="userProfileMenu" />
 	</instructions>
@@ -37,12 +38,22 @@
 		<instruction type="acpTemplate" />
 		<instruction type="acpMenu" />
 		<instruction type="file" />
-		<instruction type="database">acp/database/update_de.berny23.igdb_integration_2.0.0.php</instruction>
+		<instruction type="script">acp/update_de.berny23.igdb_integration_2.0.1_fix_unsigned.php</instruction>
+		<instruction type="database">acp/database/update_de.berny23.igdb_integration_2.0.1_from_1.2.3.php</instruction>
 		<instruction type="template" />
 		<instruction type="language" />
 		<instruction type="option" />
 		<instruction type="userOption" />
 		<instruction type="objectType" />
+		<instruction type="cronjob" />
 		<instruction type="script">acp/update_de.berny23.igdb_integration_2.0.0_activity_points.php</instruction>
+		<instruction type="script">acp/update_de.berny23.igdb_integration_2.0.1_stats.php</instruction>
+	</instructions>
+	<instructions type="update" fromversion="2.0.0">
+		<instruction type="file" />
+		<instruction type="script">acp/update_de.berny23.igdb_integration_2.0.1_fix_unsigned.php</instruction>
+		<instruction type="database">acp/database/update_de.berny23.igdb_integration_2.0.1.php</instruction>
+		<instruction type="cronjob" />
+		<instruction type="script">acp/update_de.berny23.igdb_integration_2.0.1_stats.php</instruction>
 	</instructions>
 </package>

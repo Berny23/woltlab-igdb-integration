@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data xmlns="http://www.woltlab.com"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.woltlab.com http://www.woltlab.com/XSD/vortex/cronjob.xsd">
+	<import>
+		<cronjob name="de.berny23.igdb_integration.gameStats">
+			<classname>wcf\system\cronjob\IgdbIntegrationGameStatsCronjob</classname>
+			<description>Synchronizes the computed game statistics (player count, average rating)</description>
+			<description language="de">Synchronisiert die berechneten Spiele-Statistiken (Spieleranzahl, durchschnittliche Bewertung)</description>
+			<startminute>30</startminute>
+			<starthour>2</starthour>
+			<startdom>*</startdom>
+			<startmonth>*</startmonth>
+			<startdow>*</startdow>
+			<canbeedited>1</canbeedited>
+			<canbedisabled>1</canbedisabled>
+		</cronjob>
+	</import>
+</data>

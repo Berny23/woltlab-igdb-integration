@@ -35,9 +35,7 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
 					localizedCovers,
 					releaseYear,
 					rating AS ownRating,
-					COUNT(gu.userId)
-						OVER (PARTITION BY gu.gameId)
-						AS playerCount,
+					g.playerCount AS playerCount,
 					CASE WHEN
 						EXISTS (
 							SELECT userId

@@ -319,6 +319,29 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
+	 * Synchronizes the computed playerCount and averageRating columns of a
+	 * game with its association rows.
+	 */
+	protected function updateGameStats($gameId)
+	{
+		$sql = "UPDATE wcf1_igdb_integration_game
+				SET playerCount = (
+						SELECT COUNT(*)
+						FROM wcf1_igdb_integration_game_user
+						WHERE gameId = ?
+					),
+					averageRating = COALESCE((
+						SELECT ROUND(AVG(rating))
+						FROM wcf1_igdb_integration_game_user
+						WHERE gameId = ?
+							AND rating > 0
+					), 0)
+				WHERE gameId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$gameId, $gameId, $gameId]);
+	}
+
+	/**
 	 * @inheritDoc
 	 */
 	public function delete()
@@ -361,7 +384,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	protected function fireActivityEvent($gameId, $userId, string $action, $rating = 0)
 	{
-		if (IGDB_INTEGRATION_GENERAL_ENABLE_USER_ACTIVITY) {
+		if (defined('IGDB_INTEGRATION_GENERAL_ENABLE_USER_ACTIVITY') && IGDB_INTEGRATION_GENERAL_ENABLE_USER_ACTIVITY) {
 			UserActivityEventHandler::getInstance()->fireEvent(
 				'de.berny23.igdb_integration.recentActivityEvent.game',
 				$gameId,
@@ -387,6 +410,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	protected function getUpdatedGameUserData($gameId, $userId, $isOwned)
 	{
+		// Keep the computed sort columns in sync after every change,
+		// including rating changes that fire no activity event
+		$this->updateGameStats($gameId);
+
 		// Reload the game <-> user association for the game.
 
 		// Either calculate average rating and count users or get single rating of owner
