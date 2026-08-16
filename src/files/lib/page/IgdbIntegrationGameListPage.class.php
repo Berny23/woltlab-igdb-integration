@@ -61,6 +61,27 @@ class IgdbIntegrationGameListPage extends SortablePage
 	private $showIgdbError = false;
 
 	/**
+	 * Whether the Steam import is available for the current user.
+	 */
+	private $steamImportAvailable = false;
+
+	/**
+	 * Whether the current user has already verified a Steam account.
+	 */
+	private $steamImportAuthenticated = false;
+
+	/**
+	 * Whether the import dialog should open automatically, i.e. the user just
+	 * returned from a successful Steam login.
+	 */
+	private $steamImportAutoOpen = false;
+
+	/**
+	 * Whether the Steam login has failed.
+	 */
+	private $steamImportError = false;
+
+	/**
 	 * @inheritDoc
 	 */
 	public function readParameters()
@@ -108,6 +129,15 @@ class IgdbIntegrationGameListPage extends SortablePage
 			// Search for games on IGDB and update local database
 			$result = IgdbIntegrationUtil::updateDatabaseGamesByName($this->searchField);
 			$this->showIgdbError = !$result;
+		}
+
+		$this->steamImportAvailable = WCF::getUser()->userID
+			&& WCF::getSession()->getPermission('user.igdb_integration.can_import_games')
+			&& IgdbIntegrationUtil::isSteamConnectionDataValid();
+		if ($this->steamImportAvailable) {
+			$this->steamImportAuthenticated = (bool)WCF::getSession()->getVar('igdbSteamId');
+			$this->steamImportAutoOpen = $this->steamImportAuthenticated && isset($_GET['steamImport']);
+			$this->steamImportError = isset($_GET['steamImportError']);
 		}
 	}
 
@@ -177,7 +207,13 @@ class IgdbIntegrationGameListPage extends SortablePage
 			'topPlayerProfileLinks' => $topPlayerProfileLinks,
 			'availablePlatforms' => $availablePlatforms,
 			'platformFilter' => $platformPreselection,
-			'platformFilterParams' => $platformFilterParams
+			'platformFilterParams' => $platformFilterParams,
+			'steamImportAvailable' => $this->steamImportAvailable,
+			'steamImportAuthenticated' => $this->steamImportAuthenticated,
+			'steamImportAutoOpen' => $this->steamImportAutoOpen,
+			'steamImportError' => $this->steamImportError,
+			'steamAuthUrl' => LinkHandler::getInstance()->getLink('IgdbIntegrationSteamAuth'),
+			'steamGameListUrl' => LinkHandler::getInstance()->getLink('IgdbIntegrationGameList')
 		]);
 	}
 

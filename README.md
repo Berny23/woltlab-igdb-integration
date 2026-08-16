@@ -75,7 +75,7 @@ podman compose up -d --build
 ./setup-woltlab.sh ~/Downloads/woltlab-suite-*.zip
 ```
 
-Then open http://localhost/install.php (database: host `db`, user/password/database `woltlab`). WoltLab files and the database are stored in named volumes.
+Then open http://woltlab.localhost/install.php (database: host `db`, user/password/database `woltlab`). WoltLab files and the database are stored in named volumes.
 Use `podman compose down` to shut everything down.
 
 ### Plugin reload via developer tools (Projects)

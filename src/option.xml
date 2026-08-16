@@ -32,6 +32,11 @@
 				<defaultvalue></defaultvalue>
 				<hidden>1</hidden>
 			</option>
+			<option name="igdb_integration_auth_steam_api_key">
+				<categoryname>igdb_integration_auth</categoryname>
+				<optiontype>password</optiontype>
+				<defaultvalue></defaultvalue>
+			</option>
 			<option name="igdb_integration_general_result_limit">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>integer</optiontype>

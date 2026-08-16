@@ -2,6 +2,7 @@
 
 use	wcf\system\database\table\column\NotNullVarchar255DatabaseTableColumn;
 use wcf\system\database\table\column\TextDatabaseTableColumn;
+use	wcf\system\database\table\column\IntDatabaseTableColumn;
 use	wcf\system\database\table\column\NotNullInt10DatabaseTableColumn;
 use	wcf\system\database\table\column\ObjectIdDatabaseTableColumn;
 use	wcf\system\database\table\column\SmallintDatabaseTableColumn;
@@ -31,6 +32,9 @@ return [
 			NotNullVarchar255DatabaseTableColumn::create('slug')
 				->defaultValue(''),
 			TextDatabaseTableColumn::create('localizedCovers'),
+			// Steam app id from IGDB's external game links, NULL if unknown
+			IntDatabaseTableColumn::create('steamAppId')
+				->length(10),
 			NotNullInt10DatabaseTableColumn::create('lastInteractionTime')
 				->defaultValue(0),
 			NotNullInt10DatabaseTableColumn::create('playerCount')
@@ -51,6 +55,8 @@ return [
 				->columns(['playerCount']),
 			DatabaseTableIndex::create('averageRating')
 				->columns(['averageRating']),
+			DatabaseTableIndex::create('steamAppId')
+				->columns(['steamAppId']),
 		]),
 	DatabaseTable::create('wcf1_igdb_integration_game_user')
 		->columns([

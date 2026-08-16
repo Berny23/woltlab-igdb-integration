@@ -14,6 +14,11 @@
 		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Player Toplist]]></item>
 		<item name="wcf.igdb_integration.page.game_quick_add"><![CDATA[Add to my games]]></item>
 		<item name="wcf.igdb_integration.page.game_quick_remove"><![CDATA[Remove from my games]]></item>
+		<item name="wcf.igdb_integration.page.steam_import"><![CDATA[Steam Import]]></item>
+		<item name="wcf.igdb_integration.page.steam_import_info"><![CDATA[Sign in through Steam to import your owned games into your game library. Only your public game list is accessed and no account data is stored permanently.]]></item>
+		<item name="wcf.igdb_integration.page.steam_import_sign_in"><![CDATA[Sign in through Steam]]></item>
+		<item name="wcf.igdb_integration.page.steam_import_button"><![CDATA[Import Steam library]]></item>
+		<item name="wcf.igdb_integration.page.steam_import_error"><![CDATA[The Steam sign-in has failed. Please try again.]]></item>
 	</category>
 
 	<!-- Game data -->
@@ -48,6 +53,20 @@
 		<item name="wcf.igdb_integration.dialog.game_user_edit_title"><![CDATA[Game Details]]></item>
 		<item name="wcf.igdb_integration.dialog.game_player_list_title"><![CDATA[Owners]]></item>
 		<item name="wcf.igdb_integration.dialog.game_igdb_link"><![CDATA[View on IGDB]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_title"><![CDATA[Import Steam Library]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_confirm"><![CDATA[Found <b>{#$steamGameCount}</b> games for the Steam account with the ID <b>{$steamImportSteamId}</b>.<br>Games that are already in your library are skipped. Depending on the size of the library, the import may take a moment.]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_empty"><![CDATA[No games were found for the Steam account with the ID <b>{$steamImportSteamId}</b>. Make sure that the "Game details" setting in your <a href="https://steamcommunity.com/my/edit/settings" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Steam privacy settings</a> is set to "Public" and try again.]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_request_failed"><![CDATA[The connection to Steam has failed. Please check the Steam Web API key in the configuration menu of the IGDB Integration or try again later.]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_progress_title"><![CDATA[Importing Steam Library…]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_progress_batches"><![CDATA[Requesting game data from IGDB (batch {#$current} of {#$total})…]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_progress_search"><![CDATA[Searching IGDB for unmatched titles ({#$current} of {#$total})…]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_progress_finalize"><![CDATA[Finalizing import…]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_title"><![CDATA[Import finished]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_failed"><![CDATA[The Steam library could not be retrieved. Please sign in through Steam again.]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_imported"><![CDATA[{#$count} games have been added to your library.]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_already_owned"><![CDATA[{#$count} games were already in your library.]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_ambiguous"><![CDATA[{#$count} games were skipped because several entries share the same name. Please add the correct entry manually:]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_unmatched"><![CDATA[{#$count} games could not be matched to an IGDB entry:]]></item>
 	</category>
 
 	<!-- ACP content menu -->
@@ -106,6 +125,8 @@
 		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client ID]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_id.description"><![CDATA[A detailed explanation on how to get the client ID and client secret for IGDB can be found on the <a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration/#overview" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">plugin store page</a>.]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client Secret]]></item>
+		<item name="wcf.acp.option.igdb_integration_auth_steam_api_key"><![CDATA[Steam Web API Key]]></item>
+		<item name="wcf.acp.option.igdb_integration_auth_steam_api_key.description"><![CDATA[Required for the Steam library import of users. A free key can be created on the <a href="https://steamcommunity.com/dev/apikey" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Steam Web API key page</a>. If empty, the Steam import is disabled.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. results per IGDB search]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page"><![CDATA[Games per page]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page.description"><![CDATA[This is the <b>default value</b>. This setting can be personalized in the Account Management.]]></item>
@@ -133,6 +154,7 @@
 		<item name="wcf.acp.group.option.admin.igdb_integration.can_manage_games"><![CDATA[Can edit or delete all games]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_search_igdb"><![CDATA[Can retrieve latest data from IGDB when searching]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_manage_own_games"><![CDATA[Can manage own games library]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_import_games"><![CDATA[Can import owned games from Steam]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Can list all players of a game]]></item>
 	</category>
 </language>

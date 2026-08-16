@@ -30,6 +30,27 @@ class IgdbIntegrationUtil
 	const TWITCH_URL_BASE = 'https://id.twitch.tv/oauth2/token';
 	const COVER_URL_BASE = 'https://images.igdb.com/igdb/image/upload/t_cover_med/';
 	const COVER_URL_FILETYPE = '.jpg';
+	const STEAM_API_URL_BASE = 'https://api.steampowered.com/';
+
+	/**
+	 * Id of Steam in IGDB's external game source list.
+	 */
+	const EXTERNAL_GAME_SOURCE_STEAM = 1;
+
+	/**
+	 * Fields requested for every game fetched from IGDB.
+	 */
+	const GAME_FIELDS = 'id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id,slug,game_localizations.cover.image_id,game_localizations.region,external_games.uid,external_games.external_game_source';
+
+	/**
+	 * Roman numeral words replaced during title normalization.
+	 */
+	private const ROMAN_NUMERALS = [
+		'i' => 1, 'ii' => 2, 'iii' => 3, 'iv' => 4, 'v' => 5,
+		'vi' => 6, 'vii' => 7, 'viii' => 8, 'ix' => 9, 'x' => 10,
+		'xi' => 11, 'xii' => 12, 'xiii' => 13, 'xiv' => 14, 'xv' => 15,
+		'xvi' => 16, 'xvii' => 17, 'xviii' => 18, 'xix' => 19, 'xx' => 20,
+	];
 
 	/**
 	 * @var ClientInterface
@@ -44,9 +65,20 @@ class IgdbIntegrationUtil
 	/**
 	 * Check if all authentication variables are available
 	 */
-	private static function isConnectionDataValid()
+	public static function isConnectionDataValid()
 	{
 		return (!empty(IGDB_INTEGRATION_AUTH_CLIENT_ID) && !empty(IGDB_INTEGRATION_AUTH_CLIENT_SECRET) && !empty(IGDB_INTEGRATION_GENERAL_RESULT_LIMIT));
+	}
+
+	/**
+	 * Check if the Steam library import can be used, i.e. the IGDB credentials
+	 * and the Steam Web API key are available.
+	 */
+	public static function isSteamConnectionDataValid()
+	{
+		return self::isConnectionDataValid()
+			&& defined('IGDB_INTEGRATION_AUTH_STEAM_API_KEY')
+			&& !empty(IGDB_INTEGRATION_AUTH_STEAM_API_KEY);
 	}
 
 	/**
@@ -87,9 +119,9 @@ class IgdbIntegrationUtil
 	}
 
 	/**
-	 * Returns response with fetched game data from IGDB.
+	 * Sends a query to the IGDB games endpoint and returns the response.
 	 */
-	private static function fetchGameDataByName($name)
+	private static function fetchIgdbGames($body)
 	{
 		if (self::$client === null) {
 			self::$client = HttpFactory::getDefaultClient();
@@ -105,43 +137,94 @@ class IgdbIntegrationUtil
 			'Client-ID' => IGDB_INTEGRATION_AUTH_CLIENT_ID,
 			'Authorization' => 'Bearer ' . $accessToken
 		];
-		$body = 'search "' . str_replace(['"', '\\'], '', $name) . '";
-				fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id,slug,game_localizations.cover.image_id,game_localizations.region;
-				limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
 		$request = new Request('POST', self::URL_BASE . 'games', $headers, $body);
 		return self::$client->send($request);
 	}
 
 	/**
+	 * Sends a query to the IGDB games endpoint, fetching a new access token and
+	 * retrying once if the request fails, e.g. because the token has expired.
+	 */
+	private static function fetchIgdbGamesWithTokenRefresh($body)
+	{
+		try {
+			return self::fetchIgdbGames($body);
+		} catch (Exception $ex) {
+			if (!self::saveNewAccessToken()) {
+				throw $ex;
+			}
+
+			// The fresh token is kept in self::$tempAccessToken for all
+			// following requests of this page load
+			return self::fetchIgdbGames($body);
+		}
+	}
+
+	/**
 	 * Updates the game database with search results, if gameId doesn't already exist.
 	 */
-	public static function updateDatabaseGamesByName($name, $isRetry = false): bool
+	public static function updateDatabaseGamesByName($name): bool
 	{
 		if (!self::isConnectionDataValid()) {
 			return false;
 		}
 
-		try {
-			$response = self::fetchGameDataByName($name);
-		} catch (Exception $ex) {
-			if (self::saveNewAccessToken()) {
-				// Retry IGDB request if successfully got new token
-				try {
-					$response = self::fetchGameDataByName($name);
-				} catch (Exception $retryEx) {
-					// The retry failed as well, e.g. IGDB outage or rate limit
-					self::$tempAccessToken = null;
+		$body = 'search "' . str_replace(['"', '\\'], '', $name) . '";
+				fields ' . self::GAME_FIELDS . ';
+				limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
 
-					return false;
-				}
-				self::$tempAccessToken = null;
-			} else {
-				// Failed getting new token
+		try {
+			$response = self::fetchIgdbGamesWithTokenRefresh($body);
+		} catch (Exception $ex) {
+			return false;
+		}
+
+		self::insertGamesFromResponse($response);
+
+		return true;
+	}
+
+	/**
+	 * Updates the game database with all IGDB games that are linked to one of
+	 * the given Steam app ids. Returns false if any request failed.
+	 */
+	public static function updateDatabaseGamesBySteamAppIds(array $steamAppIds): bool
+	{
+		if (!self::isConnectionDataValid() || empty($steamAppIds)) {
+			return false;
+		}
+
+		// Multiple IGDB games (e.g. editions) can share an app id, so request
+		// fewer app ids per batch than the maximum result limit of 500
+		$chunks = array_chunk($steamAppIds, 250);
+		foreach ($chunks as $index => $chunk) {
+			$uidList = '("' . implode('","', array_map('intval', $chunk)) . '")';
+			$body = 'fields ' . self::GAME_FIELDS . ';
+					where external_games.uid = ' . $uidList . ' & external_games.external_game_source = ' . self::EXTERNAL_GAME_SOURCE_STEAM . ';
+					limit 500;';
+
+			try {
+				$response = self::fetchIgdbGamesWithTokenRefresh($body);
+			} catch (Exception $ex) {
 				return false;
+			}
+
+			self::insertGamesFromResponse($response);
+
+			if ($index < count($chunks) - 1) {
+				// Stay below the IGDB rate limit of 4 requests per second
+				usleep(300000);
 			}
 		}
 
-		// Insert into games database
+		return true;
+	}
+
+	/**
+	 * Inserts or updates all games of an IGDB games response in the database.
+	 */
+	private static function insertGamesFromResponse($response)
+	{
 		$gamesJson = JSON::decode($response->getBody(), false);
 		$sql = "INSERT INTO wcf1_igdb_integration_game
 				SET gameId = ?,
@@ -152,7 +235,8 @@ class IgdbIntegrationUtil
 					summary = ?,
 					coverImageId = ?,
 					slug = ?,
-					localizedCovers = ?
+					localizedCovers = ?,
+					steamAppId = ?
 				ON DUPLICATE KEY UPDATE
 					name = ?,
 					germanName = ?,
@@ -161,7 +245,8 @@ class IgdbIntegrationUtil
 					summary = ?,
 					coverImageId = ?,
 					slug = ?,
-					localizedCovers = ?";
+					localizedCovers = ?,
+					steamAppId = COALESCE(?, steamAppId)";
 		$statement = WCF::getDB()->prepare($sql);
 		foreach ($gamesJson as $game) {
 			$gamePlatforms = '';
@@ -198,6 +283,18 @@ class IgdbIntegrationUtil
 				}
 			}
 
+			// A NULL app id never overwrites a known one on update, so links
+			// backfilled by the Steam import survive later IGDB refreshes
+			$gameSteamAppId = null;
+			if (isset($game->external_games)) {
+				foreach ($game->external_games as $externalGame) {
+					if (isset($externalGame->external_game_source) && $externalGame->external_game_source == self::EXTERNAL_GAME_SOURCE_STEAM && !empty($externalGame->uid)) {
+						$gameSteamAppId = intval($externalGame->uid);
+						break;
+					}
+				}
+			}
+
 			$gameId = $game->id;
 			$gameName = $game->name ?? '';
 			$gameYear = isset($game->first_release_date) ? gmdate('Y', $game->first_release_date) : null;
@@ -206,13 +303,79 @@ class IgdbIntegrationUtil
 			$gameSlug = $game->slug ?? '';
 			$gameLocalizedCoversJson = JSON::encode($gameLocalizedCovers);
 
-			$statement->execute([$gameId, $gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson,
+			$statement->execute([$gameId, $gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId,
 								/* UPDATE starts here */
-								$gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson]);
+								$gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId]);
 		}
 		WCF::getDB()->commitTransaction();
+	}
 
-		return true;
+	/**
+	 * Returns the games owned by the given Steam account as a map,
+	 * or null if the request failed. An empty result usually means
+	 * that the "Game details" privacy setting of the profile is not public.
+	 */
+	public static function fetchSteamOwnedGames($steamId): ?array
+	{
+		if (!self::isSteamConnectionDataValid() || !preg_match('/^\d{17}$/', $steamId)) {
+			return null;
+		}
+
+		if (self::$client === null) {
+			self::$client = HttpFactory::getDefaultClient();
+		}
+
+		$url = self::STEAM_API_URL_BASE . 'IPlayerService/GetOwnedGames/v1/?' . http_build_query([
+			'key' => IGDB_INTEGRATION_AUTH_STEAM_API_KEY,
+			'steamid' => $steamId,
+			'include_appinfo' => 1,
+			'include_played_free_games' => 1,
+		]);
+
+		try {
+			$response = self::$client->send(new Request('GET', $url));
+			$data = JSON::decode($response->getBody());
+		} catch (Exception $ex) {
+			return null;
+		}
+
+		if (!isset($data['response']) || !is_array($data['response'])) {
+			return null;
+		}
+
+		$games = [];
+		foreach ($data['response']['games'] ?? [] as $game) {
+			if (isset($game['appid']) && isset($game['name'])) {
+				$games[intval($game['appid'])] = $game['name'];
+			}
+		}
+
+		return $games;
+	}
+
+	/**
+	 * Normalizes a game title for matching: lowercase, punctuation and symbols
+	 * like ™ collapsed to single spaces. Optionally, roman numeral words are
+	 * converted to numbers for a less strict second matching pass.
+	 */
+	public static function normalizeGameTitle($title, bool $convertRomanNumerals = false): string
+	{
+		$title = mb_strtolower($title);
+		$title = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $title);
+		$title = trim(preg_replace('/ +/', ' ', $title));
+
+		if ($convertRomanNumerals) {
+			$words = explode(' ', $title);
+			foreach ($words as &$word) {
+				if (isset(self::ROMAN_NUMERALS[$word])) {
+					$word = (string)self::ROMAN_NUMERALS[$word];
+				}
+			}
+			unset($word);
+			$title = implode(' ', $words);
+		}
+
+		return $title;
 	}
 
 	public static function validateRating($value)

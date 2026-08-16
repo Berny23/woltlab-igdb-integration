@@ -19,7 +19,11 @@ services:
     ports:
       # Rootless podman needs:
       # net.ipv4.ip_unprivileged_port_start=80
+      # The site is served as http://woltlab.localhost (*.localhost resolves
+      # to ::1 via systemd-resolved, hence the IPv6 binding); the bare
+      # "localhost" hostname is rejected by Steam's WAF during OpenID login.
       - "127.0.0.1:80:80"
+      - "[::1]:80:80"
     volumes:
       - woltlab:/var/www/html
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro

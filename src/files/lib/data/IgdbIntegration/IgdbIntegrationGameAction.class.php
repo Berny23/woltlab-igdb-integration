@@ -17,6 +17,7 @@ use wcf\system\form\builder\field\RatingFormField;
 use wcf\system\form\builder\field\TextFormField;
 use wcf\system\form\builder\field\DescriptionFormField;
 use wcf\system\form\builder\TemplateFormNode;
+use wcf\system\exception\PermissionDeniedException;
 use wcf\system\exception\UserInputException;
 use wcf\system\user\activity\event\UserActivityEventHandler;
 use wcf\util\StringUtil;
@@ -31,6 +32,28 @@ use wcf\util\StringUtil;
  */
 class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 {
+	/**
+	 * Number of Steam app ids fetched from IGDB per import step.
+	 */
+	const STEAM_IMPORT_BATCH_SIZE = 250;
+
+	/**
+	 * Maximum number of per-title IGDB search requests during a Steam import.
+	 */
+	const STEAM_IMPORT_SEARCH_LIMIT = 100;
+
+	/**
+	 * Number of per-title IGDB search requests per import step. The searches
+	 * are throttled to respect the IGDB rate limit, so this keeps a single
+	 * step reasonably fast.
+	 */
+	const STEAM_IMPORT_SEARCHES_PER_STEP = 5;
+
+	/**
+	 * Session variable holding the state of a running Steam import.
+	 */
+	const STEAM_IMPORT_STATE_KEY = 'igdbSteamImportState';
+
 	/**
 	 * @inheritDoc
 	 */
@@ -269,6 +292,398 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		}
 
 		return $this->getUpdatedGameUserData($gameId, $userId, false);
+	}
+
+	/**
+	 * Checks for permission to show the Steam import dialog.
+	 */
+	public function validateGetSteamImportDialog()
+	{
+		if (!WCF::getUser()->userID) {
+			throw new PermissionDeniedException();
+		}
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_games']);
+
+		if (!IgdbIntegrationUtil::isSteamConnectionDataValid()) {
+			throw new PermissionDeniedException();
+		}
+		if (!WCF::getSession()->getVar('igdbSteamId')) {
+			// The Steam account has to be verified via the login flow first
+			throw new PermissionDeniedException();
+		}
+	}
+
+	/**
+	 * Returns the data to show the dialog that confirms the Steam library import.
+	 */
+	public function getSteamImportDialog()
+	{
+		$steamId = WCF::getSession()->getVar('igdbSteamId');
+		$steamGames = IgdbIntegrationUtil::fetchSteamOwnedGames($steamId);
+		$steamGameCount = is_array($steamGames) ? count($steamGames) : 0;
+
+		$this->dialog = DialogFormDocument::create('steamImportDialog')
+			->appendChildren([
+				TemplateFormNode::create('steamImportInfo')
+					->templateName('__igdbIntegrationSteamImportInfo')
+					->variables([
+						'steamImportSteamId' => $steamId,
+						'steamGameCount' => $steamGameCount,
+						'steamRequestFailed' => $steamGames === null,
+					])
+			]);
+
+		if (!$steamGameCount) {
+			$this->dialog->addDefaultButton(false);
+		}
+
+		EventHandler::getInstance()->fireAction($this, 'getSteamImportDialog');
+
+		$this->dialog->build();
+
+		return [
+			'dialog' => $this->dialog->getHtml(),
+			'formId' => $this->dialog->getId(),
+		];
+	}
+
+	/**
+	 * Checks for permission to start the Steam library import.
+	 */
+	public function validateStartSteamImport()
+	{
+		$this->validateGetSteamImportDialog();
+	}
+
+	/**
+	 * Starts the Steam library import: fetches the Steam library, matches it
+	 * against the local database and prepares the IGDB request batches for the
+	 * following import steps.
+	 */
+	public function startSteamImport()
+	{
+		$steamId = WCF::getSession()->getVar('igdbSteamId');
+		$steamGames = IgdbIntegrationUtil::fetchSteamOwnedGames($steamId);
+		if (empty($steamGames)) {
+			// The library became unavailable between dialog and submit, e.g.
+			// because the profile privacy changed
+			WCF::getSession()->unregister('igdbSteamId');
+
+			return [
+				'failed' => true,
+				'batchCount' => 0,
+				'gameCount' => 0,
+			];
+		}
+
+		$state = [
+			'remaining' => $steamGames, // Steam app id => name
+			'ambiguous' => [],          // Steam app id => name
+			'stats' => ['imported' => 0, 'alreadyOwned' => 0],
+			'searchQueue' => null,      // filled on the first search step
+			'searchTotal' => 0,
+			'searched' => 0,
+		];
+
+		// Match everything that needs no IGDB request: games already linked to
+		// a Steam app id and games with the exact same normalized title
+		$matched = [];
+		$this->matchRemainingBySteamAppId($state['remaining'], $matched);
+		$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
+		$this->insertSteamImportMatches($matched, $state['stats']);
+
+		// The remaining app ids are fetched from IGDB in batches
+		$state['batches'] = array_chunk(array_keys($state['remaining']), self::STEAM_IMPORT_BATCH_SIZE);
+
+		WCF::getSession()->register(self::STEAM_IMPORT_STATE_KEY, $state);
+
+		return [
+			'failed' => false,
+			'batchCount' => count($state['batches']),
+			'gameCount' => count($steamGames),
+		];
+	}
+
+	/**
+	 * Checks for permission to run a step of a started Steam library import.
+	 */
+	public function validateProcessSteamImportBatch()
+	{
+		if (!WCF::getUser()->userID) {
+			throw new PermissionDeniedException();
+		}
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_games']);
+
+		if (!is_array(WCF::getSession()->getVar(self::STEAM_IMPORT_STATE_KEY))) {
+			// No import has been started in this session
+			throw new UserInputException('steamImportState');
+		}
+	}
+
+	/**
+	 * Fetches the next batch of Steam app ids from IGDB and matches the new
+	 * local data against the remaining Steam games.
+	 */
+	public function processSteamImportBatch()
+	{
+		$state = WCF::getSession()->getVar(self::STEAM_IMPORT_STATE_KEY);
+
+		$batch = array_shift($state['batches']);
+		if ($batch !== null) {
+			// Earlier steps may have matched some of the batch's games already
+			$appIds = array_values(array_intersect($batch, array_keys($state['remaining'])));
+			if (!empty($appIds)) {
+				IgdbIntegrationUtil::updateDatabaseGamesBySteamAppIds($appIds);
+			}
+
+			$matched = [];
+			$this->matchRemainingBySteamAppId($state['remaining'], $matched);
+			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
+			$this->insertSteamImportMatches($matched, $state['stats']);
+		}
+
+		WCF::getSession()->register(self::STEAM_IMPORT_STATE_KEY, $state);
+
+		return [
+			'remainingBatches' => count($state['batches']),
+		];
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessSteamImportBatch()
+	 */
+	public function validateProcessSteamImportSearch()
+	{
+		$this->validateProcessSteamImportBatch();
+	}
+
+	/**
+	 * Searches IGDB for a few of the remaining unmatched titles and matches
+	 * the results. The client repeats this step until it reports completion.
+	 */
+	public function processSteamImportSearch()
+	{
+		$state = WCF::getSession()->getVar(self::STEAM_IMPORT_STATE_KEY);
+
+		if ($state['searchQueue'] === null) {
+			$state['searchQueue'] = array_slice($state['remaining'], 0, self::STEAM_IMPORT_SEARCH_LIMIT, true);
+			$state['searchTotal'] = count($state['searchQueue']);
+		}
+
+		if (IgdbIntegrationUtil::isConnectionDataValid()) {
+			$searchedThisStep = 0;
+			while (!empty($state['searchQueue']) && $searchedThisStep < self::STEAM_IMPORT_SEARCHES_PER_STEP) {
+				$appId = array_key_first($state['searchQueue']);
+				$name = $state['searchQueue'][$appId];
+				unset($state['searchQueue'][$appId]);
+				$state['searched']++;
+
+				// May have been matched by a search result of a previous step
+				if (!isset($state['remaining'][$appId])) {
+					continue;
+				}
+
+				IgdbIntegrationUtil::updateDatabaseGamesByName($name);
+				$searchedThisStep++;
+
+				if (!empty($state['searchQueue'])) {
+					// Stay below the IGDB rate limit of 4 requests per second
+					usleep(300000);
+				}
+			}
+
+			// The search results may contain the Steam link or the exact title
+			$matched = [];
+			$this->matchRemainingBySteamAppId($state['remaining'], $matched);
+			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
+			$this->insertSteamImportMatches($matched, $state['stats']);
+		} else {
+			$state['searchQueue'] = [];
+		}
+
+		WCF::getSession()->register(self::STEAM_IMPORT_STATE_KEY, $state);
+
+		return [
+			'searched' => $state['searched'],
+			'searchTotal' => $state['searchTotal'],
+			'done' => empty($state['searchQueue']),
+		];
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessSteamImportBatch()
+	 */
+	public function validateFinishSteamImport()
+	{
+		$this->validateProcessSteamImportBatch();
+	}
+
+	/**
+	 * Runs the roman numeral matching pass as a last resort, synchronizes all
+	 * computed values and returns the import summary.
+	 */
+	public function finishSteamImport()
+	{
+		$state = WCF::getSession()->getVar(self::STEAM_IMPORT_STATE_KEY);
+
+		$matched = [];
+		$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], true);
+		$this->insertSteamImportMatches($matched, $state['stats']);
+
+		if ($state['stats']['imported'] > 0) {
+			IgdbIntegrationUtil::updateAllGameStats();
+		}
+		$gameCount = $this->updateUserGameCount(WCF::getUser()->userID);
+
+		// The verification is intended for a single import
+		WCF::getSession()->unregister(self::STEAM_IMPORT_STATE_KEY);
+		WCF::getSession()->unregister('igdbSteamId');
+
+		$unmatchedNames = array_values($state['remaining']);
+		sort($unmatchedNames, SORT_NATURAL | SORT_FLAG_CASE);
+		$ambiguousNames = array_values($state['ambiguous']);
+		sort($ambiguousNames, SORT_NATURAL | SORT_FLAG_CASE);
+
+		return [
+			'failed' => false,
+			'importedCount' => $state['stats']['imported'],
+			'alreadyOwnedCount' => $state['stats']['alreadyOwned'],
+			'unmatched' => $unmatchedNames,
+			'ambiguous' => $ambiguousNames,
+			'gameCount' => $gameCount,
+		];
+	}
+
+	/**
+	 * Adds all matched games that the current user does not own yet, without
+	 * firing activity events to not flood the recent activity list, and adds
+	 * the counts to the import statistics.
+	 */
+	protected function insertSteamImportMatches(array $matched, array &$stats)
+	{
+		if (empty($matched)) {
+			return;
+		}
+
+		$userId = WCF::getUser()->userID;
+		$matchedGameIds = array_values(array_unique($matched));
+
+		$conditions = new PreparedStatementConditionBuilder();
+		$conditions->add('userId = ?', [$userId]);
+		$conditions->add('gameId IN (?)', [$matchedGameIds]);
+		$sql = "SELECT gameId
+				FROM wcf1_igdb_integration_game_user
+				" . $conditions;
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute($conditions->getParameters());
+		$ownedGameIds = $statement->fetchAll(\PDO::FETCH_COLUMN);
+
+		$newGameIds = array_diff($matchedGameIds, $ownedGameIds);
+		if (!empty($newGameIds)) {
+			$sql = "INSERT INTO wcf1_igdb_integration_game_user
+					SET gameId = ?, userId = ?, rating = ?";
+			$statement = WCF::getDB()->prepare($sql);
+			foreach ($newGameIds as $gameId) {
+				$statement->execute([$gameId, $userId, 0]);
+			}
+			WCF::getDB()->commitTransaction();
+
+			// Remember the time of the interaction for sorting
+			$conditions = new PreparedStatementConditionBuilder();
+			$conditions->add('gameId IN (?)', [array_values($newGameIds)]);
+			$sql = "UPDATE wcf1_igdb_integration_game
+					SET lastInteractionTime = " . TIME_NOW . "
+					" . $conditions;
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute($conditions->getParameters());
+		}
+
+		$stats['imported'] += count($newGameIds);
+		$stats['alreadyOwned'] += count($matchedGameIds) - count($newGameIds);
+	}
+
+	/**
+	 * Matches the remaining Steam games against the steamAppId column and
+	 * moves all hits from $remaining to $matched.
+	 */
+	protected function matchRemainingBySteamAppId(array &$remaining, array &$matched)
+	{
+		if (empty($remaining)) {
+			return;
+		}
+
+		foreach (array_chunk(array_keys($remaining), 500) as $chunk) {
+			$conditions = new PreparedStatementConditionBuilder();
+			$conditions->add('steamAppId IN (?)', [$chunk]);
+			$sql = "SELECT steamAppId, gameId
+					FROM wcf1_igdb_integration_game
+					" . $conditions;
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute($conditions->getParameters());
+			while ($row = $statement->fetchArray()) {
+				$steamAppId = intval($row['steamAppId']);
+				if (isset($remaining[$steamAppId])) {
+					$matched[$steamAppId] = intval($row['gameId']);
+					unset($remaining[$steamAppId]);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Matches remaining Steam games by normalized title against all local games.
+	 * Unique hits are moved to $matched. Titles shared by multiple games (e.g. game +
+	 * same-named remaster) are moved to $ambiguous, because Steam provides no year.
+	 */
+	protected function matchRemainingByName(array &$remaining, array &$matched, array &$ambiguous, bool $convertRomanNumerals)
+	{
+		if (empty($remaining)) {
+			return;
+		}
+
+		// Token match to not confuse "PC" with platforms like "PC-FX"
+		$platformPattern = '(^|, )(PC|Mac|Linux)(,|$)';
+		$sql = "SELECT gameId, name, steamAppId
+				FROM wcf1_igdb_integration_game
+				WHERE platforms REGEXP ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$platformPattern]);
+
+		$gamesByTitle = [];
+		while ($row = $statement->fetchArray()) {
+			$title = IgdbIntegrationUtil::normalizeGameTitle($row['name'], $convertRomanNumerals);
+			if ($title !== '') {
+				$gamesByTitle[$title][] = $row;
+			}
+		}
+
+		$backfillStatement = null;
+		foreach ($remaining as $steamAppId => $name) {
+			$title = IgdbIntegrationUtil::normalizeGameTitle($name, $convertRomanNumerals);
+			if ($title === '' || !isset($gamesByTitle[$title])) {
+				continue;
+			}
+
+			$gameIds = array_unique(array_column($gamesByTitle[$title], 'gameId'));
+			if (count($gameIds) === 1) {
+				$matched[$steamAppId] = intval(reset($gameIds));
+
+				// Remember direct matches, so future imports resolve them by
+				// app id; roman numeral matches are too fuzzy to persist
+				if (!$convertRomanNumerals && $gamesByTitle[$title][0]['steamAppId'] === null) {
+					if ($backfillStatement === null) {
+						$sql = "UPDATE wcf1_igdb_integration_game
+								SET steamAppId = ?
+								WHERE gameId = ? AND steamAppId IS NULL";
+						$backfillStatement = WCF::getDB()->prepare($sql);
+					}
+					$backfillStatement->execute([$steamAppId, $matched[$steamAppId]]);
+				}
+			} else {
+				$ambiguous[$steamAppId] = $name;
+			}
+			unset($remaining[$steamAppId]);
+		}
 	}
 
 	/**
