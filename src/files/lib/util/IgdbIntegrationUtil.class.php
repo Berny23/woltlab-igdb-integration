@@ -119,10 +119,13 @@ class IgdbIntegrationUtil
 	}
 
 	/**
-	 * Sends a query to the IGDB games endpoint and returns the response.
+	 * Sends a query to the IGDB games endpoint and returns the response. The
+	 * request waits for a free slot of the sitewide rate limit queue.
 	 */
 	private static function fetchIgdbGames($body)
 	{
+		IgdbIntegrationApiRateLimiter::acquireSlot(IgdbIntegrationApiRateLimiter::API_IGDB);
+
 		if (self::$client === null) {
 			self::$client = HttpFactory::getDefaultClient();
 		}
@@ -195,9 +198,10 @@ class IgdbIntegrationUtil
 		}
 
 		// Multiple IGDB games (e.g. editions) can share an app id, so request
-		// fewer app ids per batch than the maximum result limit of 500
+		// fewer app ids per batch than the maximum result limit of 500. The
+		// request pacing is handled by the sitewide rate limit queue.
 		$chunks = array_chunk($steamAppIds, 250);
-		foreach ($chunks as $index => $chunk) {
+		foreach ($chunks as $chunk) {
 			$uidList = '("' . implode('","', array_map('intval', $chunk)) . '")';
 			$body = 'fields ' . self::GAME_FIELDS . ';
 					where external_games.uid = ' . $uidList . ' & external_games.external_game_source = ' . self::EXTERNAL_GAME_SOURCE_STEAM . ';
@@ -210,11 +214,6 @@ class IgdbIntegrationUtil
 			}
 
 			self::insertGamesFromResponse($response);
-
-			if ($index < count($chunks) - 1) {
-				// Stay below the IGDB rate limit of 4 requests per second
-				usleep(300000);
-			}
 		}
 
 		return true;
@@ -333,6 +332,9 @@ class IgdbIntegrationUtil
 		]);
 
 		try {
+			// Wait for a free slot of the sitewide rate limit queue
+			IgdbIntegrationApiRateLimiter::acquireSlot(IgdbIntegrationApiRateLimiter::API_STEAM);
+
 			$response = self::$client->send(new Request('GET', $url));
 			$data = JSON::decode($response->getBody());
 		} catch (Exception $ex) {

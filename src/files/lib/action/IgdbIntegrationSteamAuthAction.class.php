@@ -10,6 +10,7 @@ use wcf\system\io\HttpFactory;
 use wcf\system\request\LinkHandler;
 use wcf\system\WCF;
 use wcf\util\HeaderUtil;
+use wcf\util\IgdbIntegrationApiRateLimiter;
 use wcf\util\IgdbIntegrationUtil;
 
 /**
@@ -154,6 +155,9 @@ class IgdbIntegrationSteamAuthAction extends AbstractAction
 		);
 
 		try {
+			// Wait for a free slot of the sitewide rate limit queue
+			IgdbIntegrationApiRateLimiter::acquireSlot(IgdbIntegrationApiRateLimiter::API_STEAM);
+
 			$response = HttpFactory::getDefaultClient()->send($request);
 		} catch (Exception $ex) {
 			return false;

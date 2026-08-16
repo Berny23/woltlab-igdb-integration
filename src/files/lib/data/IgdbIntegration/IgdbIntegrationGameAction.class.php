@@ -483,13 +483,9 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 					continue;
 				}
 
+				// The request pacing is handled by the sitewide rate limit queue
 				IgdbIntegrationUtil::updateDatabaseGamesByName($name);
 				$searchedThisStep++;
-
-				if (!empty($state['searchQueue'])) {
-					// Stay below the IGDB rate limit of 4 requests per second
-					usleep(300000);
-				}
 			}
 
 			// The search results may contain the Steam link or the exact title

@@ -1,5 +1,6 @@
 <?php
 
+use	wcf\system\database\table\column\BigintDatabaseTableColumn;
 use	wcf\system\database\table\column\NotNullVarchar255DatabaseTableColumn;
 use wcf\system\database\table\column\TextDatabaseTableColumn;
 use	wcf\system\database\table\column\IntDatabaseTableColumn;
@@ -82,6 +83,19 @@ return [
 				->referencedTable('wcf1_user')
 				->referencedColumns(['userID'])
 				->onDelete('CASCADE'),
+		]),
+	// Sitewide request slots of the used external APIs, see IgdbIntegrationApiRateLimiter
+	DatabaseTable::create('wcf1_igdb_integration_api_slot')
+		->columns([
+			NotNullVarchar255DatabaseTableColumn::create('apiName'),
+			BigintDatabaseTableColumn::create('nextSlotTime')
+				->length(20)
+				->notNull()
+				->defaultValue(0)
+		])
+		->indices([
+			DatabaseTablePrimaryIndex::create()
+				->columns(['apiName'])
 		]),
 	// Add column to default user table
 	PartialDatabaseTable::create('wcf1_user')
