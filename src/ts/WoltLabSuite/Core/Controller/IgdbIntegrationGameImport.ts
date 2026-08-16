@@ -10,7 +10,6 @@
 
 import { dboAction } from "WoltLabSuite/Core/Ajax";
 import { dialogFactory } from "WoltLabSuite/Core/Component/Dialog";
-import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
 import { getPhrase } from "WoltLabSuite/Core/Language";
 import { escapeHTML } from "WoltLabSuite/Core/StringUtil";
 
@@ -25,6 +24,12 @@ interface StartResult {
 	failed: boolean;
 	batchCount: number;
 	gameCount: number;
+}
+
+interface SteamImportData {
+	steamId: string;
+	gameCount: number;
+	requestFailed: boolean;
 }
 
 interface SearchResult {
@@ -288,32 +293,48 @@ async function handleIgdbListFile(file: File): Promise<void> {
 	dialog.show(getPhrase('wcf.igdb_integration.dialog.igdb_import_title'));
 }
 
-function openSteamImportDialog(): void {
-	const form = new FormBuilderDialog(
-		'steamImportDialog',
-		ACTION_CLASS,
-		'getSteamImportDialog', {
-		destroyOnClose: true,
-		dialog: {
-			title: getPhrase('wcf.igdb_integration.dialog.steam_import_title')
-		},
-		submitActionName: 'startSteamImport',
-		successCallback(returnValues) {
-			void runSteamImportSteps(returnValues as StartResult);
-		}
-	});
+async function openSteamImportDialog(): Promise<void> {
+	const data = (await dboAction('getSteamImportData', ACTION_CLASS).dispatch()) as SteamImportData;
+	const title = getPhrase('wcf.igdb_integration.dialog.steam_import_title');
 
-	form.open();
+	if (data.requestFailed) {
+		dialogFactory()
+			.fromHtml('<p>' + getPhrase('wcf.igdb_integration.dialog.steam_import_request_failed') + '</p>')
+			.asAlert()
+			.show(title);
+		return;
+	}
+	if (data.gameCount === 0) {
+		dialogFactory()
+			.fromHtml('<p>' + getPhrase('wcf.igdb_integration.dialog.steam_import_empty', { steamImportSteamId: data.steamId }) + '</p>')
+			.asAlert()
+			.show(title);
+		return;
+	}
+
+	const dialog = dialogFactory()
+		.fromHtml('<p>' + getPhrase('wcf.igdb_integration.dialog.steam_import_confirm', {
+			steamImportSteamId: data.steamId,
+			steamGameCount: data.gameCount,
+		}) + '</p>')
+		.asConfirmation();
+	dialog.addEventListener('primary', () => {
+		void (async () => {
+			const start = (await dboAction('startSteamImport', ACTION_CLASS).dispatch()) as StartResult;
+			await runSteamImportSteps(start);
+		})();
+	});
+	dialog.show(title);
 }
 
 export function init(steamAutoOpen: boolean, gameListUrl: string) {
 	cleanGameListUrl = gameListUrl;
 
 	const steamButton = document.getElementById('steamImportButton');
-	steamButton?.addEventListener('click', () => openSteamImportDialog());
+	steamButton?.addEventListener('click', () => void openSteamImportDialog());
 
 	if (steamAutoOpen && steamButton !== null) {
-		openSteamImportDialog();
+		void openSteamImportDialog();
 	}
 
 	const fileInput = document.getElementById('igdbImportFileInput') as HTMLInputElement | null;

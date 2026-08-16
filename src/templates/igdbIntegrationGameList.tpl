@@ -217,6 +217,9 @@
 			ControllerIgdbIntegrationGameImport) => {
 			Language.addObject({
 				'wcf.igdb_integration.dialog.steam_import_title': '{jslang}wcf.igdb_integration.dialog.steam_import_title{/jslang}',
+				'wcf.igdb_integration.dialog.steam_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_confirm{/jslang}',
+				'wcf.igdb_integration.dialog.steam_import_empty': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_empty{/jslang}',
+				'wcf.igdb_integration.dialog.steam_import_request_failed': '{jslang}wcf.igdb_integration.dialog.steam_import_request_failed{/jslang}',
 				'wcf.igdb_integration.dialog.steam_import_progress_title': '{jslang}wcf.igdb_integration.dialog.steam_import_progress_title{/jslang}',
 				'wcf.igdb_integration.dialog.steam_import_progress_batches': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_progress_batches{/jslang}',
 				'wcf.igdb_integration.dialog.steam_import_progress_search': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_progress_search{/jslang}',

@@ -311,9 +311,9 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * Checks for permission to show the Steam import dialog.
+	 * Checks for permission to prepare the Steam library import.
 	 */
-	public function validateGetSteamImportDialog()
+	public function validateGetSteamImportData()
 	{
 		if (!WCF::getUser()->userID) {
 			throw new PermissionDeniedException();
@@ -330,36 +330,17 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * Returns the data to show the dialog that confirms the Steam library import.
+	 * Returns the data for the dialog that confirms the Steam library import.
 	 */
-	public function getSteamImportDialog()
+	public function getSteamImportData()
 	{
 		$steamId = WCF::getSession()->getVar('igdbSteamId');
 		$steamGames = IgdbIntegrationUtil::fetchSteamOwnedGames($steamId);
-		$steamGameCount = is_array($steamGames) ? count($steamGames) : 0;
-
-		$this->dialog = DialogFormDocument::create('steamImportDialog')
-			->appendChildren([
-				TemplateFormNode::create('steamImportInfo')
-					->templateName('__igdbIntegrationSteamImportInfo')
-					->variables([
-						'steamImportSteamId' => $steamId,
-						'steamGameCount' => $steamGameCount,
-						'steamRequestFailed' => $steamGames === null,
-					])
-			]);
-
-		if (!$steamGameCount) {
-			$this->dialog->addDefaultButton(false);
-		}
-
-		EventHandler::getInstance()->fireAction($this, 'getSteamImportDialog');
-
-		$this->dialog->build();
 
 		return [
-			'dialog' => $this->dialog->getHtml(),
-			'formId' => $this->dialog->getId(),
+			'steamId' => $steamId,
+			'gameCount' => is_array($steamGames) ? count($steamGames) : 0,
+			'requestFailed' => $steamGames === null,
 		];
 	}
 
@@ -368,7 +349,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	public function validateStartSteamImport()
 	{
-		$this->validateGetSteamImportDialog();
+		$this->validateGetSteamImportData();
 	}
 
 	/**
