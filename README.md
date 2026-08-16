@@ -7,7 +7,7 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 ## Features
 
 - Automatically imports all games from search results
-- Users can add, rate and remove games with a single click
+- Users can easily add, rate, and remove games
 - Shows average ratings and a configurable player toplist
 - Optional region-specific covers (Europe, Japan, Korea)
 - Filterable by platforms, sortable by name, year, players, rating and last activity
