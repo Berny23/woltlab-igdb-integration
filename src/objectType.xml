@@ -17,5 +17,11 @@
 			<definitionname>com.woltlab.wcf.user.recentActivityEvent</definitionname>
 			<classname>wcf\system\user\activity\event\IgdbIntegrationGameUserActivityEvent</classname>
 		</type>
+		<!-- Activity points -->
+		<type>
+			<name>de.berny23.igdb_integration.activityPointEvent.game</name>
+			<definitionname>com.woltlab.wcf.user.activityPointEvent</definitionname>
+			<points>2</points>
+		</type>
 	</import>
 </data>

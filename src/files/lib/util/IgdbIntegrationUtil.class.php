@@ -11,6 +11,8 @@ use GuzzleHttp\Psr7\Request;
 use \wcf\system\WCF;
 use \wcf\data\option\OptionEditor;
 use \wcf\data\option\Option;
+use wcf\system\user\activity\point\UserActivityPointHandler;
+use wcf\system\user\group\assignment\UserGroupAssignmentHandler;
 
 /**
  * A utility class for API interactions with IGDB.
@@ -23,6 +25,7 @@ use \wcf\data\option\Option;
  */
 class IgdbIntegrationUtil
 {
+	const ACTIVITY_POINT_OBJECT_TYPE = 'de.berny23.igdb_integration.activityPointEvent.game';
 	const URL_BASE = 'https://api.igdb.com/v4/';
 	const TWITCH_URL_BASE = 'https://id.twitch.tv/oauth2/token';
 	const COVER_URL_BASE = 'https://images.igdb.com/igdb/image/upload/t_cover_med/';
@@ -197,6 +200,31 @@ class IgdbIntegrationUtil
 	public static function validateRating($value)
 	{
 		return $value != 0;
+	}
+
+	/**
+	 * Synchronizes the activity points of a user with the given owned game count.
+	 */
+	public static function updateActivityPoints($userId, $gameCount)
+	{
+		$handler = UserActivityPointHandler::getInstance();
+		$objectType = $handler->getObjectTypeByName(self::ACTIVITY_POINT_OBJECT_TYPE);
+		if ($objectType === null) {
+			return;
+		}
+
+		// Write the absolute owned game count instead of firing incremental
+		// events, so the points are always correct regardless of history
+		$sql = "INSERT INTO wcf1_user_activity_point
+						(userID, objectTypeID, activityPoints, items)
+				VALUES (?, ?, ?, ?)
+				ON DUPLICATE KEY UPDATE activityPoints = VALUES(activityPoints),
+						items = VALUES(items)";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$userId, $objectType->objectTypeID, $gameCount * $objectType->points, $gameCount]);
+
+		$handler->updateUsers([$userId]);
+		UserGroupAssignmentHandler::getInstance()->checkUsers([$userId]);
 	}
 
 	/**

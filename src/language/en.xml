@@ -60,6 +60,11 @@
 		<item name="wcf.user.condition.igdb_integration_game_count"><![CDATA[Owned Games]]></item>
 	</category>
 
+	<!-- Activity points -->
+	<category name="wcf.user.activityPoint">
+		<item name="wcf.user.activityPoint.objectType.de.berny23.igdb_integration.activityPointEvent.game"><![CDATA[Owned Games]]></item>
+	</category>
+
 	<!-- User profile -->
 	<category name="wcf.user.profile">
 		<item name="wcf.user.profile.menu.igdb_integration_game_list"><![CDATA[My Game]]></item>

@@ -3,6 +3,7 @@
 namespace wcf\data\IgdbIntegration;
 
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
+use wcf\util\IgdbIntegrationUtil;
 use wcf\system\WCF;
 use wcf\data\user\UserEditor;
 use wcf\data\user\User;
@@ -367,11 +368,14 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		]);
 
 		// Update user database info used for trophies
-		$sql = "UPDATE wcf1_user 
-				SET IgdbIntegrationGameCount = ? 
+		$sql = "UPDATE wcf1_user
+				SET IgdbIntegrationGameCount = ?
 				WHERE userID = ?";
 		$statement = WCF::getDB()->prepare($sql);
 		$statement->execute([$gameCount['gameCount'], $userId]);
+
+		// Synchronize activity points with the owned game count
+		IgdbIntegrationUtil::updateActivityPoints($userId, $gameCount['gameCount']);
 
 		// Return data for displaying in HTML
 		return [
