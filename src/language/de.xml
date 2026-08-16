@@ -129,6 +129,7 @@
 		<item name="wcf.acp.option.category.igdb_integration"><![CDATA[IGDB-Integration]]></item>
 		<item name="wcf.acp.option.category.igdb_integration_auth"><![CDATA[Authentifizierung]]></item>
 		<item name="wcf.acp.option.category.igdb_integration_general"><![CDATA[Allgemein]]></item>
+		<item name="wcf.acp.option.category.igdb_integration_filter"><![CDATA[Filter]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_id"><![CDATA[Client-ID]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_id.description"><![CDATA[Eine ausführliche Erklärung, wie Client-ID und Client-Geheimnis für IGDB erstellt werden, befindet sich auf der <a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration/#overview" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Plugin-Store-Seite</a>.]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_client_secret"><![CDATA[Client-Geheimnis]]></item>

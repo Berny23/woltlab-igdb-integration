@@ -10,9 +10,13 @@
 				<parent>igdb_integration</parent>
 				<showorder>1</showorder>
 			</category>
-			<category name="igdb_integration_auth">
+			<category name="igdb_integration_filter">
 				<parent>igdb_integration</parent>
 				<showorder>2</showorder>
+			</category>
+			<category name="igdb_integration_auth">
+				<parent>igdb_integration</parent>
+				<showorder>3</showorder>
 			</category>
 		</categories>
 		<options>
@@ -52,7 +56,7 @@
 				<maxvalue>10000</maxvalue>
 			</option>
 			<option name="igdb_integration_general_game_sort_field">
-				<categoryname>igdb_integration_general</categoryname>
+				<categoryname>igdb_integration_filter</categoryname>
 				<optiontype>select</optiontype>
 				<defaultvalue>lastInteractionTime</defaultvalue>
 				<selectoptions>displayName:wcf.igdb_integration.game.name
@@ -62,7 +66,7 @@ averageRating:wcf.form.field.rating
 lastInteractionTime:wcf.igdb_integration.game.last_interaction</selectoptions>
 			</option>
 			<option name="igdb_integration_general_game_sort_order">
-				<categoryname>igdb_integration_general</categoryname>
+				<categoryname>igdb_integration_filter</categoryname>
 				<optiontype>select</optiontype>
 				<defaultvalue>DESC</defaultvalue>
 				<selectoptions>ASC:wcf.global.sortOrder.ascending
@@ -76,7 +80,7 @@ DESC:wcf.global.sortOrder.descending</selectoptions>
 				<maxvalue>500</maxvalue>
 			</option>
 			<option name="igdb_integration_general_preferred_region">
-				<categoryname>igdb_integration_general</categoryname>
+				<categoryname>igdb_integration_filter</categoryname>
 				<optiontype>select</optiontype>
 				<defaultvalue>0</defaultvalue>
 				<selectoptions>0:wcf.igdb_integration.region.none
@@ -85,7 +89,7 @@ DESC:wcf.global.sortOrder.descending</selectoptions>
 2:wcf.igdb_integration.region.korea</selectoptions>
 			</option>
 			<option name="igdb_integration_general_default_platform_filter">
-				<categoryname>igdb_integration_general</categoryname>
+				<categoryname>igdb_integration_filter</categoryname>
 				<optiontype>igdbIntegrationPlatforms</optiontype>
 				<defaultvalue></defaultvalue>
 			</option>
