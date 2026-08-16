@@ -70,24 +70,32 @@
 			</div>
 		</form>
 	</section>
-	{if $steamImportAvailable}
+	{if $igdbImportAvailable}
 		<section id="importBox" class="box">
 			<details{if $steamImportAuthenticated || $steamImportError} open{/if}>
 				<summary>
 					<h2 class="boxTitle">{lang}wcf.igdb_integration.page.import{/lang}</h2>
 				</summary>
 				<div class="boxContent">
-					<h3>{lang}wcf.igdb_integration.page.steam_import{/lang}</h3>
-					{if $steamImportError}
-						<p class="error">{lang}wcf.igdb_integration.page.steam_import_error{/lang}</p>
-					{/if}
-					<p>{lang}wcf.igdb_integration.page.steam_import_info{/lang}</p>
-					<div class="formSubmit">
-						{if $steamImportAuthenticated}
-							<button type="button" class="button buttonPrimary" id="steamImportButton">{lang}wcf.igdb_integration.page.steam_import_button{/lang}</button>
-						{else}
-							<a href="{$steamAuthUrl}" class="igdbIntegrationSteamSignInButton"><img src="{$__wcf->getPath()}images/igdbIntegration/signInThroughSteam.png" width="180" height="35" alt="{lang}wcf.igdb_integration.page.steam_import_sign_in{/lang}" title="{lang}wcf.igdb_integration.page.steam_import_sign_in{/lang}"></a>
+					{if $steamImportAvailable}
+						<h3>{lang}wcf.igdb_integration.page.steam_import{/lang}</h3>
+						{if $steamImportError}
+							<p class="error">{lang}wcf.igdb_integration.page.steam_import_error{/lang}</p>
 						{/if}
+						<p>{lang}wcf.igdb_integration.page.steam_import_info{/lang}</p>
+						<div class="formSubmit">
+							{if $steamImportAuthenticated}
+								<button type="button" class="button buttonPrimary" id="steamImportButton">{lang}wcf.igdb_integration.page.steam_import_button{/lang}</button>
+							{else}
+								<a href="{$steamAuthUrl}" class="igdbIntegrationSteamSignInButton"><img src="{$__wcf->getPath()}images/igdbIntegration/signInThroughSteam.png" width="180" height="35" alt="{lang}wcf.igdb_integration.page.steam_import_sign_in{/lang}" title="{lang}wcf.igdb_integration.page.steam_import_sign_in{/lang}"></a>
+							{/if}
+						</div>
+					{/if}
+					<h3>{lang}wcf.igdb_integration.page.igdb_import{/lang}</h3>
+					<p>{lang}wcf.igdb_integration.page.igdb_import_info{/lang}</p>
+					<div class="formSubmit">
+						<input type="file" id="igdbImportFileInput" accept=".csv,text/csv" style="display: none;">
+						<button type="button" class="button" id="igdbImportButton">{lang}wcf.igdb_integration.page.igdb_import_button{/lang}</button>
 					</div>
 				</div>
 			</details>
@@ -203,10 +211,10 @@
 	});
 </script>
 
-{if $steamImportAuthenticated}
+{if $igdbImportAvailable}
 	<script data-relocate="true">
-		require(['Language', 'WoltLabSuite/Core/Controller/IgdbIntegrationSteamImport'], (Language,
-			ControllerIgdbIntegrationSteamImport) => {
+		require(['Language', 'WoltLabSuite/Core/Controller/IgdbIntegrationGameImport'], (Language,
+			ControllerIgdbIntegrationGameImport) => {
 			Language.addObject({
 				'wcf.igdb_integration.dialog.steam_import_title': '{jslang}wcf.igdb_integration.dialog.steam_import_title{/jslang}',
 				'wcf.igdb_integration.dialog.steam_import_progress_title': '{jslang}wcf.igdb_integration.dialog.steam_import_progress_title{/jslang}',
@@ -218,9 +226,12 @@
 				'wcf.igdb_integration.dialog.steam_import_result_imported': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_result_imported{/jslang}',
 				'wcf.igdb_integration.dialog.steam_import_result_already_owned': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_result_already_owned{/jslang}',
 				'wcf.igdb_integration.dialog.steam_import_result_ambiguous': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_result_ambiguous{/jslang}',
-				'wcf.igdb_integration.dialog.steam_import_result_unmatched': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_result_unmatched{/jslang}'
+				'wcf.igdb_integration.dialog.steam_import_result_unmatched': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_result_unmatched{/jslang}',
+				'wcf.igdb_integration.dialog.igdb_import_title': '{jslang}wcf.igdb_integration.dialog.igdb_import_title{/jslang}',
+				'wcf.igdb_integration.dialog.igdb_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.igdb_import_confirm{/jslang}',
+				'wcf.igdb_integration.dialog.igdb_import_invalid_file': '{jslang}wcf.igdb_integration.dialog.igdb_import_invalid_file{/jslang}'
 			});
-			ControllerIgdbIntegrationSteamImport.init({if $steamImportAutoOpen}true{else}false{/if}, '{unsafe:$steamGameListUrl|encodeJS}');
+			ControllerIgdbIntegrationGameImport.init({if $steamImportAutoOpen}true{else}false{/if}, '{unsafe:$steamGameListUrl|encodeJS}');
 		});
 	</script>
 {/if}

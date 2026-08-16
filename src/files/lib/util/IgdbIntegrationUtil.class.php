@@ -220,6 +220,33 @@ class IgdbIntegrationUtil
 	}
 
 	/**
+	 * Updates the game database with all IGDB games with the given IGDB ids.
+	 * Returns false if any request failed.
+	 */
+	public static function updateDatabaseGamesByIds(array $gameIds): bool
+	{
+		if (!self::isConnectionDataValid() || empty($gameIds)) {
+			return false;
+		}
+
+		foreach (array_chunk($gameIds, 400) as $chunk) {
+			$body = 'fields ' . self::GAME_FIELDS . ';
+					where id = (' . implode(',', array_map('intval', $chunk)) . ');
+					limit 500;';
+
+			try {
+				$response = self::fetchIgdbGamesWithTokenRefresh($body);
+			} catch (Exception $ex) {
+				return false;
+			}
+
+			self::insertGamesFromResponse($response);
+		}
+
+		return true;
+	}
+
+	/**
 	 * Inserts or updates all games of an IGDB games response in the database.
 	 */
 	private static function insertGamesFromResponse($response)

@@ -20,6 +20,9 @@
 		<item name="wcf.igdb_integration.page.steam_import_sign_in"><![CDATA[Über Steam anmelden]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_button"><![CDATA[Steam-Bibliothek importieren]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_error"><![CDATA[Die Anmeldung über Steam ist fehlgeschlagen. Bitte versuche{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} es erneut.]]></item>
+		<item name="wcf.igdb_integration.page.igdb_import"><![CDATA[IGDB-Import]]></item>
+		<item name="wcf.igdb_integration.page.igdb_import_info"><![CDATA[Exportiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} eine Liste {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihrer{else}deiner{/if} Spiele als CSV-Datei in den <a href="https://www.igdb.com" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Listen</a> und importiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Datei hier.]]></item>
+		<item name="wcf.igdb_integration.page.igdb_import_button"><![CDATA[CSV-Datei importieren]]></item>
 	</category>
 
 	<!-- Game data -->
@@ -68,6 +71,9 @@
 		<item name="wcf.igdb_integration.dialog.steam_import_result_already_owned"><![CDATA[{#$count} Spiele befanden sich bereits in der Bibliothek.]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_result_ambiguous"><![CDATA[{#$count} Spiele wurden übersprungen, weil mehrere Einträge mit demselben Namen existieren. Der passende Eintrag muss manuell hinzugefügt werden:]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_result_unmatched"><![CDATA[{#$count} Spiele konnten keinem IGDB-Eintrag zugeordnet werden:]]></item>
+		<item name="wcf.igdb_integration.dialog.igdb_import_title"><![CDATA[IGDB-Liste importieren]]></item>
+		<item name="wcf.igdb_integration.dialog.igdb_import_confirm"><![CDATA[Die Datei enthält {#$count} Spiele. Spiele, die sich bereits in der Bibliothek befinden, werden übersprungen. Import starten?]]></item>
+		<item name="wcf.igdb_integration.dialog.igdb_import_invalid_file"><![CDATA[Die ausgewählte Datei ist kein gültiger IGDB-Listenexport.]]></item>
 	</category>
 
 	<!-- ACP content menu -->
@@ -155,7 +161,7 @@
 		<item name="wcf.acp.group.option.admin.igdb_integration.can_manage_games"><![CDATA[Kann alle Spiele editieren oder löschen]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_search_igdb"><![CDATA[Kann beim Suchen aktuelle Daten von IGDB abrufen]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_manage_own_games"><![CDATA[Kann eigene Spiele-Bibliothek verwalten]]></item>
-		<item name="wcf.acp.group.option.user.igdb_integration.can_import_games"><![CDATA[Kann eigene Spiele von Steam importieren]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_import_games"><![CDATA[Kann eigene Spiele von Steam oder IGDB importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Kann alle Spieler eines Spiels auflisten]]></item>
 	</category>
 </language>

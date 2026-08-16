@@ -55,6 +55,22 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	const STEAM_IMPORT_STATE_KEY = 'igdbSteamImportState';
 
 	/**
+	 * Number of IGDB game ids fetched from IGDB per import step. Ids are
+	 * unique per game, so a batch can never exceed the result limit of 500.
+	 */
+	const IGDB_IMPORT_BATCH_SIZE = 400;
+
+	/**
+	 * Maximum number of games accepted from an IGDB list import file.
+	 */
+	const IGDB_IMPORT_MAX_GAMES = 100000;
+
+	/**
+	 * Session variable holding the state of a running IGDB list import.
+	 */
+	const IGDB_IMPORT_STATE_KEY = 'igdbListImportState';
+
+	/**
 	 * @inheritDoc
 	 */
 	protected $permissionsCreate = ['admin.igdb_integration.can_manage_games'];
@@ -390,7 +406,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$matched = [];
 		$this->matchRemainingBySteamAppId($state['remaining'], $matched);
 		$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
-		$this->insertSteamImportMatches($matched, $state['stats']);
+		$this->insertImportMatches($matched, $state['stats']);
 
 		// The remaining app ids are fetched from IGDB in batches
 		$state['batches'] = array_chunk(array_keys($state['remaining']), self::STEAM_IMPORT_BATCH_SIZE);
@@ -439,7 +455,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$matched = [];
 			$this->matchRemainingBySteamAppId($state['remaining'], $matched);
 			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
-			$this->insertSteamImportMatches($matched, $state['stats']);
+			$this->insertImportMatches($matched, $state['stats']);
 		}
 
 		WCF::getSession()->register(self::STEAM_IMPORT_STATE_KEY, $state);
@@ -492,7 +508,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$matched = [];
 			$this->matchRemainingBySteamAppId($state['remaining'], $matched);
 			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
-			$this->insertSteamImportMatches($matched, $state['stats']);
+			$this->insertImportMatches($matched, $state['stats']);
 		} else {
 			$state['searchQueue'] = [];
 		}
@@ -524,7 +540,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 		$matched = [];
 		$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], true);
-		$this->insertSteamImportMatches($matched, $state['stats']);
+		$this->insertImportMatches($matched, $state['stats']);
 
 		if ($state['stats']['imported'] > 0) {
 			IgdbIntegrationUtil::updateAllGameStats();
@@ -551,11 +567,182 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
+	 * Checks for permission to start an IGDB list import and parses the
+	 * submitted game id list.
+	 */
+	public function validateStartIgdbImport()
+	{
+		if (!WCF::getUser()->userID) {
+			throw new PermissionDeniedException();
+		}
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_games']);
+
+		// Unlike the Steam import, only the IGDB credentials are required
+		if (!IgdbIntegrationUtil::isConnectionDataValid()) {
+			throw new PermissionDeniedException();
+		}
+
+		// The ids are sent as a single comma-separated string, because a large
+		// library as an array parameter would exceed PHP's max_input_vars
+		$this->readString('idList');
+
+		$gameIds = [];
+		foreach (explode(',', $this->parameters['idList']) as $gameId) {
+			$gameId = intval($gameId);
+			if ($gameId > 0) {
+				$gameIds[$gameId] = $gameId;
+			}
+		}
+		if (empty($gameIds)) {
+			throw new UserInputException('idList');
+		}
+
+		$this->parameters['gameIds'] = array_slice($gameIds, 0, self::IGDB_IMPORT_MAX_GAMES, true);
+	}
+
+	/**
+	 * Starts the import of an IGDB list export: matches the game ids against
+	 * the local database and prepares the IGDB request batches for the
+	 * following import steps.
+	 */
+	public function startIgdbImport()
+	{
+		$gameIds = $this->parameters['gameIds'];
+
+		$state = [
+			'remaining' => $gameIds, // IGDB game id => IGDB game id
+			'stats' => ['imported' => 0, 'alreadyOwned' => 0],
+		];
+
+		// Games that are already in the local database need no IGDB request
+		$matched = $this->loadExistingGameIds($state['remaining']);
+		foreach ($matched as $gameId) {
+			unset($state['remaining'][$gameId]);
+		}
+		$this->insertImportMatches($matched, $state['stats']);
+
+		$state['batches'] = array_chunk(array_keys($state['remaining']), self::IGDB_IMPORT_BATCH_SIZE);
+
+		WCF::getSession()->register(self::IGDB_IMPORT_STATE_KEY, $state);
+
+		return [
+			'failed' => false,
+			'batchCount' => count($state['batches']),
+			'gameCount' => count($gameIds),
+		];
+	}
+
+	/**
+	 * Checks for permission to run a step of a started IGDB list import.
+	 */
+	public function validateProcessIgdbImportBatch()
+	{
+		if (!WCF::getUser()->userID) {
+			throw new PermissionDeniedException();
+		}
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_games']);
+
+		if (!is_array(WCF::getSession()->getVar(self::IGDB_IMPORT_STATE_KEY))) {
+			// No import has been started in this session
+			throw new UserInputException('igdbImportState');
+		}
+	}
+
+	/**
+	 * Fetches the next batch of game ids from IGDB and adds all games that
+	 * exist there to the library of the current user.
+	 */
+	public function processIgdbImportBatch()
+	{
+		$state = WCF::getSession()->getVar(self::IGDB_IMPORT_STATE_KEY);
+
+		$batch = array_shift($state['batches']);
+		if ($batch !== null) {
+			$gameIds = array_values(array_intersect($batch, array_keys($state['remaining'])));
+			if (!empty($gameIds)) {
+				IgdbIntegrationUtil::updateDatabaseGamesByIds($gameIds);
+
+				// Ids that IGDB did not return (e.g. deleted games) stay in
+				// the remaining list and are reported as unmatched at the end
+				$matched = $this->loadExistingGameIds($gameIds);
+				foreach ($matched as $gameId) {
+					unset($state['remaining'][$gameId]);
+				}
+				$this->insertImportMatches($matched, $state['stats']);
+			}
+		}
+
+		WCF::getSession()->register(self::IGDB_IMPORT_STATE_KEY, $state);
+
+		return [
+			'remainingBatches' => count($state['batches']),
+		];
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessIgdbImportBatch()
+	 */
+	public function validateFinishIgdbImport()
+	{
+		$this->validateProcessIgdbImportBatch();
+	}
+
+	/**
+	 * Synchronizes all computed values and returns the summary of the IGDB
+	 * list import.
+	 */
+	public function finishIgdbImport()
+	{
+		$state = WCF::getSession()->getVar(self::IGDB_IMPORT_STATE_KEY);
+
+		if ($state['stats']['imported'] > 0) {
+			IgdbIntegrationUtil::updateAllGameStats();
+		}
+		$gameCount = $this->updateUserGameCount(WCF::getUser()->userID);
+
+		WCF::getSession()->unregister(self::IGDB_IMPORT_STATE_KEY);
+
+		$unmatchedIds = array_values($state['remaining']);
+		sort($unmatchedIds);
+
+		return [
+			'failed' => false,
+			'importedCount' => $state['stats']['imported'],
+			'alreadyOwnedCount' => $state['stats']['alreadyOwned'],
+			'unmatchedIds' => $unmatchedIds,
+			'gameCount' => $gameCount,
+		];
+	}
+
+	/**
+	 * Returns the subset of the given IGDB game ids that exist in the local
+	 * game database, as a map of game id to game id.
+	 */
+	protected function loadExistingGameIds(array $gameIds): array
+	{
+		$existingGameIds = [];
+		foreach (array_chunk(array_values($gameIds), 500) as $chunk) {
+			$conditions = new PreparedStatementConditionBuilder();
+			$conditions->add('gameId IN (?)', [$chunk]);
+			$sql = "SELECT gameId
+					FROM wcf1_igdb_integration_game
+					" . $conditions;
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute($conditions->getParameters());
+			while ($gameId = $statement->fetchColumn()) {
+				$existingGameIds[intval($gameId)] = intval($gameId);
+			}
+		}
+
+		return $existingGameIds;
+	}
+
+	/**
 	 * Adds all matched games that the current user does not own yet, without
 	 * firing activity events to not flood the recent activity list, and adds
 	 * the counts to the import statistics.
 	 */
-	protected function insertSteamImportMatches(array $matched, array &$stats)
+	protected function insertImportMatches(array $matched, array &$stats)
 	{
 		if (empty($matched)) {
 			return;

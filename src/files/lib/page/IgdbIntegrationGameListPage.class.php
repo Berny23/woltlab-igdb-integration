@@ -61,6 +61,11 @@ class IgdbIntegrationGameListPage extends SortablePage
 	private $showIgdbError = false;
 
 	/**
+	 * Whether the game import box is available for the current user
+	 */
+	private $igdbImportAvailable = false;
+
+	/**
 	 * Whether the Steam import is available for the current user.
 	 */
 	private $steamImportAvailable = false;
@@ -131,8 +136,10 @@ class IgdbIntegrationGameListPage extends SortablePage
 			$this->showIgdbError = !$result;
 		}
 
-		$this->steamImportAvailable = WCF::getUser()->userID
+		$this->igdbImportAvailable = WCF::getUser()->userID
 			&& WCF::getSession()->getPermission('user.igdb_integration.can_import_games')
+			&& IgdbIntegrationUtil::isConnectionDataValid();
+		$this->steamImportAvailable = $this->igdbImportAvailable
 			&& IgdbIntegrationUtil::isSteamConnectionDataValid();
 		if ($this->steamImportAvailable) {
 			$this->steamImportAuthenticated = (bool)WCF::getSession()->getVar('igdbSteamId');
@@ -208,6 +215,7 @@ class IgdbIntegrationGameListPage extends SortablePage
 			'availablePlatforms' => $availablePlatforms,
 			'platformFilter' => $platformPreselection,
 			'platformFilterParams' => $platformFilterParams,
+			'igdbImportAvailable' => $this->igdbImportAvailable,
 			'steamImportAvailable' => $this->steamImportAvailable,
 			'steamImportAuthenticated' => $this->steamImportAuthenticated,
 			'steamImportAutoOpen' => $this->steamImportAutoOpen,
