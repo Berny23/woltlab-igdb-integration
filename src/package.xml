@@ -41,5 +41,6 @@
 		<instruction type="language" />
 		<instruction type="option" />
 		<instruction type="userOption" />
+		<instruction type="objectType" />
 	</instructions>
 </package>

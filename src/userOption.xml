@@ -31,7 +31,8 @@
 displayName:wcf.igdb_integration.game.name
 releaseYear:wcf.igdb_integration.game.year
 playerCount:wcf.igdb_integration.game.players
-averageRating:wcf.form.field.rating</selectoptions>
+averageRating:wcf.form.field.rating
+lastInteractionTime:wcf.igdb_integration.game.last_interaction</selectoptions>
 				<visible>3</visible>
 				<editable>3</editable>
 			</option>

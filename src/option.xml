@@ -53,7 +53,8 @@
 				<selectoptions>displayName:wcf.igdb_integration.game.name
 releaseYear:wcf.igdb_integration.game.year
 playerCount:wcf.igdb_integration.game.players
-averageRating:wcf.form.field.rating</selectoptions>
+averageRating:wcf.form.field.rating
+lastInteractionTime:wcf.igdb_integration.game.last_interaction</selectoptions>
 			</option>
 			<option name="igdb_integration_general_game_sort_order">
 				<categoryname>igdb_integration_general</categoryname>

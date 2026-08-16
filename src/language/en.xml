@@ -30,6 +30,7 @@
 		<item name="wcf.igdb_integration.game.localized_covers.description"><![CDATA[IGDB region IDs mapped to cover image IDs in JSON format, e.g. <code>{ldelim}"4":"co7ksw"{rdelim}</code> for a European cover.]]></item>
 		<item name="wcf.igdb_integration.game.localized_covers.error.invalid"><![CDATA[The entered value is not valid JSON.]]></item>
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Image URL]]></item>
+		<item name="wcf.igdb_integration.game.last_interaction"><![CDATA[Last user interaction]]></item>
 	</category>
 
 	<!-- IGDB cover regions -->
@@ -62,6 +63,14 @@
 	<!-- User profile -->
 	<category name="wcf.user.profile">
 		<item name="wcf.user.profile.menu.igdb_integration_game_list"><![CDATA[My Game]]></item>
+		<item name="wcf.user.profile.recentActivity.igdb_integration.game_add"><![CDATA[<strong>{$author}</strong> now owns the game <strong>{$gameName}</strong>.]]></item>
+		<item name="wcf.user.profile.recentActivity.igdb_integration.game_remove"><![CDATA[<strong>{$author}</strong> no longer owns the game <strong>{$gameName}</strong>.]]></item>
+		<item name="wcf.user.profile.recentActivity.igdb_integration.game_rating"><![CDATA[<strong>{$author}</strong> rated the game <strong>{$gameName}</strong>.]]></item>
+	</category>
+
+	<!-- Recent activity event types -->
+	<category name="wcf.user.recentActivity">
+		<item name="wcf.user.recentActivity.de.berny23.igdb_integration.recentActivityEvent.game"><![CDATA[Game (IGDB Integration)]]></item>
 	</category>
 
 	<!-- User options -->

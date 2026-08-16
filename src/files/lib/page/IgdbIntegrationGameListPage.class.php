@@ -39,7 +39,7 @@ class IgdbIntegrationGameListPage extends SortablePage
 	/**
 	 * @inheritDoc
 	 */
-	public $validSortFields = ['displayName', 'releaseYear', 'playerCount', 'averageRating'];
+	public $validSortFields = ['displayName', 'releaseYear', 'playerCount', 'averageRating', 'lastInteractionTime'];
 
 	/**
 	 * @inheritDoc

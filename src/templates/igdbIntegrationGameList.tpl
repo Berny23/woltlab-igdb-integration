@@ -50,6 +50,8 @@
 								{lang}wcf.igdb_integration.game.players{/lang}</option>
 							<option value="averageRating" {if $sortField == 'averageRating'} selected{/if}>
 								{lang}wcf.form.field.rating{/lang}</option>
+							<option value="lastInteractionTime" {if $sortField == 'lastInteractionTime'} selected{/if}>
+								{lang}wcf.igdb_integration.game.last_interaction{/lang}</option>
 							{event name='sortField'}
 						</select>
 						<select name="sortOrder">

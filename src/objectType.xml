@@ -11,5 +11,11 @@
 			<propertyname>IgdbIntegrationGameCount</propertyname>
 			<minvalue>0</minvalue>
 		</type>
+		<!-- Recent activity events -->
+		<type>
+			<name>de.berny23.igdb_integration.recentActivityEvent.game</name>
+			<definitionname>com.woltlab.wcf.user.recentActivityEvent</definitionname>
+			<classname>wcf\system\user\activity\event\IgdbIntegrationGameUserActivityEvent</classname>
+		</type>
 	</import>
 </data>

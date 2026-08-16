@@ -30,6 +30,7 @@
 		<item name="wcf.igdb_integration.game.localized_covers.description"><![CDATA[IGDB-Region-IDs mit zugeordneten Cover-Bild-IDs im JSON-Format, z. B. <code>{ldelim}"4":"co7ksw"{rdelim}</code> für ein europäisches Cover.]]></item>
 		<item name="wcf.igdb_integration.game.localized_covers.error.invalid"><![CDATA[Der eingegebene Wert ist kein gültiges JSON.]]></item>
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Bild-URL]]></item>
+		<item name="wcf.igdb_integration.game.last_interaction"><![CDATA[Letzte Benutzerinteraktion]]></item>
 	</category>
 
 	<!-- IGDB cover regions -->
@@ -62,6 +63,14 @@
 	<!-- User profile -->
 	<category name="wcf.user.profile">
 		<item name="wcf.user.profile.menu.igdb_integration_game_list"><![CDATA[Meine Spiele]]></item>
+		<item name="wcf.user.profile.recentActivity.igdb_integration.game_add"><![CDATA[<strong>{$author}</strong> besitzt nun das Spiel <strong>{$gameName}</strong>.]]></item>
+		<item name="wcf.user.profile.recentActivity.igdb_integration.game_remove"><![CDATA[<strong>{$author}</strong> besitzt nicht mehr das Spiel <strong>{$gameName}</strong>.]]></item>
+		<item name="wcf.user.profile.recentActivity.igdb_integration.game_rating"><![CDATA[<strong>{$author}</strong> hat das Spiel <strong>{$gameName}</strong> bewertet.]]></item>
+	</category>
+
+	<!-- Recent activity event types -->
+	<category name="wcf.user.recentActivity">
+		<item name="wcf.user.recentActivity.de.berny23.igdb_integration.recentActivityEvent.game"><![CDATA[Spiel (IGDB-Integration)]]></item>
 	</category>
 
 	<!-- User options -->

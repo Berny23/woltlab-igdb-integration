@@ -16,6 +16,7 @@ use wcf\system\form\builder\field\TextFormField;
 use wcf\system\form\builder\field\DescriptionFormField;
 use wcf\system\form\builder\TemplateFormNode;
 use wcf\system\exception\UserInputException;
+use wcf\system\user\activity\event\UserActivityEventHandler;
 
 /**
  * Executes game-related actions.
@@ -159,27 +160,34 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$isOwned = boolval($this->parameters['data']['isOwned']);
 		$rating = $this->parameters['data']['rating'] ?? 0;
 
+		$sql = "SELECT rating
+				FROM wcf1_igdb_integration_game_user
+				WHERE gameId = ? AND userId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$gameId, $userId]);
+		$row = $statement->fetchSingleRow();
+
 		if ($isOwned) {
 			// Insert or update association data
 
-			$sql = "SELECT gameId,userId 
-					FROM wcf1_igdb_integration_game_user 
-					WHERE gameId = ? AND userId = ?";
-			$statement = WCF::getDB()->prepare($sql);
-			$statement->execute([$gameId, $userId]);
-			$row = $statement->fetchSingleRow();
-
 			if (!empty($row)) {
-				$sql = "UPDATE wcf1_igdb_integration_game_user 
-						SET rating = ? 
+				$sql = "UPDATE wcf1_igdb_integration_game_user
+						SET rating = ?
 						WHERE gameId = ? AND userId = ?";
 				$statement = WCF::getDB()->prepare($sql);
 				$statement->execute([$rating, $gameId, $userId]);
+
+				if ($rating > 0 && $rating != $row['rating']) {
+					$this->fireActivityEvent($gameId, $userId, 'rating', $rating);
+				}
 			} else {
-				$sql = "INSERT INTO wcf1_igdb_integration_game_user 
+				$sql = "INSERT INTO wcf1_igdb_integration_game_user
 						SET gameId = ?, userId = ?, rating = ?";
 				$statement = WCF::getDB()->prepare($sql);
 				$statement->execute([$gameId, $userId, $rating]);
+
+				// Adding and rating together is shown as a single activity
+				$this->fireActivityEvent($gameId, $userId, 'add', $rating);
 			}
 		} else {
 			// Remove association data
@@ -188,6 +196,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 					WHERE gameId = ? AND userId = ?";
 			$statement = WCF::getDB()->prepare($sql);
 			$statement->execute([$gameId, $userId]);
+
+			if (!empty($row)) {
+				$this->fireActivityEvent($gameId, $userId, 'remove');
+			}
 		}
 
 		return $this->getUpdatedGameUserData($gameId, $userId, $isOwned);
@@ -228,6 +240,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 					SET gameId = ?, userId = ?, rating = ?";
 			$statement = WCF::getDB()->prepare($sql);
 			$statement->execute([$gameId, $userId, 0]);
+
+			$this->fireActivityEvent($gameId, $userId, 'add');
 		}
 
 		return $this->getUpdatedGameUserData($gameId, $userId, true);
@@ -260,12 +274,48 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$gameId = $this->game->gameId;
 		$userId = WCF::getUser()->userID;
 
+		$sql = "SELECT gameId,userId
+				FROM wcf1_igdb_integration_game_user
+				WHERE gameId = ? AND userId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$gameId, $userId]);
+		$row = $statement->fetchSingleRow();
+
 		$sql = "DELETE FROM wcf1_igdb_integration_game_user
 				WHERE gameId = ? AND userId = ?";
 		$statement = WCF::getDB()->prepare($sql);
 		$statement->execute([$gameId, $userId]);
 
+		if (!empty($row)) {
+			$this->fireActivityEvent($gameId, $userId, 'remove');
+		}
+
 		return $this->getUpdatedGameUserData($gameId, $userId, false);
+	}
+
+	/**
+	 * Fires a recent activity event for a game action of the given user and
+	 * remembers the time of the interaction for sorting.
+	 */
+	protected function fireActivityEvent($gameId, $userId, string $action, $rating = 0)
+	{
+		UserActivityEventHandler::getInstance()->fireEvent(
+			'de.berny23.igdb_integration.recentActivityEvent.game',
+			$gameId,
+			null,
+			$userId,
+			TIME_NOW,
+			[
+				'action' => $action,
+				'rating' => $rating,
+			]
+		);
+
+		$sql = "UPDATE wcf1_igdb_integration_game
+				SET lastInteractionTime = ?
+				WHERE gameId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([TIME_NOW, $gameId]);
 	}
 
 	/**
