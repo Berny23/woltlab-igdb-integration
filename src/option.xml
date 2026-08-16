@@ -54,7 +54,7 @@
 			<option name="igdb_integration_general_game_sort_field">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>select</optiontype>
-				<defaultvalue>playerCount</defaultvalue>
+				<defaultvalue>lastInteractionTime</defaultvalue>
 				<selectoptions>displayName:wcf.igdb_integration.game.name
 releaseYear:wcf.igdb_integration.game.year
 playerCount:wcf.igdb_integration.game.players

@@ -14,8 +14,9 @@
 		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Player Toplist]]></item>
 		<item name="wcf.igdb_integration.page.game_quick_add"><![CDATA[Add to my games]]></item>
 		<item name="wcf.igdb_integration.page.game_quick_remove"><![CDATA[Remove from my games]]></item>
+		<item name="wcf.igdb_integration.page.import"><![CDATA[Import Game Library]]></item>
 		<item name="wcf.igdb_integration.page.steam_import"><![CDATA[Steam Import]]></item>
-		<item name="wcf.igdb_integration.page.steam_import_info"><![CDATA[Sign in through Steam to import your owned games into your game library. Only your public game list is accessed and no account data is stored permanently.]]></item>
+		<item name="wcf.igdb_integration.page.steam_import_info"><![CDATA[Sign in through Steam to import your owned games. Only your public game list is accessed and no account data is stored permanently.]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_sign_in"><![CDATA[Sign in through Steam]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_button"><![CDATA[Import Steam library]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_error"><![CDATA[The Steam sign-in has failed. Please try again.]]></item>

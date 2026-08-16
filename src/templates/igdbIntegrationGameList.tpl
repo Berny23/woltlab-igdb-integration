@@ -14,7 +14,7 @@
 {capture assign='sidebarRight'}
 	<section class="box">
 		<form id="gameSortForm" method="post" action="{link controller='IgdbIntegrationGameList'}{/link}">
-			<h2 class="boxTitle">{lang}wcf.global.search{/lang}</h2>
+			<h2 class="boxTitle">{lang}wcf.global.filter{/lang}</h2>
 
 			<div class="boxContent">
 				<div class="igdbIntegrationSearchInfo">
@@ -64,28 +64,33 @@
 				</dl>
 
 				<div class="formSubmit">
-					<a href="{link controller='IgdbIntegrationGameList'}{/link}" class="button">{lang}wcf.global.button.reset{/lang}</a>
 					<input type="submit" value="{lang}wcf.global.button.submit{/lang}" accesskey="s">
+					<a href="{link controller='IgdbIntegrationGameList'}{/link}" class="button">{lang}wcf.global.button.reset{/lang}</a>
 				</div>
 			</div>
 		</form>
 	</section>
 	{if $steamImportAvailable}
-		<section id="steamImportBox" class="box">
-			<h2 class="boxTitle">{lang}wcf.igdb_integration.page.steam_import{/lang}</h2>
-			<div class="boxContent">
-				{if $steamImportError}
-					<p class="error">{lang}wcf.igdb_integration.page.steam_import_error{/lang}</p>
-				{/if}
-				<p>{lang}wcf.igdb_integration.page.steam_import_info{/lang}</p>
-				<div class="formSubmit">
-					{if $steamImportAuthenticated}
-						<button type="button" class="button buttonPrimary" id="steamImportButton">{lang}wcf.igdb_integration.page.steam_import_button{/lang}</button>
-					{else}
-						<a href="{$steamAuthUrl}" class="button">{lang}wcf.igdb_integration.page.steam_import_sign_in{/lang}</a>
+		<section id="importBox" class="box">
+			<details{if $steamImportAuthenticated || $steamImportError} open{/if}>
+				<summary>
+					<h2 class="boxTitle">{lang}wcf.igdb_integration.page.import{/lang}</h2>
+				</summary>
+				<div class="boxContent">
+					<h3>{lang}wcf.igdb_integration.page.steam_import{/lang}</h3>
+					{if $steamImportError}
+						<p class="error">{lang}wcf.igdb_integration.page.steam_import_error{/lang}</p>
 					{/if}
+					<p>{lang}wcf.igdb_integration.page.steam_import_info{/lang}</p>
+					<div class="formSubmit">
+						{if $steamImportAuthenticated}
+							<button type="button" class="button buttonPrimary" id="steamImportButton">{lang}wcf.igdb_integration.page.steam_import_button{/lang}</button>
+						{else}
+							<a href="{$steamAuthUrl}" class="igdbIntegrationSteamSignInButton"><img src="{$__wcf->getPath()}images/igdbIntegration/signInThroughSteam.png" width="180" height="35" alt="{lang}wcf.igdb_integration.page.steam_import_sign_in{/lang}" title="{lang}wcf.igdb_integration.page.steam_import_sign_in{/lang}"></a>
+						{/if}
+					</div>
 				</div>
-			</div>
+			</details>
 		</section>
 	{/if}
 	<section id="playerToplistBox" class="box">

@@ -126,6 +126,28 @@
 	text-decoration: underline;
 }
 
+#importBox summary {
+	cursor: pointer;
+	user-select: none;
+}
+
+#importBox summary .boxTitle {
+	display: inline;
+}
+
+#importBox details > .boxContent {
+	margin-top: 20px;
+}
+
+#importBox .boxContent > h3 {
+	margin-bottom: 5px;
+	font-weight: 600;
+}
+
+#importBox .igdbIntegrationSteamSignInButton img {
+	max-width: 100%;
+}
+
 #tpl_wcf_igdbIntegrationGameList .boxesSidebarRight #playerToplistBox table {
 	display: inline-block;
 	overflow: auto;
