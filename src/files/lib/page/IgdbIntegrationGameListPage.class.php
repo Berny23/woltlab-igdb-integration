@@ -6,10 +6,9 @@ use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
 use wcf\util\ArrayUtil;
 use wcf\util\HeaderUtil;
 use wcf\util\IgdbIntegrationUtil;
+use wcf\system\cache\runtime\UserProfileRuntimeCache;
 use wcf\system\request\LinkHandler;
 use wcf\system\WCF;
-use wcf\data\user\User;
-use wcf\data\user\UserProfile;
 
 /**
  * Shows the list of games.
@@ -73,11 +72,12 @@ class IgdbIntegrationGameListPage extends SortablePage
 			$this->itemsPerPage = $userOptionItemsPerPage;
 		}
 
+		// Guests have no user options, so fall back to the global defaults
 		$userOptionGameSortField = WCF::getUser()->getUserOption('igdb_integration_default_game_sort_field');
-		$this->defaultSortField = $userOptionGameSortField !== 'default' ? $userOptionGameSortField : IGDB_INTEGRATION_GENERAL_GAME_SORT_FIELD;
+		$this->defaultSortField = ($userOptionGameSortField !== null && $userOptionGameSortField !== 'default') ? $userOptionGameSortField : IGDB_INTEGRATION_GENERAL_GAME_SORT_FIELD;
 
 		$userOptionGameSortOrder = WCF::getUser()->getUserOption('igdb_integration_default_game_sort_order');
-		$this->defaultSortOrder = $userOptionGameSortOrder !== 'default' ? $userOptionGameSortOrder : IGDB_INTEGRATION_GENERAL_GAME_SORT_ORDER;
+		$this->defaultSortOrder = ($userOptionGameSortOrder !== null && $userOptionGameSortOrder !== 'default') ? $userOptionGameSortOrder : IGDB_INTEGRATION_GENERAL_GAME_SORT_ORDER;
 
 		$this->searchField = '';
 		if (isset($_REQUEST['searchField'])) {
@@ -121,8 +121,7 @@ class IgdbIntegrationGameListPage extends SortablePage
 		// Generate image proxy links, if enabled
 		$coverImageUrls = array();
 		foreach ($this->objectList->getObjects() as $game) {
-			$coverImageId = IgdbIntegrationUtil::getLocalizedCoverImageId($game->coverImageId, $game->localizedCovers);
-			$coverImageUrls[$game->gameId] = IgdbIntegrationUtil::getImageProxyLink(IgdbIntegrationUtil::COVER_URL_BASE . $coverImageId . IgdbIntegrationUtil::COVER_URL_FILETYPE);
+			$coverImageUrls[$game->gameId] = IgdbIntegrationUtil::getCoverImageUrl($game->coverImageId, $game->localizedCovers);
 		}
 
 		// Get game count for player toplist
@@ -139,10 +138,13 @@ class IgdbIntegrationGameListPage extends SortablePage
 		$statement->execute([$userOptionPlayerToplistLimit]);
 		$topPlayers = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
-		// Get links to the players in the toplist
+		// Get links to the players in the toplist (batch-loaded)
+		$profiles = UserProfileRuntimeCache::getInstance()->getObjects(array_column($topPlayers, 'userId'));
 		$topPlayerProfileLinks = array();
 		foreach ($topPlayers as $player) {
-			$topPlayerProfileLinks[$player['userId']] = (new UserProfile(new User($player['userId'])))->getAnchorTag();
+			if (!empty($profiles[$player['userId']])) {
+				$topPlayerProfileLinks[$player['userId']] = $profiles[$player['userId']]->getAnchorTag();
+			}
 		}
 
 		// Collect all distinct platforms for the platform filter
@@ -184,28 +186,24 @@ class IgdbIntegrationGameListPage extends SortablePage
 	{
 		parent::initObjectList();
 
-		$name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
-		$this->objectList->sqlSelects .= "DISTINCT CASE WHEN 
-											" . $name . " = '' 
-											THEN name ELSE " . $name . " END 
-											AS displayName,";
-		$this->objectList->sqlSelects .= "COUNT(gu.userId) 
-											OVER (PARTITION BY gu.gameId) 
+		$this->objectList->sqlSelects .= "DISTINCT " . IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName,";
+		$this->objectList->sqlSelects .= "COUNT(gu.userId)
+											OVER (PARTITION BY gu.gameId)
 											AS playerCount,";
 		$this->objectList->sqlSelects .= "(
-												SELECT DISTINCT ROUND(AVG(rating) 
-												OVER (PARTITION BY guTempA.gameId), 0) 
-												FROM wcf" . WCF_N . "_igdb_integration_game_user guTempA 
-												WHERE guTempA.gameId = gu.gameId 
+												SELECT DISTINCT ROUND(AVG(rating)
+												OVER (PARTITION BY guTempA.gameId), 0)
+												FROM wcf" . WCF_N . "_igdb_integration_game_user guTempA
+												WHERE guTempA.gameId = gu.gameId
 												AND guTempA.rating > 0
 											) AS averageRating,";
-		$this->objectList->sqlSelects .= "CASE WHEN 
+		$this->objectList->sqlSelects .= "CASE WHEN
 											EXISTS (
-												SELECT userId 
-												FROM wcf" . WCF_N . "_igdb_integration_game_user guTempB 
-												WHERE guTempB.gameId = gu.gameId 
-												AND guTempB.userId = " . WCF::getUser()->userID . ") 
-											THEN 1 ELSE 0 END 
+												SELECT userId
+												FROM wcf" . WCF_N . "_igdb_integration_game_user guTempB
+												WHERE guTempB.gameId = gu.gameId
+												AND guTempB.userId = " . intval(WCF::getUser()->userID) . ")
+											THEN 1 ELSE 0 END
 											AS isOwned";
 		$this->objectList->sqlJoins .= "LEFT JOIN wcf" . WCF_N . "_igdb_integration_game_user gu 
 										ON gu.gameId = " . $this->objectList->getDatabaseTableAlias() . ".gameId";

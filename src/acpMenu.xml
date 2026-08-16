@@ -9,5 +9,11 @@
 			<parent>wcf.acp.menu.link.igdb_integration</parent>
 			<permissions>admin.igdb_integration.can_manage_games</permissions>
 		</acpmenuitem>
+		<acpmenuitem name="wcf.acp.menu.link.igdb_integration.add">
+			<controller>wcf\acp\form\IgdbIntegrationGameAddForm</controller>
+			<parent>wcf.acp.menu.link.igdb_integration.game_list</parent>
+			<permissions>admin.igdb_integration.can_manage_games</permissions>
+			<icon solid="true">plus</icon>
+		</acpmenuitem>
 	</import>
 </data>

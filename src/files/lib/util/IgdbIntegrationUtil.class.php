@@ -57,7 +57,18 @@ class IgdbIntegrationUtil
 		if (self::$client === null) {
 			self::$client = HttpFactory::getDefaultClient();
 		}
-		$request = new Request('POST', self::TWITCH_URL_BASE . '?client_id=' . rawurlencode(IGDB_INTEGRATION_AUTH_CLIENT_ID) . '&client_secret=' . rawurlencode(IGDB_INTEGRATION_AUTH_CLIENT_SECRET) . '&grant_type=client_credentials');
+		// Send the credentials in the POST body so the client secret cannot
+		// leak into proxy logs or exception messages containing the URL
+		$request = new Request(
+			'POST',
+			self::TWITCH_URL_BASE,
+			['Content-Type' => 'application/x-www-form-urlencoded'],
+			http_build_query([
+				'client_id' => IGDB_INTEGRATION_AUTH_CLIENT_ID,
+				'client_secret' => IGDB_INTEGRATION_AUTH_CLIENT_SECRET,
+				'grant_type' => 'client_credentials',
+			])
+		);
 
 		try {
 			$response = self::$client->send($request);
@@ -94,7 +105,7 @@ class IgdbIntegrationUtil
 			'Client-ID' => IGDB_INTEGRATION_AUTH_CLIENT_ID,
 			'Authorization' => 'Bearer ' . $accessToken
 		];
-		$body = 'search "' . str_replace('"', '', $name) . '";
+		$body = 'search "' . str_replace(['"', '\\'], '', $name) . '";
 				fields id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id,slug,game_localizations.cover.image_id,game_localizations.region;
 				limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
 		$request = new Request('POST', self::URL_BASE . 'games', $headers, $body);
@@ -115,7 +126,14 @@ class IgdbIntegrationUtil
 		} catch (Exception $ex) {
 			if (self::saveNewAccessToken()) {
 				// Retry IGDB request if successfully got new token
-				$response = self::fetchGameDataByName($name);
+				try {
+					$response = self::fetchGameDataByName($name);
+				} catch (Exception $retryEx) {
+					// The retry failed as well, e.g. IGDB outage or rate limit
+					self::$tempAccessToken = null;
+
+					return false;
+				}
 				self::$tempAccessToken = null;
 			} else {
 				// Failed getting new token
@@ -163,7 +181,7 @@ class IgdbIntegrationUtil
 				foreach ($game->alternative_names as $altName) {
 					if (isset($altName->comment) && isset($altName->name)) {
 						// Find language name in comment of alternative name
-						if (empty($gameGermanName) && (stripos($altName->comment, 'german') !== false || stripos($altName->comment, 'german') !== false)) {
+						if (empty($gameGermanName) && (stripos($altName->comment, 'german') !== false || stripos($altName->comment, 'deutsch') !== false)) {
 							$gameGermanName = $altName->name;
 						}
 					}
@@ -200,6 +218,28 @@ class IgdbIntegrationUtil
 	public static function validateRating($value)
 	{
 		return $value != 0;
+	}
+
+	/**
+	 * Returns the SQL expression that resolves the localized display name of a
+	 * game, falling back to the original name.
+	 */
+	public static function getDisplayNameSql(): string
+	{
+		$name = self::getLocalizedGameNameColumn();
+
+		return "CASE WHEN " . $name . " = '' THEN name ELSE " . $name . " END";
+	}
+
+	/**
+	 * Returns the full cover image url for a game, using the localized cover of
+	 * the preferred region if available and the image proxy if enabled.
+	 */
+	public static function getCoverImageUrl($coverImageId, $localizedCovers): string
+	{
+		$coverImageId = self::getLocalizedCoverImageId($coverImageId, $localizedCovers);
+
+		return self::getImageProxyLink(self::COVER_URL_BASE . $coverImageId . self::COVER_URL_FILETYPE);
 	}
 
 	/**

@@ -166,19 +166,18 @@
 </footer>
 
 <script data-relocate="true">
-	{foreach from=$objects item=game}
-		require(['Language', 'WoltLabSuite/Core/Controller/IgdbIntegrationGameList'], (Language,
-			ControllerIgdbIntegrationGameList) => {
-			Language.addObject({
-				'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
-				'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}',
-				'wcf.igdb_integration.page.game_quick_add': '{jslang}wcf.igdb_integration.page.game_quick_add{/jslang}',
-				'wcf.igdb_integration.page.game_quick_remove': '{jslang}wcf.igdb_integration.page.game_quick_remove{/jslang}'
-			})
-			let gameId = {unsafe:$game->gameId};
-			ControllerIgdbIntegrationGameList.init(gameId);
+	require(['Language', 'WoltLabSuite/Core/Controller/IgdbIntegrationGameList'], (Language,
+		ControllerIgdbIntegrationGameList) => {
+		Language.addObject({
+			'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
+			'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}',
+			'wcf.igdb_integration.page.game_quick_add': '{jslang}wcf.igdb_integration.page.game_quick_add{/jslang}',
+			'wcf.igdb_integration.page.game_quick_remove': '{jslang}wcf.igdb_integration.page.game_quick_remove{/jslang}'
 		});
-	{/foreach}
+		{foreach from=$objects item=game}
+			ControllerIgdbIntegrationGameList.init({unsafe:$game->gameId});
+		{/foreach}
+	});
 </script>
 
 {include file='footer'}

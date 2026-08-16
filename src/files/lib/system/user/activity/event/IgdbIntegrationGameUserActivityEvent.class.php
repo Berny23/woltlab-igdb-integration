@@ -36,13 +36,9 @@ class IgdbIntegrationGameUserActivityEvent extends SingletonFactory implements I
 		// Fetch the localized names of the games
 		$games = [];
 		if (!empty($gameIds)) {
-			$name = IgdbIntegrationUtil::getLocalizedGameNameColumn();
 			$conditions = new PreparedStatementConditionBuilder();
 			$conditions->add('gameId IN (?)', [$gameIds]);
-			$sql = "SELECT gameId, CASE WHEN
-						" . $name . " = ''
-						THEN name ELSE " . $name . " END
-						AS displayName
+			$sql = "SELECT gameId, " . IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName
 					FROM wcf1_igdb_integration_game
 					" . $conditions;
 			$statement = WCF::getDB()->prepare($sql);
@@ -62,7 +58,9 @@ class IgdbIntegrationGameUserActivityEvent extends SingletonFactory implements I
 			$event->setIsAccessible();
 
 			$action = $event->additionalData['action'] ?? 'add';
-			$rating = intval($event->additionalData['rating'] ?? 0);
+			// Clamp defensively so bad legacy data can never repeat the star
+			// icon excessively
+			$rating = min(max(intval($event->additionalData['rating'] ?? 0), 0), 5);
 
 			switch ($action) {
 				case 'remove':

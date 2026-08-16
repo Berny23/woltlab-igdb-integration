@@ -8,7 +8,11 @@
 					<div class="gameOverlay" id="gameOverlay{$game['gameId']}">
 						<span class="gameOverlayButton pointer" id="gameOverlayEdit{$game['gameId']}"
 							title="{lang}wcf.igdb_integration.dialog.game_user_edit_title{/lang}">
-							{icon size=48 name='pen-to-square' type='solid'}
+							{if $__wcf->user->userID && $__wcf->session->getPermission('user.igdb_integration.can_manage_own_games')}
+								{icon size=48 name='pen-to-square' type='solid'}
+							{else}
+								{icon size=48 name='circle-info' type='solid'}
+							{/if}
 						</span>
 						{if $__wcf->user->userID == $userId && $__wcf->session->getPermission('user.igdb_integration.can_manage_own_games')}
 							<span class="gameOverlayButton pointer" id="gameOverlayQuickRemove{$game['gameId']}"
@@ -44,15 +48,14 @@
 {/if}
 
 <script data-relocate="true">
-	{foreach from=$userGames item=game}
-		require(['Language', 'WoltLabSuite/Core/Controller/IgdbIntegrationGameListUserProfile'], (Language,
-			ControllerIgdbIntegrationGameListUserProfile) => {
-			Language.addObject({
-				'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
-				'wcf.user.option.igdb_integration_game_count': '{jslang}wcf.user.option.igdb_integration_game_count{/jslang}'
-			});
-
-			ControllerIgdbIntegrationGameListUserProfile.init({unsafe:$game['gameId']}, {$userId});
+	require(['Language', 'WoltLabSuite/Core/Controller/IgdbIntegrationGameListUserProfile'], (Language,
+		ControllerIgdbIntegrationGameListUserProfile) => {
+		Language.addObject({
+			'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
+			'wcf.user.option.igdb_integration_game_count': '{jslang}wcf.user.option.igdb_integration_game_count{/jslang}'
 		});
-	{/foreach}
+		{foreach from=$userGames item=game}
+			ControllerIgdbIntegrationGameListUserProfile.init({unsafe:$game['gameId']}, {$userId});
+		{/foreach}
+	});
 </script>

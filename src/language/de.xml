@@ -7,6 +7,7 @@
 		<item name="wcf.igdb_integration.page.game_list_title"><![CDATA[Spiele-Liste]]></item>
 		<item name="wcf.igdb_integration.page.game_list_igdb_error"><![CDATA[<b>Die Verbindung zu IGDB ist fehlgeschlagen!</b><br>Bitte überprüfe{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Zugangsdaten im Konfigurationsmenü der IGDB-Integration.]]></item>
 		<item name="wcf.igdb_integration.page.game_list_info"><![CDATA[<b>Spiele zum Hinzufügen suchen.</b><br>Trage{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} fehlende Spiele oder Informationen bitte direkt in die <a href="https://www.igdb.com/" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB</a> ein.]]></item>
+		<item name="wcf.igdb_integration.page.game_add_title"><![CDATA[Spiel hinzufügen]]></item>
 		<item name="wcf.igdb_integration.page.game_edit_title"><![CDATA[Spiel bearbeiten]]></item>
 		<item name="wcf.igdb_integration.page.acp_game_list_subtitle"><![CDATA[Änderungen an Spielen werden durch Aktualisierungen von IGDB überschrieben und sind daher wahrscheinlich nicht dauerhaft.]]></item>
 		<item name="wcf.igdb_integration.page.copyright_info"><![CDATA[<a href="https://www.woltlab.com/pluginstore/file/7473-igdb-integration"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Integration</a> © 2026 <a href="https://berny23.de"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Berny23</a>]]></item>
@@ -53,6 +54,7 @@
 	<category name="wcf.acp.menu">
 		<item name="wcf.acp.menu.link.igdb_integration"><![CDATA[IGDB-Integration]]></item>
 		<item name="wcf.acp.menu.link.igdb_integration.game_list"><![CDATA[Spiele-Liste]]></item>
+		<item name="wcf.acp.menu.link.igdb_integration.add"><![CDATA[Spiel hinzufügen]]></item>
 	</category>
 
 	<!-- User conditions (for trophy conditions) -->

@@ -35,6 +35,7 @@
 	</instructions>
 	<instructions type="update" fromversion="1.2.3">
 		<instruction type="acpTemplate" />
+		<instruction type="acpMenu" />
 		<instruction type="file" />
 		<instruction type="database">acp/database/update_de.berny23.igdb_integration_2.0.0.php</instruction>
 		<instruction type="template" />
