@@ -7,20 +7,22 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 ## Features
 
 - Automatically imports all games from search results
-- Users can add games to their library
-- Users can rate games and see the average ratings
-- Players appear in a toplist, size configurable
-- Modern and user-friendly design
-- English and German interface
-- Supports automated Trophies
-- Supports system-wide image proxy for privacy
-- Supports global options, user settings and permissions
+- Users can add, rate and remove games with a single click
+- Shows average ratings and a configurable player toplist
+- Optional region-specific covers (Europe, Japan, Korea)
+- Filterable by platforms, sortable by name, year, players, rating and last activity
+- Search allows for any part of the title to be in any order
+- Shows game titles in the current user's language, if available
 - Shows owned games and game count on profile pages
 - Users can view a list of all players of a game
-- Shows game titles in the current user's language, if available
-- Sortable by name, year, players and rating
-- Search allows for any part of the title to be in any order
+- Recent activity events for adding, removing and rating games
+- Supports automated Trophies and activity points for owned games
+- Modern admin game list with filters, bulk actions and manual game creation
+- Supports global options, user settings and permissions
+- Supports system-wide image proxy for privacy
+- English and German interface
 - Compatible with light and dark Styles
+- Branding can be disabled for free
 
 ## Demo
 
