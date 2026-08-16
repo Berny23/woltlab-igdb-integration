@@ -74,7 +74,7 @@ function showResultDialog(result: ImportResult): void {
 			html += buildNotice('warning', getPhrase('wcf.igdb_integration.dialog.steam_import_result_ambiguous', { count: result.ambiguous.length }), result.ambiguous);
 		}
 		if (result.unmatched.length > 0) {
-			html += buildNotice('error', getPhrase('wcf.igdb_integration.dialog.steam_import_result_unmatched', { count: result.unmatched.length }), result.unmatched);
+			html += buildNotice('warning', getPhrase('wcf.igdb_integration.dialog.steam_import_result_unmatched', { count: result.unmatched.length }), result.unmatched);
 		}
 	}
 

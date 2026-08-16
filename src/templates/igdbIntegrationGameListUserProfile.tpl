@@ -1,6 +1,11 @@
 {if $userGames}
 	<div class="status info" id="igdbIntegrationGameCount">{lang}wcf.user.option.igdb_integration_game_count{/lang}: {$gameCount}</div>
 	<br />
+	{if $gameListPages > 1}
+		<div class="paginationTop">
+			<woltlab-core-pagination page="{$gameListPageNo}" count="{$gameListPages}" url="{$gameListBaseUrl}"></woltlab-core-pagination>
+		</div>
+	{/if}
 	<div class="section igdbIntegrationGameListContainer">
 		{foreach from=$userGames item=game}
 			<div class="gameBox" id="gameBox{$game['gameId']}">
@@ -29,14 +34,20 @@
 						<p class="gameOwnRating orange">
 							{section name=ratingStars loop=$game['ownRating']}{icon size=16 name='star' type='solid'}{/section}
 						</p>
-						<p class="gamePlayerCount {if $game['isOwned'] == 1} isOwned{/if}" id="gamePlayerCount{$game['gameId']}"
-							{if $game['playerCount'] <= 0} style="display: none;" {/if}>
+						<p class="gamePlayerCount pointer{if $game['isOwned'] == 1} isOwned{/if}"
+							id="gamePlayerCount{$game['gameId']}" {if $game['playerCount'] <= 0} style="display: none;" {/if}>
+							{icon size=16 name='user' type='solid'} {$game['playerCount']}
 						</p>
 					</div>
 				</div>
 			</div>
 		{/foreach}
 	</div>
+	{if $gameListPages > 1}
+		<div class="paginationBottom">
+			<woltlab-core-pagination page="{$gameListPageNo}" count="{$gameListPages}" url="{$gameListBaseUrl}"></woltlab-core-pagination>
+		</div>
+	{/if}
 {else}
 	<p class="info">{lang}wcf.global.noItems{/lang}</p>
 {/if}
@@ -52,8 +63,10 @@
 		ControllerIgdbIntegrationGameListUserProfile) => {
 		Language.addObject({
 			'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
+			'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}',
 			'wcf.user.option.igdb_integration_game_count': '{jslang}wcf.user.option.igdb_integration_game_count{/jslang}'
 		});
+		ControllerIgdbIntegrationGameListUserProfile.watchTabSelection();
 		{foreach from=$userGames item=game}
 			ControllerIgdbIntegrationGameListUserProfile.init({unsafe:$game['gameId']}, {$userId});
 		{/foreach}

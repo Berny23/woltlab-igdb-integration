@@ -6,12 +6,56 @@
  * @license		MIT License <https://choosealicense.com/licenses/mit/>
  * @module		WoltLabSuite/Core/Controller/IgdbIntegrationGameListUserProfile
  */
-define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog", "WoltLabSuite/Core/Form/Builder/Dialog", "WoltLabSuite/Core/Language", "WoltLabSuite/Core/Ui/Notification", "WoltLabSuite/Core/User"], function (require, exports, tslib_1, Ajax_1, IgdbIntegrationGameDialog_1, Dialog_1, Language_1, Notification_1, User_1) {
+define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog", "WoltLabSuite/Core/Controller/IgdbIntegrationGameList", "WoltLabSuite/Core/Event/Handler", "WoltLabSuite/Core/Form/Builder/Dialog", "WoltLabSuite/Core/Language", "WoltLabSuite/Core/Ui/Notification", "WoltLabSuite/Core/User"], function (require, exports, tslib_1, Ajax_1, IgdbIntegrationGameDialog_1, IgdbIntegrationGameList_1, EventHandler, Dialog_1, Language_1, Notification_1, User_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.watchTabSelection = watchTabSelection;
     exports.init = init;
+    EventHandler = tslib_1.__importStar(EventHandler);
     Dialog_1 = tslib_1.__importDefault(Dialog_1);
     User_1 = tslib_1.__importDefault(User_1);
+    const FILTER_PARAMETER_REGEX = /[?&](?:gameSearch|gameSortField|gameSortOrder|gamePlatforms(?:\[\]|%5B%5D)|pageNo)=[^&#]*/g;
+    let tabWatcherActive = false;
+    let removedFilterParameters = '';
+    /**
+     * Removes the game list filter parameters from the address bar when another
+     * profile tab is selected, so the filter is not reapplied on reload there,
+     * and restores them when the games tab is selected again.
+     */
+    function watchTabSelection() {
+        if (tabWatcherActive) {
+            return;
+        }
+        tabWatcherActive = true;
+        EventHandler.add('com.woltlab.wcf.simpleTabMenu_profileContent', 'select', (data) => {
+            // The profile URL is not a regular query string without URL rewriting
+            // (e.g. "index.php?user/1-example/&gameSearch="), so the parameters
+            // are handled on the raw URL instead of using URLSearchParams
+            const hash = window.location.hash;
+            let url = window.location.href.replace(/#.*$/, '');
+            if (data.activeName === 'igdb_integration_game_list') {
+                // Restore the parameters that were removed when the tab was left,
+                // the displayed list still matches them
+                if (removedFilterParameters !== '') {
+                    url += (url.includes('?') ? '&' : '?') + removedFilterParameters;
+                    removedFilterParameters = '';
+                    window.history.replaceState(undefined, '', url + hash);
+                }
+                return;
+            }
+            const parameters = url.match(FILTER_PARAMETER_REGEX);
+            if (parameters === null) {
+                return;
+            }
+            removedFilterParameters = parameters.map((parameter) => parameter.substring(1)).join('&');
+            url = url.replace(FILTER_PARAMETER_REGEX, '');
+            if (!url.includes('?') && url.includes('&')) {
+                // The removed part contained the "?" of the remaining parameters
+                url = url.replace('&', '?');
+            }
+            window.history.replaceState(undefined, '', url + hash);
+        });
+    }
     function updateGameCount(gameCount) {
         const countElement = document.getElementById('igdbIntegrationGameCount');
         if (countElement !== null) {
@@ -60,7 +104,13 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
                     var playersElement = document.getElementById('gamePlayerCount' + returnValues.gameId);
                     if (ratingElement !== null && playersElement !== null) {
                         ratingElement.innerHTML = '';
+                        playersElement.innerHTML = '';
                         playersElement.style.display = returnValues.playerCount <= 0 ? 'none' : '';
+                        const userIcon = document.createElement('fa-icon');
+                        userIcon.size = 16;
+                        userIcon.setIcon('user', true);
+                        playersElement.appendChild(userIcon);
+                        playersElement.innerHTML += ' ' + returnValues.playerCount;
                         for (let i = 0; i < returnValues.ownRating; i++) {
                             // Add star icon
                             const starIcon = document.createElement('fa-icon');
@@ -83,6 +133,9 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
         });
         document.getElementById('gameOverlayQuickRemove' + gameId)?.addEventListener('click', function () {
             void quickRemoveGame(gameId, userId);
+        });
+        document.getElementById('gamePlayerCount' + gameId)?.addEventListener('click', function () {
+            void (0, IgdbIntegrationGameList_1.showGamePlayerListDialog)(gameId);
         });
     }
 });

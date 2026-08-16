@@ -33,6 +33,8 @@
 		<instruction type="cronjob" />
 		<instruction type="userGroupOption" />
 		<instruction type="userProfileMenu" />
+		<instruction type="eventListener" />
+		<instruction type="templateListener" />
 	</instructions>
 	<instructions type="update" fromversion="2.0.1">
 		<instruction type="file" />
@@ -41,5 +43,7 @@
 		<instruction type="language" />
 		<instruction type="option" />
 		<instruction type="userGroupOption" />
+		<instruction type="eventListener" />
+		<instruction type="templateListener" />
 	</instructions>
 </package>

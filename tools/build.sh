@@ -24,11 +24,13 @@ mkdir -p "$DIST_DIR"
 cd "$DIST_DIR"
 cp "$SRC_DIR/acpMenu.xml" \
    "$SRC_DIR/cronjob.xml" \
+   "$SRC_DIR/eventListener.xml" \
    "$SRC_DIR/menuItem.xml" \
    "$SRC_DIR/objectType.xml" \
    "$SRC_DIR/option.xml" \
    "$SRC_DIR/package.xml" \
    "$SRC_DIR/page.xml" \
+   "$SRC_DIR/templateListener.xml" \
    "$SRC_DIR/userGroupOption.xml" \
    "$SRC_DIR/userOption.xml" \
    "$SRC_DIR/userProfileMenu.xml" .
@@ -36,14 +38,16 @@ cp -r "$SRC_DIR/language" language
 
 tar -cf "de.berny23.igdb-integration.tar" \
     "acptemplates.tar" "files.tar" "language" "templates.tar" \
-    "acpMenu.xml" "cronjob.xml" "menuItem.xml" "objectType.xml" "option.xml" \
-    "package.xml" "page.xml" "userGroupOption.xml" "userOption.xml" \
+    "acpMenu.xml" "cronjob.xml" "eventListener.xml" "menuItem.xml" \
+    "objectType.xml" "option.xml" "package.xml" "page.xml" \
+    "templateListener.xml" "userGroupOption.xml" "userOption.xml" \
     "userProfileMenu.xml"
 
 # Remove temporary files and folders
 rm -f "acptemplates.tar" "files.tar" "templates.tar" \
-      "acpMenu.xml" "cronjob.xml" "menuItem.xml" "objectType.xml" "option.xml" \
-      "package.xml" "page.xml" "userGroupOption.xml" "userOption.xml" \
+      "acpMenu.xml" "cronjob.xml" "eventListener.xml" "menuItem.xml" \
+      "objectType.xml" "option.xml" "package.xml" "page.xml" \
+      "templateListener.xml" "userGroupOption.xml" "userOption.xml" \
       "userProfileMenu.xml"
 rm -rf language
 

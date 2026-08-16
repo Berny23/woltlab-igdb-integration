@@ -37,7 +37,7 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
                 html += buildNotice('warning', (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_ambiguous', { count: result.ambiguous.length }), result.ambiguous);
             }
             if (result.unmatched.length > 0) {
-                html += buildNotice('error', (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_unmatched', { count: result.unmatched.length }), result.unmatched);
+                html += buildNotice('warning', (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_unmatched', { count: result.unmatched.length }), result.unmatched);
             }
         }
         const dialog = (0, Dialog_1.dialogFactory)().fromHtml(html).asAlert();

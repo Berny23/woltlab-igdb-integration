@@ -516,15 +516,27 @@ class IgdbIntegrationUtil
 	}
 
 	/**
-	 * Returns all distinct platform names of the games in the database.
+	 * Returns all distinct platform names of the games in the database,
+	 * limited to the games owned by the given user if set.
 	 */
-	public static function getAvailablePlatforms(): array
+	public static function getAvailablePlatforms(?int $userId = null): array
 	{
-		$sql = "SELECT DISTINCT platforms
-				FROM wcf1_igdb_integration_game
-				WHERE platforms <> ''";
+		$parameters = [];
+		if ($userId === null) {
+			$sql = "SELECT DISTINCT platforms
+					FROM wcf1_igdb_integration_game
+					WHERE platforms <> ''";
+		} else {
+			$sql = "SELECT DISTINCT g.platforms
+					FROM wcf1_igdb_integration_game g
+					INNER JOIN wcf1_igdb_integration_game_user gu
+					ON gu.gameId = g.gameId
+					WHERE gu.userId = ?
+					AND g.platforms <> ''";
+			$parameters[] = $userId;
+		}
 		$statement = WCF::getDB()->prepare($sql);
-		$statement->execute();
+		$statement->execute($parameters);
 		$availablePlatforms = [];
 		while ($platforms = $statement->fetchColumn()) {
 			foreach (ArrayUtil::trim(explode(',', $platforms)) as $platform) {

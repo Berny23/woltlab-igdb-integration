@@ -103,7 +103,7 @@ async function quickToggleGame(gameId: number) {
 	showNotification();
 }
 
-async function showGamePlayerListDialog(gameId: number) {
+export async function showGamePlayerListDialog(gameId: number) {
 	let form = new FormBuilderDialog(
 		'gamePlayerListDialog' + gameId,
 		'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction',
