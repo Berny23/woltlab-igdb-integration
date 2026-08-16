@@ -3,6 +3,15 @@
 	flex-wrap: wrap;
 }
 
+.userProfileContent .tabMenuContent > .paginationTop {
+	margin-top: 20px;
+}
+
+.userProfileContent .tabMenuContent > .paginationTop + .section.igdbIntegrationGameListContainer,
+.userProfileContent .tabMenuContent > #igdbIntegrationGameCount + .section.igdbIntegrationGameListContainer {
+	margin-top: 20px;
+}
+
 .igdbIntegrationGameListContainer .gameBox {
 	display: flex;
 	flex-direction: column;

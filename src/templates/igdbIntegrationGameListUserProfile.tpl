@@ -1,6 +1,5 @@
 {if $userGames}
 	<div class="status info" id="igdbIntegrationGameCount">{lang}wcf.user.option.igdb_integration_game_count{/lang}: {$gameCount}</div>
-	<br />
 	{if $gameListPages > 1}
 		<div class="paginationTop">
 			<woltlab-core-pagination page="{$gameListPageNo}" count="{$gameListPages}" url="{$gameListBaseUrl}"></woltlab-core-pagination>
