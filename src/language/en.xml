@@ -117,6 +117,8 @@
 		<item name="wcf.acp.option.igdb_integration_general_preferred_region.description"><![CDATA[Shows region-specific game covers if available on IGDB. This is the <b>default value</b>. This setting can be personalized in the Account Management.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_default_platform_filter"><![CDATA[Default platform pre-selection]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_default_platform_filter.description"><![CDATA[These platforms are pre-selected in the platform filter when opening the game list. This setting can be personalized in the Account Management.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_enable_user_activity"><![CDATA[Enable user activity]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_enable_user_activity.description"><![CDATA[Publishes events in the recent activities when users add, remove or rate games. Disabling this also hides previously published events without deleting them.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_show_branding"><![CDATA[Show branding]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_show_branding.description"><![CDATA[Shows the copyright notice of this plugin below the game lists. There is no paid version of this plugin, so you can disable branding for free.]]></item>
 	</category>

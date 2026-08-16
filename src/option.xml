@@ -84,6 +84,11 @@ DESC:wcf.global.sortOrder.descending</selectoptions>
 				<optiontype>igdbIntegrationPlatforms</optiontype>
 				<defaultvalue></defaultvalue>
 			</option>
+			<option name="igdb_integration_general_enable_user_activity">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>boolean</optiontype>
+				<defaultvalue>1</defaultvalue>
+			</option>
 			<option name="igdb_integration_general_show_branding">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>boolean</optiontype>

@@ -300,17 +300,19 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	protected function fireActivityEvent($gameId, $userId, string $action, $rating = 0)
 	{
-		UserActivityEventHandler::getInstance()->fireEvent(
-			'de.berny23.igdb_integration.recentActivityEvent.game',
-			$gameId,
-			null,
-			$userId,
-			TIME_NOW,
-			[
-				'action' => $action,
-				'rating' => $rating,
-			]
-		);
+		if (IGDB_INTEGRATION_GENERAL_ENABLE_USER_ACTIVITY) {
+			UserActivityEventHandler::getInstance()->fireEvent(
+				'de.berny23.igdb_integration.recentActivityEvent.game',
+				$gameId,
+				null,
+				$userId,
+				TIME_NOW,
+				[
+					'action' => $action,
+					'rating' => $rating,
+				]
+			);
+		}
 
 		$sql = "UPDATE wcf1_igdb_integration_game
 				SET lastInteractionTime = ?

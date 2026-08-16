@@ -23,6 +23,11 @@ class IgdbIntegrationGameUserActivityEvent extends SingletonFactory implements I
 	 */
 	public function prepare(array $events)
 	{
+		// Hide (but keep) existing events while the user activity is disabled
+		if (!IGDB_INTEGRATION_GENERAL_ENABLE_USER_ACTIVITY) {
+			return;
+		}
+
 		$gameIds = [];
 		foreach ($events as $event) {
 			$gameIds[] = $event->objectID;
