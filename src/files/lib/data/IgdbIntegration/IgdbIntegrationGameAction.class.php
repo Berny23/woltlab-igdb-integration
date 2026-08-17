@@ -21,6 +21,7 @@ use wcf\system\form\builder\TemplateFormNode;
 use wcf\system\exception\PermissionDeniedException;
 use wcf\system\exception\UserInputException;
 use wcf\system\user\activity\event\UserActivityEventHandler;
+use wcf\util\JSON;
 use wcf\util\StringUtil;
 
 /**
@@ -54,6 +55,33 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 * Session variable holding the state of a running Steam import.
 	 */
 	const STEAM_IMPORT_STATE_KEY = 'igdbSteamImportState';
+
+	/**
+	 * Number of pages of the public GOG profile games endpoint fetched per
+	 * import step. The requests are throttled to respect the GOG rate limit,
+	 * so this keeps a single step reasonably fast.
+	 */
+	const GOG_IMPORT_PAGES_PER_STEP = 5;
+
+	/**
+	 * Number of GOG product ids fetched from IGDB per import step.
+	 */
+	const GOG_IMPORT_BATCH_SIZE = 250;
+
+	/**
+	 * Maximum number of per-title IGDB search requests during a GOG import.
+	 */
+	const GOG_IMPORT_SEARCH_LIMIT = 100;
+
+	/**
+	 * Number of per-title IGDB search requests per GOG import step.
+	 */
+	const GOG_IMPORT_SEARCHES_PER_STEP = 5;
+
+	/**
+	 * Session variable holding the state of a running GOG import.
+	 */
+	const GOG_IMPORT_STATE_KEY = 'igdbGogImportState';
 
 	/**
 	 * Number of IGDB game ids fetched from IGDB per import step. Ids are
@@ -255,7 +283,12 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			}
 		}
 
-		return $this->getUpdatedGameUserData($gameId, $userId, $isOwned);
+		$data = $this->getUpdatedGameUserData($gameId, $userId, $isOwned);
+		// The embedded game boxes show the rating of the message author, which
+		// has to follow the dialog if the author edits their own entry
+		$data['currentUserRating'] = $isOwned ? $rating : 0;
+
+		return $data;
 	}
 
 	/**
@@ -287,7 +320,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$this->fireActivityEvent($gameId, $userId, 'add');
 		}
 
-		return $this->getUpdatedGameUserData($gameId, $userId, true);
+		$data = $this->getUpdatedGameUserData($gameId, $userId, true);
+		$data['currentUserRating'] = !empty($row) ? intval($row['rating']) : 0;
+
+		return $data;
 	}
 
 	/**
@@ -319,7 +355,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$this->fireActivityEvent($gameId, $userId, 'remove');
 		}
 
-		return $this->getUpdatedGameUserData($gameId, $userId, false);
+		$data = $this->getUpdatedGameUserData($gameId, $userId, false);
+		$data['currentUserRating'] = 0;
+
+		return $data;
 	}
 
 	/**
@@ -330,7 +369,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		if (!WCF::getUser()->userID) {
 			throw new PermissionDeniedException();
 		}
-		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_games']);
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_steam_games']);
 
 		if (!IgdbIntegrationUtil::isSteamConnectionDataValid()) {
 			throw new PermissionDeniedException();
@@ -397,7 +436,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		// Match everything that needs no IGDB request: games already linked to
 		// a Steam app id and games with the exact same normalized title
 		$matched = [];
-		$this->matchRemainingBySteamAppId($state['remaining'], $matched);
+		$this->matchRemainingByExternalId('steamAppId', $state['remaining'], $matched);
 		$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
 		$this->insertImportMatches($matched, $state['stats']);
 
@@ -421,7 +460,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		if (!WCF::getUser()->userID) {
 			throw new PermissionDeniedException();
 		}
-		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_games']);
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_steam_games']);
 
 		if (!is_array(WCF::getSession()->getVar(self::STEAM_IMPORT_STATE_KEY))) {
 			// No import has been started in this session
@@ -446,7 +485,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			}
 
 			$matched = [];
-			$this->matchRemainingBySteamAppId($state['remaining'], $matched);
+			$this->matchRemainingByExternalId('steamAppId', $state['remaining'], $matched);
 			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
 			$this->insertImportMatches($matched, $state['stats']);
 		}
@@ -499,7 +538,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 			// The search results may contain the Steam link or the exact title
 			$matched = [];
-			$this->matchRemainingBySteamAppId($state['remaining'], $matched);
+			$this->matchRemainingByExternalId('steamAppId', $state['remaining'], $matched);
 			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
 			$this->insertImportMatches($matched, $state['stats']);
 		} else {
@@ -560,6 +599,299 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
+	 * Checks for permission to prepare the GOG library import and validates
+	 * the submitted GOG username.
+	 */
+	public function validateGetGogImportData()
+	{
+		if (!WCF::getUser()->userID) {
+			throw new PermissionDeniedException();
+		}
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_gog_games']);
+
+		if (!IgdbIntegrationUtil::isConnectionDataValid()) {
+			throw new PermissionDeniedException();
+		}
+
+		$this->readString('gogUsername');
+		if (!preg_match(IgdbIntegrationUtil::GOG_USERNAME_REGEX, $this->parameters['gogUsername'])) {
+			throw new UserInputException('gogUsername');
+		}
+	}
+
+	/**
+	 * Returns the data for the dialog that confirms the GOG library import.
+	 * There is no account verification.
+	 */
+	public function getGogImportData()
+	{
+		$username = $this->parameters['gogUsername'];
+		$firstPage = IgdbIntegrationUtil::fetchGogLibraryPage($username, 1);
+
+		return [
+			'gogUsername' => $username,
+			'gameCount' => is_array($firstPage) ? $firstPage['total'] : 0,
+			'requestFailed' => $firstPage === null,
+		];
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateGetGogImportData()
+	 */
+	public function validateStartGogImport()
+	{
+		$this->validateGetGogImportData();
+	}
+
+	/**
+	 * Starts the GOG library import: fetches the first page of the public
+	 * games list and prepares the state for the following fetch steps. The
+	 * matching begins once all pages have been fetched.
+	 */
+	public function startGogImport()
+	{
+		$username = $this->parameters['gogUsername'];
+		$firstPage = IgdbIntegrationUtil::fetchGogLibraryPage($username, 1);
+		if ($firstPage === null || empty($firstPage['games'])) {
+			// The profile became unavailable between dialog and submit
+			return [
+				'failed' => true,
+				'pageCount' => 0,
+				'gameCount' => 0,
+			];
+		}
+
+		$state = [
+			'username' => $username,
+			'remaining' => $firstPage['games'], // GOG product id => title
+			'ambiguous' => [],                  // GOG product id => title
+			'stats' => ['imported' => 0, 'alreadyOwned' => 0],
+			'page' => 1,
+			'pageCount' => $firstPage['pages'],
+			'batches' => null,                  // filled when all pages are fetched
+			'searchQueue' => null,              // filled on the first search step
+			'searchTotal' => 0,
+			'searched' => 0,
+		];
+
+		WCF::getSession()->register(self::GOG_IMPORT_STATE_KEY, $state);
+
+		return [
+			'failed' => false,
+			'pageCount' => $firstPage['pages'],
+			'gameCount' => $firstPage['total'],
+		];
+	}
+
+	/**
+	 * Checks for permission to run a step of a started GOG library import.
+	 */
+	public function validateProcessGogImportFetch()
+	{
+		if (!WCF::getUser()->userID) {
+			throw new PermissionDeniedException();
+		}
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_gog_games']);
+
+		if (!is_array(WCF::getSession()->getVar(self::GOG_IMPORT_STATE_KEY))) {
+			// No import has been started in this session
+			throw new UserInputException('gogImportState');
+		}
+	}
+
+	/**
+	 * Fetches the next pages of the public GOG games list. Once the last page
+	 * has been fetched, the games are matched against the local database and
+	 * the IGDB request batches are prepared.
+	 */
+	public function processGogImportFetch()
+	{
+		$state = WCF::getSession()->getVar(self::GOG_IMPORT_STATE_KEY);
+
+		if (!is_array($state['batches'])) {
+			$fetchedThisStep = 0;
+			while ($state['page'] < $state['pageCount'] && $fetchedThisStep < self::GOG_IMPORT_PAGES_PER_STEP) {
+				$page = IgdbIntegrationUtil::fetchGogLibraryPage($state['username'], $state['page'] + 1);
+				if ($page === null) {
+					WCF::getSession()->unregister(self::GOG_IMPORT_STATE_KEY);
+
+					return [
+						'failed' => true,
+						'currentPage' => $state['page'],
+						'pageCount' => $state['pageCount'],
+						'done' => true,
+						'batchCount' => 0,
+					];
+				}
+
+				// The product ids are unique across all pages
+				$state['remaining'] += $page['games'];
+				$state['page']++;
+				$fetchedThisStep++;
+			}
+
+			if ($state['page'] >= $state['pageCount']) {
+				// Match everything that needs no IGDB request: games already
+				// linked to a GOG product id and games with the exact same
+				// normalized title
+				$matched = [];
+				$this->matchRemainingByExternalId('gogId', $state['remaining'], $matched);
+				$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false, 'gogId');
+				$this->insertImportMatches($matched, $state['stats']);
+
+				// The remaining product ids are fetched from IGDB in batches
+				$state['batches'] = array_chunk(array_keys($state['remaining']), self::GOG_IMPORT_BATCH_SIZE);
+			}
+
+			WCF::getSession()->register(self::GOG_IMPORT_STATE_KEY, $state);
+		}
+
+		return [
+			'failed' => false,
+			'currentPage' => $state['page'],
+			'pageCount' => $state['pageCount'],
+			'done' => is_array($state['batches']),
+			'batchCount' => is_array($state['batches']) ? count($state['batches']) : 0,
+		];
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessGogImportFetch()
+	 */
+	public function validateProcessGogImportBatch()
+	{
+		$this->validateProcessGogImportFetch();
+	}
+
+	/**
+	 * Fetches the next batch of GOG product ids from IGDB and matches the new
+	 * local data against the remaining GOG games.
+	 */
+	public function processGogImportBatch()
+	{
+		$state = WCF::getSession()->getVar(self::GOG_IMPORT_STATE_KEY);
+
+		$batch = is_array($state['batches']) ? array_shift($state['batches']) : null;
+		if ($batch !== null) {
+			// Earlier steps may have matched some of the batch's games already
+			$gogIds = array_values(array_intersect($batch, array_keys($state['remaining'])));
+			if (!empty($gogIds)) {
+				IgdbIntegrationUtil::updateDatabaseGamesByGogIds($gogIds);
+			}
+
+			$matched = [];
+			$this->matchRemainingByExternalId('gogId', $state['remaining'], $matched);
+			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false, 'gogId');
+			$this->insertImportMatches($matched, $state['stats']);
+		}
+
+		WCF::getSession()->register(self::GOG_IMPORT_STATE_KEY, $state);
+
+		return [
+			'remainingBatches' => is_array($state['batches']) ? count($state['batches']) : 0,
+		];
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessGogImportFetch()
+	 */
+	public function validateProcessGogImportSearch()
+	{
+		$this->validateProcessGogImportFetch();
+	}
+
+	/**
+	 * Searches IGDB for a few of the remaining unmatched titles and matches
+	 * the results. The client repeats this step until it reports completion.
+	 */
+	public function processGogImportSearch()
+	{
+		$state = WCF::getSession()->getVar(self::GOG_IMPORT_STATE_KEY);
+
+		if ($state['searchQueue'] === null) {
+			$state['searchQueue'] = array_slice($state['remaining'], 0, self::GOG_IMPORT_SEARCH_LIMIT, true);
+			$state['searchTotal'] = count($state['searchQueue']);
+		}
+
+		if (IgdbIntegrationUtil::isConnectionDataValid()) {
+			$searchedThisStep = 0;
+			while (!empty($state['searchQueue']) && $searchedThisStep < self::GOG_IMPORT_SEARCHES_PER_STEP) {
+				$gogId = array_key_first($state['searchQueue']);
+				$name = $state['searchQueue'][$gogId];
+				unset($state['searchQueue'][$gogId]);
+				$state['searched']++;
+
+				// May have been matched by a search result of a previous step
+				if (!isset($state['remaining'][$gogId])) {
+					continue;
+				}
+
+				// The request pacing is handled by the sitewide rate limit queue
+				IgdbIntegrationUtil::updateDatabaseGamesByName($name);
+				$searchedThisStep++;
+			}
+
+			// The search results may contain the GOG link or the exact title
+			$matched = [];
+			$this->matchRemainingByExternalId('gogId', $state['remaining'], $matched);
+			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false, 'gogId');
+			$this->insertImportMatches($matched, $state['stats']);
+		} else {
+			$state['searchQueue'] = [];
+		}
+
+		WCF::getSession()->register(self::GOG_IMPORT_STATE_KEY, $state);
+
+		return [
+			'searched' => $state['searched'],
+			'searchTotal' => $state['searchTotal'],
+			'done' => empty($state['searchQueue']),
+		];
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessGogImportFetch()
+	 */
+	public function validateFinishGogImport()
+	{
+		$this->validateProcessGogImportFetch();
+	}
+
+	/**
+	 * Runs the roman numeral matching pass as a last resort, synchronizes all
+	 * computed values and returns the import summary.
+	 */
+	public function finishGogImport()
+	{
+		$state = WCF::getSession()->getVar(self::GOG_IMPORT_STATE_KEY);
+
+		$matched = [];
+		$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], true, 'gogId');
+		$this->insertImportMatches($matched, $state['stats']);
+
+		if ($state['stats']['imported'] > 0) {
+			IgdbIntegrationUtil::updateAllGameStats();
+		}
+		$gameCount = $this->updateUserGameCount(WCF::getUser()->userID);
+
+		WCF::getSession()->unregister(self::GOG_IMPORT_STATE_KEY);
+
+		$unmatchedNames = array_values($state['remaining']);
+		sort($unmatchedNames, SORT_NATURAL | SORT_FLAG_CASE);
+		$ambiguousNames = array_values($state['ambiguous']);
+		sort($ambiguousNames, SORT_NATURAL | SORT_FLAG_CASE);
+
+		return [
+			'failed' => false,
+			'importedCount' => $state['stats']['imported'],
+			'alreadyOwnedCount' => $state['stats']['alreadyOwned'],
+			'unmatched' => $unmatchedNames,
+			'ambiguous' => $ambiguousNames,
+			'gameCount' => $gameCount,
+		];
+	}
+
+	/**
 	 * Checks for permission to start an IGDB list import and parses the
 	 * submitted game id list.
 	 */
@@ -568,7 +900,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		if (!WCF::getUser()->userID) {
 			throw new PermissionDeniedException();
 		}
-		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_games']);
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_igdb_games']);
 
 		// Unlike the Steam import, only the IGDB credentials are required
 		if (!IgdbIntegrationUtil::isConnectionDataValid()) {
@@ -633,7 +965,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		if (!WCF::getUser()->userID) {
 			throw new PermissionDeniedException();
 		}
-		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_games']);
+		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_igdb_games']);
 
 		if (!is_array(WCF::getSession()->getVar(self::IGDB_IMPORT_STATE_KEY))) {
 			// No import has been started in this session
@@ -779,10 +1111,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * Matches the remaining Steam games against the steamAppId column and
-	 * moves all hits from $remaining to $matched.
+	 * Matches the remaining store games against the given external id column
+	 * (steamAppId or gogId) and moves all hits from $remaining to $matched.
 	 */
-	protected function matchRemainingBySteamAppId(array &$remaining, array &$matched)
+	protected function matchRemainingByExternalId(string $externalIdColumn, array &$remaining, array &$matched)
 	{
 		if (empty($remaining)) {
 			return;
@@ -790,28 +1122,30 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 		foreach (array_chunk(array_keys($remaining), 500) as $chunk) {
 			$conditions = new PreparedStatementConditionBuilder();
-			$conditions->add('steamAppId IN (?)', [$chunk]);
-			$sql = "SELECT steamAppId, gameId
+			$conditions->add($externalIdColumn . ' IN (?)', [$chunk]);
+			$sql = "SELECT " . $externalIdColumn . " AS externalId, gameId
 					FROM wcf1_igdb_integration_game
 					" . $conditions;
 			$statement = WCF::getDB()->prepare($sql);
 			$statement->execute($conditions->getParameters());
 			while ($row = $statement->fetchArray()) {
-				$steamAppId = intval($row['steamAppId']);
-				if (isset($remaining[$steamAppId])) {
-					$matched[$steamAppId] = intval($row['gameId']);
-					unset($remaining[$steamAppId]);
+				$externalId = intval($row['externalId']);
+				if (isset($remaining[$externalId])) {
+					$matched[$externalId] = intval($row['gameId']);
+					unset($remaining[$externalId]);
 				}
 			}
 		}
 	}
 
 	/**
-	 * Matches remaining Steam games by normalized title against all local games.
+	 * Matches remaining store games by normalized title against all local games,
+	 * using the primary name first and the IGDB aliases as a fallback (e.g. GOG's
+	 * "Ultima III" matching "Ultima III: Exodus" via the alias "Ultima 3").
 	 * Unique hits are moved to $matched. Titles shared by multiple games (e.g. game +
-	 * same-named remaster) are moved to $ambiguous, because Steam provides no year.
+	 * same-named remaster) are moved to $ambiguous, because the stores provide no year.
 	 */
-	protected function matchRemainingByName(array &$remaining, array &$matched, array &$ambiguous, bool $convertRomanNumerals)
+	protected function matchRemainingByName(array &$remaining, array &$matched, array &$ambiguous, bool $convertRomanNumerals, string $externalIdColumn = 'steamAppId')
 	{
 		if (empty($remaining)) {
 			return;
@@ -819,46 +1153,69 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 		// Token match to not confuse "PC" with platforms like "PC-FX"
 		$platformPattern = '(^|, )(PC|Mac|Linux)(,|$)';
-		$sql = "SELECT gameId, name, steamAppId
+		$sql = "SELECT gameId, name, alternativeNames, " . $externalIdColumn . " AS externalId
 				FROM wcf1_igdb_integration_game
 				WHERE platforms REGEXP ?";
 		$statement = WCF::getDB()->prepare($sql);
 		$statement->execute([$platformPattern]);
 
 		$gamesByTitle = [];
+		$gamesByAlternativeTitle = [];
 		while ($row = $statement->fetchArray()) {
 			$title = IgdbIntegrationUtil::normalizeGameTitle($row['name'], $convertRomanNumerals);
 			if ($title !== '') {
 				$gamesByTitle[$title][] = $row;
 			}
+
+			if (!empty($row['alternativeNames'])) {
+				try {
+					$alternativeNames = JSON::decode($row['alternativeNames']);
+				} catch (\Exception $ex) {
+					$alternativeNames = [];
+				}
+				if (is_array($alternativeNames)) {
+					foreach ($alternativeNames as $alternativeName) {
+						$title = IgdbIntegrationUtil::normalizeGameTitle((string)$alternativeName, $convertRomanNumerals);
+						if ($title !== '') {
+							$gamesByAlternativeTitle[$title][] = $row;
+						}
+					}
+				}
+			}
 		}
 
 		$backfillStatement = null;
-		foreach ($remaining as $steamAppId => $name) {
+		foreach ($remaining as $externalId => $name) {
 			$title = IgdbIntegrationUtil::normalizeGameTitle($name, $convertRomanNumerals);
-			if ($title === '' || !isset($gamesByTitle[$title])) {
+			if ($title === '') {
 				continue;
 			}
 
-			$gameIds = array_unique(array_column($gamesByTitle[$title], 'gameId'));
+			// The aliases are only consulted if no primary name matches
+			$candidates = $gamesByTitle[$title] ?? $gamesByAlternativeTitle[$title] ?? null;
+			if ($candidates === null) {
+				continue;
+			}
+
+			$gameIds = array_unique(array_column($candidates, 'gameId'));
 			if (count($gameIds) === 1) {
-				$matched[$steamAppId] = intval(reset($gameIds));
+				$matched[$externalId] = intval(reset($gameIds));
 
 				// Remember direct matches, so future imports resolve them by
-				// app id; roman numeral matches are too fuzzy to persist
-				if (!$convertRomanNumerals && $gamesByTitle[$title][0]['steamAppId'] === null) {
+				// external id; roman numeral matches are too fuzzy to persist
+				if (!$convertRomanNumerals && $candidates[0]['externalId'] === null) {
 					if ($backfillStatement === null) {
 						$sql = "UPDATE wcf1_igdb_integration_game
-								SET steamAppId = ?
-								WHERE gameId = ? AND steamAppId IS NULL";
+								SET " . $externalIdColumn . " = ?
+								WHERE gameId = ? AND " . $externalIdColumn . " IS NULL";
 						$backfillStatement = WCF::getDB()->prepare($sql);
 					}
-					$backfillStatement->execute([$steamAppId, $matched[$steamAppId]]);
+					$backfillStatement->execute([$externalId, $matched[$externalId]]);
 				}
 			} else {
-				$ambiguous[$steamAppId] = $name;
+				$ambiguous[$externalId] = $name;
 			}
-			unset($remaining[$steamAppId]);
+			unset($remaining[$externalId]);
 		}
 	}
 

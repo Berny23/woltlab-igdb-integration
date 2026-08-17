@@ -6,8 +6,8 @@ use Exception;
 use wcf\system\WCF;
 
 /**
- * Sitewide rate limiter for outgoing API requests. Every request to the IGDB
- * or Steam API must reserve a time slot here first, so that the providers'
+ * Sitewide rate limiter for outgoing API requests. Every request to the IGDB,
+ * Steam or GOG API must reserve a time slot here first, so that the providers'
  * rate limits are never exceeded, no matter how many page requests run
  * concurrently.
  *
@@ -20,15 +20,18 @@ class IgdbIntegrationApiRateLimiter
 {
 	const API_IGDB = 'igdb';
 	const API_STEAM = 'steam';
+	const API_GOG = 'gog';
 
 	/**
 	 * Minimum time between two requests per API in microseconds. IGDB allows
-	 * 4 requests per second; Steam publishes no hard rate limit, so a
-	 * conservative pace is used.
+	 * 4 requests per second; Steam and GOG publish no hard rate limit, so a
+	 * conservative pace is used. The GOG library is fetched in pages of 50
+	 * games, so its interval is kept lower to not slow down large imports.
 	 */
 	private const REQUEST_INTERVALS = [
 		self::API_IGDB => 250000,
 		self::API_STEAM => 1000000,
+		self::API_GOG => 500000,
 	];
 
 	/**

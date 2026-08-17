@@ -31,7 +31,7 @@ class IgdbIntegrationSteamAuthAction extends AbstractAction
 	/**
 	 * @inheritDoc
 	 */
-	public $neededPermissions = ['user.igdb_integration.can_import_games'];
+	public $neededPermissions = ['user.igdb_integration.can_import_steam_games'];
 
 	/**
 	 * @inheritDoc

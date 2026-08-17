@@ -20,6 +20,9 @@
 		<item name="wcf.igdb_integration.page.steam_import_sign_in"><![CDATA[Sign in through Steam]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_button"><![CDATA[Import Steam library]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_error"><![CDATA[The Steam sign-in has failed. Please try again.]]></item>
+		<item name="wcf.igdb_integration.page.gog_import"><![CDATA[GOG Import]]></item>
+		<item name="wcf.igdb_integration.page.gog_import_info"><![CDATA[Enter your GOG username to import your owned games. Only your public game list is accessed and no account data is stored permanently.]]></item>
+		<item name="wcf.igdb_integration.page.gog_import_button"><![CDATA[Import GOG library]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import"><![CDATA[IGDB Import]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import_info"><![CDATA[Export a list of your owned games as a CSV file in your <a href="https://www.igdb.com" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB lists</a> and import the file here.]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import_button"><![CDATA[Import CSV file]]></item>
@@ -71,6 +74,14 @@
 		<item name="wcf.igdb_integration.dialog.steam_import_result_already_owned"><![CDATA[{#$count} games were already in your library.]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_result_ambiguous"><![CDATA[{#$count} games were skipped because several entries share the same name. Please add the correct entry manually:]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_result_unmatched"><![CDATA[{#$count} games could not be matched to an IGDB entry:]]></item>
+		<item name="wcf.igdb_integration.dialog.gog_import_title"><![CDATA[Import GOG Library]]></item>
+		<item name="wcf.igdb_integration.dialog.gog_import_username"><![CDATA[GOG username]]></item>
+		<item name="wcf.igdb_integration.dialog.gog_import_confirm"><![CDATA[Found <b>{#$gogGameCount}</b> games for the GOG account <b>{$gogImportUsername}</b>.<br>Games that are already in your library are skipped. Depending on the size of the library, the import may take a moment.]]></item>
+		<item name="wcf.igdb_integration.dialog.gog_import_empty"><![CDATA[No games were found for the GOG account <b>{$gogImportUsername}</b>. Make sure that the games are set to visible for everyone in your <a href="https://www.gog.com/account/settings/privacy" class="externalURL" target="_blank" rel="nofollow noopener">GOG privacy settings</a> and try again.]]></item>
+		<item name="wcf.igdb_integration.dialog.gog_import_request_failed"><![CDATA[The GOG profile <b>{$gogImportUsername}</b> could not be retrieved. Please check the username and make sure that the games are set to visible for everyone in your <a href="https://www.gog.com/account/settings/privacy" class="externalURL" target="_blank" rel="nofollow noopener">GOG privacy settings</a>, then try again.]]></item>
+		<item name="wcf.igdb_integration.dialog.gog_import_progress_title"><![CDATA[Importing GOG Library…]]></item>
+		<item name="wcf.igdb_integration.dialog.gog_import_progress_pages"><![CDATA[Retrieving the GOG games list (page {#$current} of {#$total})…]]></item>
+		<item name="wcf.igdb_integration.dialog.gog_import_result_failed"><![CDATA[The GOG library could not be retrieved. Please try again.]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_title"><![CDATA[Import IGDB List]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_confirm"><![CDATA[The file contains {#$count} games. Games that are already in your library are skipped. Start the import?]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_invalid_file"><![CDATA[The selected file is not a valid IGDB list export.]]></item>
@@ -176,7 +187,9 @@
 		<item name="wcf.acp.group.option.admin.igdb_integration.can_manage_games"><![CDATA[Can edit or delete all games]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_search_igdb"><![CDATA[Can retrieve latest data from IGDB when searching]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_manage_own_games"><![CDATA[Can manage own games library]]></item>
-		<item name="wcf.acp.group.option.user.igdb_integration.can_import_games"><![CDATA[Can import owned games from Steam or IGDB]]></item>
-		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Can list all players of a game]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_import_steam_games"><![CDATA[Can import owned games from Steam]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_import_gog_games"><![CDATA[Can import owned games from GOG]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_import_igdb_games"><![CDATA[Can import owned games from IGDB list exports]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Can list all owners of a game]]></item>
 	</category>
 </language>

@@ -23,6 +23,8 @@ return [
 				->notNull(),
 			TextDatabaseTableColumn::create('germanName')
 				->notNull(),
+			// All IGDB aliases as a JSON array, used by the import name matching
+			TextDatabaseTableColumn::create('alternativeNames'),
 			YearDatabaseTableColumn::create('releaseYear')
 				->defaultValue(null),
 			TextDatabaseTableColumn::create('platforms')
@@ -36,6 +38,9 @@ return [
 			// Steam app id from IGDB's external game links, NULL if unknown
 			IntDatabaseTableColumn::create('steamAppId')
 				->length(10),
+			// GOG product id from IGDB's external game links, NULL if unknown
+			BigintDatabaseTableColumn::create('gogId')
+				->length(20),
 			NotNullInt10DatabaseTableColumn::create('lastInteractionTime')
 				->defaultValue(0),
 			NotNullInt10DatabaseTableColumn::create('playerCount')
@@ -58,6 +63,8 @@ return [
 				->columns(['averageRating']),
 			DatabaseTableIndex::create('steamAppId')
 				->columns(['steamAppId']),
+			DatabaseTableIndex::create('gogId')
+				->columns(['gogId']),
 		]),
 	DatabaseTable::create('wcf1_igdb_integration_game_user')
 		->columns([

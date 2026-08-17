@@ -32,11 +32,28 @@ class IgdbIntegrationUtil
 	const COVER_URL_BASE_BIG = 'https://images.igdb.com/igdb/image/upload/t_cover_big/';
 	const COVER_URL_FILETYPE = '.jpg';
 	const STEAM_API_URL_BASE = 'https://api.steampowered.com/';
+	const GOG_URL_BASE = 'https://www.gog.com/';
 
 	/**
 	 * Id of Steam in IGDB's external game source list.
 	 */
 	const EXTERNAL_GAME_SOURCE_STEAM = 1;
+
+	/**
+	 * Id of GOG in IGDB's external game source list.
+	 */
+	const EXTERNAL_GAME_SOURCE_GOG = 5;
+
+	/**
+	 * Number of games per page of the public GOG profile games endpoint. The
+	 * page size is fixed by GOG and only used to size progress indicators.
+	 */
+	const GOG_GAMES_PER_PAGE = 50;
+
+	/**
+	 * Pattern of a valid GOG username.
+	 */
+	const GOG_USERNAME_REGEX = '/^[a-zA-Z0-9._+-]{1,60}$/';
 
 	/**
 	 * Fields requested for every game fetched from IGDB.
@@ -173,6 +190,11 @@ class IgdbIntegrationUtil
 			return false;
 		}
 
+		// Trademark symbols make the IGDB search miss otherwise exact matches,
+		// e.g. GOG's "Ultima II™ " not finding "Ultima II: The Revenge of the
+		// Enchantress"
+		$name = trim(preg_replace('/[™®©]/u', '', $name));
+
 		$body = 'search "' . str_replace(['"', '\\'], '', $name) . '";
 				fields ' . self::GAME_FIELDS . ';
 				limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
@@ -206,6 +228,38 @@ class IgdbIntegrationUtil
 			$uidList = '("' . implode('","', array_map('intval', $chunk)) . '")';
 			$body = 'fields ' . self::GAME_FIELDS . ';
 					where external_games.uid = ' . $uidList . ' & external_games.external_game_source = ' . self::EXTERNAL_GAME_SOURCE_STEAM . ';
+					limit 500;';
+
+			try {
+				$response = self::fetchIgdbGamesWithTokenRefresh($body);
+			} catch (Exception $ex) {
+				return false;
+			}
+
+			self::insertGamesFromResponse($response);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Updates the game database with all IGDB games that are linked to one of
+	 * the given GOG product ids. Returns false if any request failed.
+	 */
+	public static function updateDatabaseGamesByGogIds(array $gogIds): bool
+	{
+		if (!self::isConnectionDataValid() || empty($gogIds)) {
+			return false;
+		}
+
+		// Multiple IGDB games (e.g. editions) can share a product id, so
+		// request fewer product ids per batch than the maximum result limit of
+		// 500. The request pacing is handled by the sitewide rate limit queue.
+		$chunks = array_chunk($gogIds, 250);
+		foreach ($chunks as $chunk) {
+			$uidList = '("' . implode('","', array_map('intval', $chunk)) . '")';
+			$body = 'fields ' . self::GAME_FIELDS . ';
+					where external_games.uid = ' . $uidList . ' & external_games.external_game_source = ' . self::EXTERNAL_GAME_SOURCE_GOG . ';
 					limit 500;';
 
 			try {
@@ -257,23 +311,27 @@ class IgdbIntegrationUtil
 				SET gameId = ?,
 					name = ?,
 					germanName = ?,
+					alternativeNames = ?,
 					releaseYear = ?,
 					platforms = ?,
 					summary = ?,
 					coverImageId = ?,
 					slug = ?,
 					localizedCovers = ?,
-					steamAppId = ?
+					steamAppId = ?,
+					gogId = ?
 				ON DUPLICATE KEY UPDATE
 					name = ?,
 					germanName = ?,
+					alternativeNames = ?,
 					releaseYear = ?,
 					platforms = ?,
 					summary = ?,
 					coverImageId = ?,
 					slug = ?,
 					localizedCovers = ?,
-					steamAppId = COALESCE(?, steamAppId)";
+					steamAppId = COALESCE(?, steamAppId),
+					gogId = COALESCE(?, gogId)";
 		$statement = WCF::getDB()->prepare($sql);
 		foreach ($gamesJson as $game) {
 			$gamePlatforms = '';
@@ -289,9 +347,20 @@ class IgdbIntegrationUtil
 			}
 
 			$gameGermanName = '';
+			$gameAlternativeNames = [];
 			if (isset($game->alternative_names)) {
 				foreach ($game->alternative_names as $altName) {
-					if (isset($altName->comment) && isset($altName->name)) {
+					if (!isset($altName->name)) {
+						continue;
+					}
+
+					// Collect all aliases for the import name matching, e.g.
+					// "Ultima 3" for "Ultima III: Exodus"
+					if (!in_array($altName->name, $gameAlternativeNames)) {
+						$gameAlternativeNames[] = $altName->name;
+					}
+
+					if (isset($altName->comment)) {
 						// Find language name in comment of alternative name
 						if (empty($gameGermanName) && (stripos($altName->comment, 'german') !== false || stripos($altName->comment, 'deutsch') !== false)) {
 							$gameGermanName = $altName->name;
@@ -310,14 +379,19 @@ class IgdbIntegrationUtil
 				}
 			}
 
-			// A NULL app id never overwrites a known one on update, so links
-			// backfilled by the Steam import survive later IGDB refreshes
+			// A NULL external id never overwrites a known one on update, so
+			// links backfilled by the imports survive later IGDB refreshes
 			$gameSteamAppId = null;
+			$gameGogId = null;
 			if (isset($game->external_games)) {
 				foreach ($game->external_games as $externalGame) {
-					if (isset($externalGame->external_game_source) && $externalGame->external_game_source == self::EXTERNAL_GAME_SOURCE_STEAM && !empty($externalGame->uid)) {
+					if (!isset($externalGame->external_game_source) || empty($externalGame->uid)) {
+						continue;
+					}
+					if ($gameSteamAppId === null && $externalGame->external_game_source == self::EXTERNAL_GAME_SOURCE_STEAM) {
 						$gameSteamAppId = intval($externalGame->uid);
-						break;
+					} elseif ($gameGogId === null && $externalGame->external_game_source == self::EXTERNAL_GAME_SOURCE_GOG) {
+						$gameGogId = intval($externalGame->uid);
 					}
 				}
 			}
@@ -329,10 +403,11 @@ class IgdbIntegrationUtil
 			$gameCoverId = isset($game->cover) ? $game->cover->image_id : 'nocover';
 			$gameSlug = $game->slug ?? '';
 			$gameLocalizedCoversJson = JSON::encode($gameLocalizedCovers);
+			$gameAlternativeNamesJson = JSON::encode($gameAlternativeNames);
 
-			$statement->execute([$gameId, $gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId,
+			$statement->execute([$gameId, $gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId,
 								/* UPDATE starts here */
-								$gameName, $gameGermanName, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId]);
+								$gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId]);
 		}
 		WCF::getDB()->commitTransaction();
 	}
@@ -381,6 +456,59 @@ class IgdbIntegrationUtil
 		}
 
 		return $games;
+	}
+
+	/**
+	 * Returns one page of the games owned by the given GOG account, or null if
+	 * the request failed. GOG returns a 404 error for unknown usernames, for
+	 * profiles whose games are not publicly visible and for pages beyond the
+	 * last one, so all of these cases end up as null as well.
+	 *
+	 * The result contains the games of the page as a map of GOG product id to
+	 * title, the total game count and the total page count.
+	 */
+	public static function fetchGogLibraryPage($username, int $page): ?array
+	{
+		// GOG needs no API key because the public profile endpoint is used.
+		// The IGDB credentials are needed for the matching
+		if (!self::isConnectionDataValid() || !preg_match(self::GOG_USERNAME_REGEX, $username) || $page < 1) {
+			return null;
+		}
+
+		if (self::$client === null) {
+			self::$client = HttpFactory::getDefaultClient();
+		}
+
+		$url = self::GOG_URL_BASE . 'u/' . rawurlencode($username) . '/games/stats?' . http_build_query([
+			'page' => $page,
+		]);
+
+		try {
+			// Wait for a free slot of the sitewide rate limit queue
+			IgdbIntegrationApiRateLimiter::acquireSlot(IgdbIntegrationApiRateLimiter::API_GOG);
+
+			$response = self::$client->send(new Request('GET', $url));
+			$data = JSON::decode($response->getBody());
+		} catch (Exception $ex) {
+			return null;
+		}
+
+		if (!isset($data['_embedded']['items']) || !is_array($data['_embedded']['items'])) {
+			return null;
+		}
+
+		$games = [];
+		foreach ($data['_embedded']['items'] as $item) {
+			if (isset($item['game']['id']) && isset($item['game']['title'])) {
+				$games[intval($item['game']['id'])] = $item['game']['title'];
+			}
+		}
+
+		return [
+			'games' => $games,
+			'total' => intval($data['total'] ?? count($games)),
+			'pages' => max(1, intval($data['pages'] ?? 1)),
+		];
 	}
 
 	/**

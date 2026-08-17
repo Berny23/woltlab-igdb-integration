@@ -70,7 +70,7 @@
 			</div>
 		</form>
 	</section>
-	{if $igdbImportAvailable}
+	{if $importBoxAvailable}
 		<section id="importBox" class="box">
 			<details{if $steamImportAuthenticated || $steamImportError} open{/if}>
 				<summary>
@@ -91,12 +91,21 @@
 							{/if}
 						</div>
 					{/if}
-					<h3>{lang}wcf.igdb_integration.page.igdb_import{/lang}</h3>
-					<p>{lang}wcf.igdb_integration.page.igdb_import_info{/lang}</p>
-					<div class="formSubmit">
-						<input type="file" id="igdbImportFileInput" accept=".csv,text/csv" style="display: none;">
-						<button type="button" class="button" id="igdbImportButton">{lang}wcf.igdb_integration.page.igdb_import_button{/lang}</button>
-					</div>
+					{if $gogImportAvailable}
+						<h3>{lang}wcf.igdb_integration.page.gog_import{/lang}</h3>
+						<p>{lang}wcf.igdb_integration.page.gog_import_info{/lang}</p>
+						<div class="formSubmit">
+							<button type="button" class="button" id="gogImportButton">{lang}wcf.igdb_integration.page.gog_import_button{/lang}</button>
+						</div>
+					{/if}
+					{if $igdbImportAvailable}
+						<h3>{lang}wcf.igdb_integration.page.igdb_import{/lang}</h3>
+						<p>{lang}wcf.igdb_integration.page.igdb_import_info{/lang}</p>
+						<div class="formSubmit">
+							<input type="file" id="igdbImportFileInput" accept=".csv,text/csv" style="display: none;">
+							<button type="button" class="button" id="igdbImportButton">{lang}wcf.igdb_integration.page.igdb_import_button{/lang}</button>
+						</div>
+					{/if}
 				</div>
 			</details>
 		</section>
@@ -211,7 +220,7 @@
 	});
 </script>
 
-{if $igdbImportAvailable}
+{if $importBoxAvailable}
 	<script data-relocate="true">
 		require(['Language', 'WoltLabSuite/Core/Controller/IgdbIntegrationGameImport'], (Language,
 			ControllerIgdbIntegrationGameImport) => {
@@ -230,6 +239,14 @@
 				'wcf.igdb_integration.dialog.steam_import_result_already_owned': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_result_already_owned{/jslang}',
 				'wcf.igdb_integration.dialog.steam_import_result_ambiguous': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_result_ambiguous{/jslang}',
 				'wcf.igdb_integration.dialog.steam_import_result_unmatched': '{jslang __literal=true}wcf.igdb_integration.dialog.steam_import_result_unmatched{/jslang}',
+				'wcf.igdb_integration.dialog.gog_import_title': '{jslang}wcf.igdb_integration.dialog.gog_import_title{/jslang}',
+				'wcf.igdb_integration.dialog.gog_import_username': '{jslang}wcf.igdb_integration.dialog.gog_import_username{/jslang}',
+				'wcf.igdb_integration.dialog.gog_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.gog_import_confirm{/jslang}',
+				'wcf.igdb_integration.dialog.gog_import_empty': '{jslang __literal=true}wcf.igdb_integration.dialog.gog_import_empty{/jslang}',
+				'wcf.igdb_integration.dialog.gog_import_request_failed': '{jslang __literal=true}wcf.igdb_integration.dialog.gog_import_request_failed{/jslang}',
+				'wcf.igdb_integration.dialog.gog_import_progress_title': '{jslang}wcf.igdb_integration.dialog.gog_import_progress_title{/jslang}',
+				'wcf.igdb_integration.dialog.gog_import_progress_pages': '{jslang __literal=true}wcf.igdb_integration.dialog.gog_import_progress_pages{/jslang}',
+				'wcf.igdb_integration.dialog.gog_import_result_failed': '{jslang}wcf.igdb_integration.dialog.gog_import_result_failed{/jslang}',
 				'wcf.igdb_integration.dialog.igdb_import_title': '{jslang}wcf.igdb_integration.dialog.igdb_import_title{/jslang}',
 				'wcf.igdb_integration.dialog.igdb_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.igdb_import_confirm{/jslang}',
 				'wcf.igdb_integration.dialog.igdb_import_invalid_file': '{jslang}wcf.igdb_integration.dialog.igdb_import_invalid_file{/jslang}'

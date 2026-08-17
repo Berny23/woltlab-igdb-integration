@@ -61,7 +61,7 @@ class IgdbIntegrationGameListPage extends SortablePage
 	private $showIgdbError = false;
 
 	/**
-	 * Whether the game import box is available for the current user
+	 * Whether the IGDB list import is available for the current user.
 	 */
 	private $igdbImportAvailable = false;
 
@@ -85,6 +85,11 @@ class IgdbIntegrationGameListPage extends SortablePage
 	 * Whether the Steam login has failed.
 	 */
 	private $steamImportError = false;
+
+	/**
+	 * Whether the GOG import is available for the current user.
+	 */
+	private $gogImportAvailable = false;
 
 	/**
 	 * @inheritDoc
@@ -136,16 +141,20 @@ class IgdbIntegrationGameListPage extends SortablePage
 			$this->showIgdbError = !$result;
 		}
 
-		$this->igdbImportAvailable = WCF::getUser()->userID
-			&& WCF::getSession()->getPermission('user.igdb_integration.can_import_games')
-			&& IgdbIntegrationUtil::isConnectionDataValid();
-		$this->steamImportAvailable = $this->igdbImportAvailable
+		// Every import source has its own user group permission
+		$connectionDataValid = WCF::getUser()->userID && IgdbIntegrationUtil::isConnectionDataValid();
+		$this->igdbImportAvailable = $connectionDataValid
+			&& WCF::getSession()->getPermission('user.igdb_integration.can_import_igdb_games');
+		$this->steamImportAvailable = $connectionDataValid
+			&& WCF::getSession()->getPermission('user.igdb_integration.can_import_steam_games')
 			&& IgdbIntegrationUtil::isSteamConnectionDataValid();
 		if ($this->steamImportAvailable) {
 			$this->steamImportAuthenticated = (bool)WCF::getSession()->getVar('igdbSteamId');
 			$this->steamImportAutoOpen = $this->steamImportAuthenticated && isset($_GET['steamImport']);
 			$this->steamImportError = isset($_GET['steamImportError']);
 		}
+		$this->gogImportAvailable = $connectionDataValid
+			&& WCF::getSession()->getPermission('user.igdb_integration.can_import_gog_games');
 	}
 
 	/**
@@ -215,11 +224,13 @@ class IgdbIntegrationGameListPage extends SortablePage
 			'availablePlatforms' => $availablePlatforms,
 			'platformFilter' => $platformPreselection,
 			'platformFilterParams' => $platformFilterParams,
+			'importBoxAvailable' => $this->steamImportAvailable || $this->gogImportAvailable || $this->igdbImportAvailable,
 			'igdbImportAvailable' => $this->igdbImportAvailable,
 			'steamImportAvailable' => $this->steamImportAvailable,
 			'steamImportAuthenticated' => $this->steamImportAuthenticated,
 			'steamImportAutoOpen' => $this->steamImportAutoOpen,
 			'steamImportError' => $this->steamImportError,
+			'gogImportAvailable' => $this->gogImportAvailable,
 			'steamAuthUrl' => LinkHandler::getInstance()->getLink('IgdbIntegrationSteamAuth'),
 			'steamGameListUrl' => LinkHandler::getInstance()->getLink('IgdbIntegrationGameList')
 		]);

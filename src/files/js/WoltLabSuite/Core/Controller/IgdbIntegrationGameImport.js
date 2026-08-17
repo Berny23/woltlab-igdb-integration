@@ -1,6 +1,7 @@
 /**
  * Provides the game import box on the game list page: importing the owned
- * games of a Steam account and importing IGDB list export files.
+ * games of a Steam account or a public GOG profile and importing IGDB list
+ * export files.
  *
  * @author		Berny23
  * @copyright	2026 Berny23
@@ -16,6 +17,10 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
      * Plain game list url without any filter or steamImport parameters.
      */
     let cleanGameListUrl = '';
+    /**
+     * Pattern of a valid GOG username, mirroring the server-side validation.
+     */
+    const GOG_USERNAME_REGEX = /^[a-zA-Z0-9._+-]{1,60}$/;
     function buildNotice(type, text, names) {
         let html = '<woltlab-core-notice type="' + type + '">' + text;
         if (names !== undefined && names.length > 0) {
@@ -23,10 +28,10 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
         }
         return html + '</woltlab-core-notice>';
     }
-    function showResultDialog(result) {
+    function showResultDialog(result, failedPhrase = 'wcf.igdb_integration.dialog.steam_import_result_failed') {
         let html;
         if (result.failed) {
-            html = buildNotice('error', (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_failed'));
+            html = buildNotice('error', (0, Language_1.getPhrase)(failedPhrase));
         }
         else {
             html = buildNotice('success', (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_imported', { count: result.importedCount }));
@@ -53,13 +58,13 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
         });
         dialog.show((0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_title'));
     }
-    function createProgressDialog(max) {
+    function createProgressDialog(max, titlePhrase = 'wcf.igdb_integration.dialog.steam_import_progress_title') {
         const dialog = (0, Dialog_1.dialogFactory)()
             .fromHtml('<div class="section"><p id="gameImportProgressText">&nbsp;</p><progress id="gameImportProgressBar" style="width: 100%" value="0" max="' + max + '"></progress></div>')
             .withoutControls();
         const text = dialog.content.querySelector('#gameImportProgressText');
         const bar = dialog.content.querySelector('#gameImportProgressBar');
-        dialog.show((0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_progress_title'));
+        dialog.show((0, Language_1.getPhrase)(titlePhrase));
         return { dialog, text, bar };
     }
     /**
@@ -102,6 +107,73 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
             progress.bar.value = progress.bar.max;
             progress.dialog.close();
             showResultDialog(result);
+        }
+        catch (e) {
+            // The AJAX error dialog is shown by the API itself
+            progress.dialog.close();
+            throw e;
+        }
+    }
+    /**
+     * Runs all GOG import steps sequentially while showing the progress, then
+     * presents the summary. The library pages are fetched step by step, so the
+     * batch count is only known after the last fetch step.
+     */
+    async function runGogImportSteps(start) {
+        const failedPhrase = 'wcf.igdb_integration.dialog.gog_import_result_failed';
+        if (start.failed) {
+            showResultDialog({ failed: true, importedCount: 0, alreadyOwnedCount: 0, unmatched: [], ambiguous: [] }, failedPhrase);
+            return;
+        }
+        const progress = createProgressDialog(start.pageCount + 2, 'wcf.igdb_integration.dialog.gog_import_progress_title');
+        try {
+            // Phase 1: fetch the remaining pages of the public GOG games list; the
+            // first page was already fetched by startGogImport
+            let fetch = { failed: false, currentPage: 1, pageCount: start.pageCount, done: false, batchCount: 0 };
+            progress.bar.value = 1;
+            while (!fetch.done) {
+                progress.text.textContent = (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.gog_import_progress_pages', {
+                    current: fetch.currentPage,
+                    total: fetch.pageCount,
+                });
+                fetch = (await (0, Ajax_1.dboAction)('processGogImportFetch', ACTION_CLASS).dispatch());
+                progress.bar.value = fetch.currentPage;
+            }
+            if (fetch.failed) {
+                progress.dialog.close();
+                showResultDialog({ failed: true, importedCount: 0, alreadyOwnedCount: 0, unmatched: [], ambiguous: [] }, failedPhrase);
+                return;
+            }
+            // Phase 2: batched IGDB requests for the GOG product ids
+            progress.bar.max = fetch.pageCount + fetch.batchCount + 2;
+            for (let batch = 1; batch <= fetch.batchCount; batch++) {
+                progress.text.textContent = (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_progress_batches', {
+                    current: batch,
+                    total: fetch.batchCount,
+                });
+                await (0, Ajax_1.dboAction)('processGogImportBatch', ACTION_CLASS).dispatch();
+                progress.bar.value = fetch.pageCount + batch;
+            }
+            // Phase 3: per-title searches for the remaining games; the total is
+            // only known after the first step
+            let search;
+            do {
+                search = (await (0, Ajax_1.dboAction)('processGogImportSearch', ACTION_CLASS).dispatch());
+                progress.bar.max = fetch.pageCount + fetch.batchCount + Math.ceil(search.searchTotal / 5) + 1;
+                progress.bar.value = fetch.pageCount + fetch.batchCount + Math.ceil(search.searched / 5);
+                if (search.searchTotal > 0) {
+                    progress.text.textContent = (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_progress_search', {
+                        current: Math.min(search.searched, search.searchTotal),
+                        total: search.searchTotal,
+                    });
+                }
+            } while (!search.done);
+            // Phase 4: roman numeral pass and summary
+            progress.text.textContent = (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_progress_finalize');
+            const result = (await (0, Ajax_1.dboAction)('finishGogImport', ACTION_CLASS).dispatch());
+            progress.bar.value = progress.bar.max;
+            progress.dialog.close();
+            showResultDialog(result, failedPhrase);
         }
         catch (e) {
             // The AJAX error dialog is shown by the API itself
@@ -271,6 +343,67 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
         });
         dialog.show(title);
     }
+    /**
+     * Fetches the game count of the entered GOG profile and asks for confirmation
+     * before starting the import.
+     */
+    async function confirmGogImport(username) {
+        const title = (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.gog_import_title');
+        if (!GOG_USERNAME_REGEX.test(username)) {
+            (0, Dialog_1.dialogFactory)()
+                .fromHtml('<p>' + (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.gog_import_request_failed', { gogImportUsername: username }) + '</p>')
+                .asAlert()
+                .show(title);
+            return;
+        }
+        const data = (await (0, Ajax_1.dboAction)('getGogImportData', ACTION_CLASS)
+            .payload({ gogUsername: username })
+            .dispatch());
+        if (data.requestFailed) {
+            (0, Dialog_1.dialogFactory)()
+                .fromHtml('<p>' + (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.gog_import_request_failed', { gogImportUsername: username }) + '</p>')
+                .asAlert()
+                .show(title);
+            return;
+        }
+        if (data.gameCount === 0) {
+            (0, Dialog_1.dialogFactory)()
+                .fromHtml('<p>' + (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.gog_import_empty', { gogImportUsername: username }) + '</p>')
+                .asAlert()
+                .show(title);
+            return;
+        }
+        const dialog = (0, Dialog_1.dialogFactory)()
+            .fromHtml('<p>' + (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.gog_import_confirm', {
+            gogImportUsername: username,
+            gogGameCount: data.gameCount,
+        }) + '</p>')
+            .asConfirmation();
+        dialog.addEventListener('primary', () => {
+            void (async () => {
+                const start = (await (0, Ajax_1.dboAction)('startGogImport', ACTION_CLASS)
+                    .payload({ gogUsername: username })
+                    .dispatch());
+                await runGogImportSteps(start);
+            })();
+        });
+        dialog.show(title);
+    }
+    function openGogImportDialog() {
+        const dialog = (0, Dialog_1.dialogFactory)()
+            .fromHtml('<dl><dt><label for="gogImportUsername">' + (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.gog_import_username')
+            + '</label></dt><dd><input type="text" id="gogImportUsername" class="long" maxlength="60" autocomplete="off" required autofocus></dd></dl>')
+            .asPrompt();
+        const input = dialog.content.querySelector('#gogImportUsername');
+        dialog.addEventListener('primary', () => {
+            const username = input.value.trim();
+            if (username !== '') {
+                void confirmGogImport(username);
+            }
+        });
+        dialog.show((0, Language_1.getPhrase)('wcf.igdb_integration.dialog.gog_import_title'));
+        input.focus();
+    }
     function init(steamAutoOpen, gameListUrl) {
         cleanGameListUrl = gameListUrl;
         const steamButton = document.getElementById('steamImportButton');
@@ -278,6 +411,8 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
         if (steamAutoOpen && steamButton !== null) {
             void openSteamImportDialog();
         }
+        const gogButton = document.getElementById('gogImportButton');
+        gogButton?.addEventListener('click', () => openGogImportDialog());
         const fileInput = document.getElementById('igdbImportFileInput');
         const fileButton = document.getElementById('igdbImportButton');
         fileButton?.addEventListener('click', () => fileInput?.click());

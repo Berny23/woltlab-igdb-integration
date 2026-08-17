@@ -38,7 +38,23 @@
 				<userdefaultvalue>1</userdefaultvalue>
 				<usersonly>1</usersonly>
 			</option>
-			<option	name="user.igdb_integration.can_import_games">
+			<option	name="user.igdb_integration.can_import_steam_games">
+				<categoryname>user.igdb_integration</categoryname>
+				<optiontype>boolean</optiontype>
+				<admindefaultvalue>1</admindefaultvalue>
+				<moddefaultvalue>1</moddefaultvalue>
+				<userdefaultvalue>1</userdefaultvalue>
+				<usersonly>1</usersonly>
+			</option>
+			<option	name="user.igdb_integration.can_import_gog_games">
+				<categoryname>user.igdb_integration</categoryname>
+				<optiontype>boolean</optiontype>
+				<admindefaultvalue>1</admindefaultvalue>
+				<moddefaultvalue>1</moddefaultvalue>
+				<userdefaultvalue>1</userdefaultvalue>
+				<usersonly>1</usersonly>
+			</option>
+			<option	name="user.igdb_integration.can_import_igdb_games">
 				<categoryname>user.igdb_integration</categoryname>
 				<optiontype>boolean</optiontype>
 				<admindefaultvalue>1</admindefaultvalue>
