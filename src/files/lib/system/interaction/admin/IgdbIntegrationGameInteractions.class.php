@@ -7,6 +7,8 @@ use wcf\data\IgdbIntegration\IgdbIntegrationGame;
 use wcf\system\interaction\AbstractInteractionProvider;
 use wcf\system\interaction\DeleteInteraction;
 use wcf\system\interaction\EditInteraction;
+use wcf\system\interaction\RpcInteraction;
+use wcf\util\IgdbIntegrationUtil;
 
 /**
  * Interaction provider for games.
@@ -22,6 +24,12 @@ final class IgdbIntegrationGameInteractions extends AbstractInteractionProvider
 	{
 		$this->addInteractions([
 			new EditInteraction(IgdbIntegrationGameEditForm::class),
+			new RpcInteraction(
+				'refresh',
+				'core/igdb-integration/games/%s/refresh',
+				'wcf.igdb_integration.game.refresh',
+				isAvailableCallback: static fn () => IgdbIntegrationUtil::isConnectionDataValid()
+			),
 			new DeleteInteraction('core/igdb-integration/games/%s'),
 		]);
 	}

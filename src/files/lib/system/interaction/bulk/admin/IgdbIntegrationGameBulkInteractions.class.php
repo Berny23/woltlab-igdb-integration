@@ -5,6 +5,8 @@ namespace wcf\system\interaction\bulk\admin;
 use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
 use wcf\system\interaction\bulk\AbstractBulkInteractionProvider;
 use wcf\system\interaction\bulk\BulkDeleteInteraction;
+use wcf\system\interaction\bulk\BulkRpcInteraction;
+use wcf\util\IgdbIntegrationUtil;
 
 /**
  * Bulk interaction provider for games.
@@ -19,6 +21,12 @@ final class IgdbIntegrationGameBulkInteractions extends AbstractBulkInteractionP
 	public function __construct()
 	{
 		$this->addInteractions([
+			new BulkRpcInteraction(
+				'refresh',
+				'core/igdb-integration/games/%s/refresh',
+				'wcf.igdb_integration.game.refresh',
+				isAvailableCallback: static fn () => IgdbIntegrationUtil::isConnectionDataValid()
+			),
 			new BulkDeleteInteraction('core/igdb-integration/games/%s'),
 		]);
 	}
