@@ -183,8 +183,11 @@ class IgdbIntegrationUtil
 
 	/**
 	 * Updates the game database with search results, if gameId doesn't already exist.
+	 * Alias matches are included by default for the manual search; the imports
+	 * defer them via updateDatabaseGamesByAlternativeName() to the titles that
+	 * the search results did not match, saving the second request.
 	 */
-	public static function updateDatabaseGamesByName($name): bool
+	public static function updateDatabaseGamesByName($name, bool $includeAliasMatches = true): bool
 	{
 		if (!self::isConnectionDataValid()) {
 			return false;
@@ -197,6 +200,39 @@ class IgdbIntegrationUtil
 
 		$body = 'search "' . str_replace(['"', '\\'], '', $name) . '";
 				fields ' . self::GAME_FIELDS . ';
+				limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
+
+		try {
+			$response = self::fetchIgdbGamesWithTokenRefresh($body);
+		} catch (Exception $ex) {
+			return false;
+		}
+
+		self::insertGamesFromResponse($response);
+
+		if ($includeAliasMatches) {
+			return self::updateDatabaseGamesByAlternativeName($name);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Updates the game database with all IGDB games whose alternative name
+	 * matches the given name exactly (case-insensitive). Because the search
+	 * ranking may push a game with matching alias out of the result window (e.g.
+	 * "Overwatch 2" => "Overwatch", while many season entries share the prefix).
+	 */
+	public static function updateDatabaseGamesByAlternativeName($name): bool
+	{
+		if (!self::isConnectionDataValid()) {
+			return false;
+		}
+
+		$name = trim(preg_replace('/[™®©]/u', '', $name));
+
+		$body = 'fields ' . self::GAME_FIELDS . ';
+				where alternative_names.name ~ "' . str_replace(['"', '\\'], '', $name) . '";
 				limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
 
 		try {

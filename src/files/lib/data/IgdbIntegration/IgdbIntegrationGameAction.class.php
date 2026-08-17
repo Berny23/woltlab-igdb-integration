@@ -549,8 +549,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		}
 
 		if (IgdbIntegrationUtil::isConnectionDataValid()) {
-			$searchedThisStep = 0;
-			while (!empty($state['searchQueue']) && $searchedThisStep < self::STEAM_IMPORT_SEARCHES_PER_STEP) {
+			$searchedThisStep = [];
+			while (!empty($state['searchQueue']) && count($searchedThisStep) < self::STEAM_IMPORT_SEARCHES_PER_STEP) {
 				$appId = array_key_first($state['searchQueue']);
 				$name = $state['searchQueue'][$appId];
 				unset($state['searchQueue'][$appId]);
@@ -562,8 +562,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 				}
 
 				// The request pacing is handled by the sitewide rate limit queue
-				IgdbIntegrationUtil::updateDatabaseGamesByName($name);
-				$searchedThisStep++;
+				IgdbIntegrationUtil::updateDatabaseGamesByName($name, false);
+				$searchedThisStep[$appId] = $name;
 			}
 
 			// The search results may contain the Steam link or the exact title
@@ -571,6 +571,25 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$this->matchRemainingByExternalId('steamAppId', $state['remaining'], $matched);
 			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
 			$this->insertImportMatches($matched, $state['stats']);
+
+			// Titles that the search results did not match may be the alias of
+			// a differently named game, which the search ranking can push out
+			// of the result window. The extra request is only needed on the
+			// first import: afterwards the fetched game is matched directly
+			// from the local database
+			$aliasQueried = false;
+			foreach ($searchedThisStep as $appId => $name) {
+				if (isset($state['remaining'][$appId])) {
+					IgdbIntegrationUtil::updateDatabaseGamesByAlternativeName($name);
+					$aliasQueried = true;
+				}
+			}
+			if ($aliasQueried) {
+				$matched = [];
+				$this->matchRemainingByExternalId('steamAppId', $state['remaining'], $matched);
+				$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false);
+				$this->insertImportMatches($matched, $state['stats']);
+			}
 		} else {
 			$state['searchQueue'] = [];
 		}
@@ -844,8 +863,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		}
 
 		if (IgdbIntegrationUtil::isConnectionDataValid()) {
-			$searchedThisStep = 0;
-			while (!empty($state['searchQueue']) && $searchedThisStep < self::GOG_IMPORT_SEARCHES_PER_STEP) {
+			$searchedThisStep = [];
+			while (!empty($state['searchQueue']) && count($searchedThisStep) < self::GOG_IMPORT_SEARCHES_PER_STEP) {
 				$gogId = array_key_first($state['searchQueue']);
 				$name = $state['searchQueue'][$gogId];
 				unset($state['searchQueue'][$gogId]);
@@ -857,8 +876,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 				}
 
 				// The request pacing is handled by the sitewide rate limit queue
-				IgdbIntegrationUtil::updateDatabaseGamesByName($name);
-				$searchedThisStep++;
+				IgdbIntegrationUtil::updateDatabaseGamesByName($name, false);
+				$searchedThisStep[$gogId] = $name;
 			}
 
 			// The search results may contain the GOG link or the exact title
@@ -866,6 +885,25 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$this->matchRemainingByExternalId('gogId', $state['remaining'], $matched);
 			$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false, 'gogId');
 			$this->insertImportMatches($matched, $state['stats']);
+
+			// Titles that the search results did not match may be the alias of
+			// a differently named game, which the search ranking can push out
+			// of the result window. The extra request is only needed on the
+			// first import: afterwards the fetched game is matched directly
+			// from the local database
+			$aliasQueried = false;
+			foreach ($searchedThisStep as $gogId => $name) {
+				if (isset($state['remaining'][$gogId])) {
+					IgdbIntegrationUtil::updateDatabaseGamesByAlternativeName($name);
+					$aliasQueried = true;
+				}
+			}
+			if ($aliasQueried) {
+				$matched = [];
+				$this->matchRemainingByExternalId('gogId', $state['remaining'], $matched);
+				$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], false, 'gogId');
+				$this->insertImportMatches($matched, $state['stats']);
+			}
 		} else {
 			$state['searchQueue'] = [];
 		}
@@ -1146,33 +1184,41 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		}
 
 		if (IgdbIntegrationUtil::isConnectionDataValid()) {
-			$searchedThisStep = 0;
-			while (!empty($state['searchQueue']) && $searchedThisStep < self::PLAYNITE_IMPORT_SEARCHES_PER_STEP) {
-				$key = array_key_first($state['searchQueue']);
+			$searchedThisStep = [];
+			while (!empty($state['searchQueue']) && count($searchedThisStep) < self::PLAYNITE_IMPORT_SEARCHES_PER_STEP) {
+				$key = (string)array_key_first($state['searchQueue']);
 				$name = $state['searchQueue'][$key];
 				unset($state['searchQueue'][$key]);
 				$state['searched']++;
 
 				// May have been matched by a search result of a previous step
-				$prefix = substr((string)$key, 0, 1);
-				if ($prefix === 's') {
-					$stillRemaining = isset($state['remaining'][intval(substr((string)$key, 1))]);
-				} elseif ($prefix === 'g') {
-					$stillRemaining = isset($state['remainingGog'][intval(substr((string)$key, 1))]);
-				} else {
-					$stillRemaining = isset($state['remainingNames'][$key]);
-				}
-				if (!$stillRemaining) {
+				if (!$this->isPlayniteGameRemaining($state, $key)) {
 					continue;
 				}
 
 				// The request pacing is handled by the sitewide rate limit queue
-				IgdbIntegrationUtil::updateDatabaseGamesByName($name);
-				$searchedThisStep++;
+				IgdbIntegrationUtil::updateDatabaseGamesByName($name, false);
+				$searchedThisStep[$key] = $name;
 			}
 
 			// The search results may contain the store link or the exact title
 			$this->matchPlayniteRemaining($state, false);
+
+			// Titles that the search results did not match may be the alias of
+			// a differently named game (e.g. "Overwatch 2" for "Overwatch"),
+			// which the search ranking can push out of the result window. The
+			// extra request is only needed on the first import: afterwards the
+			// fetched game is matched directly from the local database
+			$aliasQueried = false;
+			foreach ($searchedThisStep as $key => $name) {
+				if ($this->isPlayniteGameRemaining($state, (string)$key)) {
+					IgdbIntegrationUtil::updateDatabaseGamesByAlternativeName($name);
+					$aliasQueried = true;
+				}
+			}
+			if ($aliasQueried) {
+				$this->matchPlayniteRemaining($state, false);
+			}
 		} else {
 			$state['searchQueue'] = [];
 		}
@@ -1228,6 +1274,23 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			'ambiguous' => $ambiguousNames,
 			'gameCount' => $gameCount,
 		];
+	}
+
+	/**
+	 * Returns whether the game behind a prefixed search queue key of the
+	 * Playnite import is still unmatched in its pool.
+	 */
+	protected function isPlayniteGameRemaining(array $state, string $key): bool
+	{
+		$prefix = substr($key, 0, 1);
+		if ($prefix === 's') {
+			return isset($state['remaining'][intval(substr($key, 1))]);
+		}
+		if ($prefix === 'g') {
+			return isset($state['remainingGog'][intval(substr($key, 1))]);
+		}
+
+		return isset($state['remainingNames'][$key]);
 	}
 
 	/**
@@ -1514,10 +1577,11 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 	/**
 	 * Matches remaining store games by normalized title against all local games,
-	 * using the primary name first and the IGDB aliases as a fallback (e.g. GOG's
+	 * considering the primary names and the IGDB aliases together (e.g. GOG's
 	 * "Ultima III" matching "Ultima III: Exodus" via the alias "Ultima 3").
 	 * Unique hits are moved to $matched. Titles shared by multiple games (e.g. game +
-	 * same-named remaster) are moved to $ambiguous, because the stores provide no year.
+	 * same-named remaster, or one game's name being another game's alias) are moved
+	 * to $ambiguous, because the stores provide no year.
 	 * $backfillExternalId must be disabled if the keys of $remaining are no real
 	 * external ids, e.g. for the name-only pool of the Playnite import.
 	 */
@@ -1571,9 +1635,11 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 				continue;
 			}
 
-			// The aliases are only consulted if no primary name matches
-			$candidates = $gamesByTitle[$title] ?? $gamesByAlternativeTitle[$title] ?? null;
-			if ($candidates === null) {
+			// Primary names and aliases are considered together, so a title
+			// shared by one game's name and another game's alias is reported
+			// as ambiguous instead of silently picking the named game
+			$candidates = array_merge($gamesByTitle[$title] ?? [], $gamesByAlternativeTitle[$title] ?? []);
+			if (empty($candidates)) {
 				continue;
 			}
 
