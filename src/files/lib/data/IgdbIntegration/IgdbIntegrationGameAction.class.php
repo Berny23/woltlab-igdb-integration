@@ -1577,11 +1577,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 	/**
 	 * Matches remaining store games by normalized title against all local games,
-	 * considering the primary names and the IGDB aliases together (e.g. GOG's
+	 * using the primary name first and the IGDB aliases as a fallback (e.g. GOG's
 	 * "Ultima III" matching "Ultima III: Exodus" via the alias "Ultima 3").
 	 * Unique hits are moved to $matched. Titles shared by multiple games (e.g. game +
-	 * same-named remaster, or one game's name being another game's alias) are moved
-	 * to $ambiguous, because the stores provide no year.
+	 * same-named remaster) are moved to $ambiguous, because the stores provide no year.
 	 * $backfillExternalId must be disabled if the keys of $remaining are no real
 	 * external ids, e.g. for the name-only pool of the Playnite import.
 	 */
@@ -1635,11 +1634,9 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 				continue;
 			}
 
-			// Primary names and aliases are considered together, so a title
-			// shared by one game's name and another game's alias is reported
-			// as ambiguous instead of silently picking the named game
-			$candidates = array_merge($gamesByTitle[$title] ?? [], $gamesByAlternativeTitle[$title] ?? []);
-			if (empty($candidates)) {
+			// The aliases are only consulted if no primary name matches
+			$candidates = $gamesByTitle[$title] ?? $gamesByAlternativeTitle[$title] ?? null;
+			if ($candidates === null) {
 				continue;
 			}
 
