@@ -23,6 +23,7 @@ mkdir -p "$DIST_DIR"
 # Compress all prepared archives and the remaining files/folders from the root directory
 cd "$DIST_DIR"
 cp "$SRC_DIR/acpMenu.xml" \
+   "$SRC_DIR/bbcode.xml" \
    "$SRC_DIR/cronjob.xml" \
    "$SRC_DIR/eventListener.xml" \
    "$SRC_DIR/menuItem.xml" \
@@ -38,15 +39,15 @@ cp -r "$SRC_DIR/language" language
 
 tar -cf "de.berny23.igdb-integration.tar" \
     "acptemplates.tar" "files.tar" "language" "templates.tar" \
-    "acpMenu.xml" "cronjob.xml" "eventListener.xml" "menuItem.xml" \
-    "objectType.xml" "option.xml" "package.xml" "page.xml" \
+    "acpMenu.xml" "bbcode.xml" "cronjob.xml" "eventListener.xml" \
+    "menuItem.xml" "objectType.xml" "option.xml" "package.xml" "page.xml" \
     "templateListener.xml" "userGroupOption.xml" "userOption.xml" \
     "userProfileMenu.xml"
 
 # Remove temporary files and folders
 rm -f "acptemplates.tar" "files.tar" "templates.tar" \
-      "acpMenu.xml" "cronjob.xml" "eventListener.xml" "menuItem.xml" \
-      "objectType.xml" "option.xml" "package.xml" "page.xml" \
+      "acpMenu.xml" "bbcode.xml" "cronjob.xml" "eventListener.xml" \
+      "menuItem.xml" "objectType.xml" "option.xml" "package.xml" "page.xml" \
       "templateListener.xml" "userGroupOption.xml" "userOption.xml" \
       "userProfileMenu.xml"
 rm -rf language

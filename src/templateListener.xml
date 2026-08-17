@@ -7,5 +7,11 @@
 			<eventname>boxes</eventname>
 			<templatecode><![CDATA[{include file='igdbIntegrationGameListUserProfileSidebar'}]]></templatecode>
 		</templatelistener>
+		<templatelistener name="wysiwygIgdbIntegrationGameEditorButton">
+			<environment>user</environment>
+			<templatename>shared_wysiwyg</templatename>
+			<eventname>wysiwyg</eventname>
+			<templatecode><![CDATA[{include file='__igdbIntegrationGameEditorButton'}]]></templatecode>
+		</templatelistener>
 	</import>
 </data>

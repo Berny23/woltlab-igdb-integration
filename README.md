@@ -15,6 +15,7 @@ Allows you to automatically import and manage all games from IGDB within the Wol
 - Shows game titles in the current user's language, if available
 - Shows owned games and game count on profile pages
 - Users can view a list of all players of a game
+- Games can be embedded into posts via an editor button with live search or the `[igdbgame]` BBCode
 - Recent activity events for adding, removing and rating games
 - Supports automated Trophies and activity points for owned games
 - Modern admin game list with filters, bulk actions and manual game creation

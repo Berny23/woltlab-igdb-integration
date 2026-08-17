@@ -35,6 +35,7 @@
 		<instruction type="userProfileMenu" />
 		<instruction type="eventListener" />
 		<instruction type="templateListener" />
+		<instruction type="bbcode" />
 	</instructions>
 	<instructions type="update" fromversion="2.0.1">
 		<instruction type="file" />
@@ -45,5 +46,6 @@
 		<instruction type="userGroupOption" />
 		<instruction type="eventListener" />
 		<instruction type="templateListener" />
+		<instruction type="bbcode" />
 	</instructions>
 </package>

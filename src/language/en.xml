@@ -74,6 +74,20 @@
 		<item name="wcf.igdb_integration.dialog.igdb_import_title"><![CDATA[Import IGDB List]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_confirm"><![CDATA[The file contains {#$count} games. Games that are already in your library are skipped. Start the import?]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_invalid_file"><![CDATA[The selected file is not a valid IGDB list export.]]></item>
+		<item name="wcf.igdb_integration.dialog.game_search_title"><![CDATA[Insert Game]]></item>
+		<item name="wcf.igdb_integration.dialog.game_search_placeholder"><![CDATA[Enter a game title…]]></item>
+		<item name="wcf.igdb_integration.dialog.game_search_no_results"><![CDATA[No matching games were found.]]></item>
+	</category>
+
+	<!-- Editor button -->
+	<category name="wcf.editor.button">
+		<item name="wcf.editor.button.igdb_game"><![CDATA[Insert Game]]></item>
+	</category>
+
+	<!-- Embedded game bbcode -->
+	<category name="wcf.igdb_integration.bbcode">
+		<item name="wcf.igdb_integration.bbcode.author_owns"><![CDATA[The author owns this game]]></item>
+		<item name="wcf.igdb_integration.bbcode.author_rating"><![CDATA[Rating of the author]]></item>
 	</category>
 
 	<!-- ACP content menu -->

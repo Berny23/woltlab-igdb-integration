@@ -186,3 +186,160 @@
 	align-self: center;
 	margin-top: 0.5rem;
 }
+
+/* Game box embedded into messages via the [igdbgame] bbcode */
+.igdbIntegrationGameEmbed.embeddedContent {
+	display: flex;
+	/* Wider than the default embeddedContent card (400px), so the larger
+	   cover is clearly visible and longer titles rarely wrap */
+	max-width: 560px;
+	min-height: 200px;
+	/* Anchor for the author-owns badge */
+	position: relative;
+}
+
+/* Badge shown in the upper right corner if the message author owns the game */
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedOwnedBadge {
+	display: none;
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	color: var(--wcfStatusSuccessText);
+}
+
+.igdbIntegrationGameEmbed.igdbIntegrationGameEmbedAuthorOwns .igdbIntegrationGameEmbedOwnedBadge {
+	display: block;
+}
+
+/* Keep the title from running under the badge */
+.igdbIntegrationGameEmbed.igdbIntegrationGameEmbedAuthorOwns h3.igdbIntegrationGameEmbedTitle {
+	padding-right: 34px;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedCover {
+	flex-shrink: 0;
+	width: 140px;
+	object-fit: cover;
+	object-position: center;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedInfo {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+	padding: 10px;
+}
+
+.igdbIntegrationGameEmbed h3.igdbIntegrationGameEmbedTitle {
+	margin: 0;
+	font-size: var(--wcfFontSizeHeadline);
+	font-weight: 600;
+	overflow-wrap: anywhere;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedYear,
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedPlatforms {
+	color: var(--wcfContentDimmedText);
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedYear {
+	font-size: var(--wcfFontSizeDefault);
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedLink {
+	margin-top: 5px;
+	align-self: flex-start;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedAuthorRating {
+	margin-top: 5px;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons {
+	display: flex;
+	margin-top: auto;
+	padding-top: 10px;
+}
+
+/* Fill the full width of the info column with evenly sized buttons */
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .button {
+	flex: 1 1 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 5px;
+}
+
+/* Join the buttons into a split button; the quick add button keeps the
+   default button color in both states */
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .button:not(:last-child) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .button:not(:first-child) {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	margin-left: 1px;
+}
+
+/* Highlight the edit and quick remove buttons in the primary color if the
+   current user owns the game */
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"],
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons:has(.igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"]) .igdbIntegrationGameEmbedEdit {
+	background-color: var(--wcfButtonPrimaryBackground);
+	color: var(--wcfButtonPrimaryText);
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"]:hover,
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons:has(.igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"]) .igdbIntegrationGameEmbedEdit:hover {
+	background-color: var(--wcfButtonPrimaryBackgroundActive);
+	color: var(--wcfButtonPrimaryTextActive);
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedPlayerList {
+	background-color: var(--wcfButtonPrimaryBackground);
+	color: var(--wcfButtonPrimaryText);
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedPlayerList:hover {
+	background-color: var(--wcfButtonPrimaryBackgroundActive);
+	color: var(--wcfButtonPrimaryTextActive);
+}
+
+/* Live search results in the editor's game search dialog */
+.igdbIntegrationGameSearchResultList {
+	max-height: 390px;
+	overflow-y: auto;
+}
+
+.igdbIntegrationGameSearchResultList .igdbIntegrationGameSearchResult {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.igdbIntegrationGameSearchResultList .igdbIntegrationGameSearchResult .igdbIntegrationGameSearchResultCover {
+	flex-shrink: 0;
+	width: 40px;
+	height: 56px;
+	object-fit: cover;
+	object-position: center;
+	border-radius: 0.25rem;
+}
+
+.igdbIntegrationGameSearchResultList .igdbIntegrationGameSearchResult .igdbIntegrationGameSearchResultText {
+	min-width: 0;
+}
+
+.igdbIntegrationGameSearchResultList .igdbIntegrationGameSearchResult small {
+	display: block;
+	color: var(--wcfContentDimmedText);
+}
+
+.igdbIntegrationGameSearchResultList .igdbIntegrationGameSearchResult .igdbIntegrationGameSearchResultPlatforms {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

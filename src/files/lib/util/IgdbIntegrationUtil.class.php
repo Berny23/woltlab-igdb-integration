@@ -29,6 +29,7 @@ class IgdbIntegrationUtil
 	const URL_BASE = 'https://api.igdb.com/v4/';
 	const TWITCH_URL_BASE = 'https://id.twitch.tv/oauth2/token';
 	const COVER_URL_BASE = 'https://images.igdb.com/igdb/image/upload/t_cover_med/';
+	const COVER_URL_BASE_BIG = 'https://images.igdb.com/igdb/image/upload/t_cover_big/';
 	const COVER_URL_FILETYPE = '.jpg';
 	const STEAM_API_URL_BASE = 'https://api.steampowered.com/';
 
@@ -427,11 +428,12 @@ class IgdbIntegrationUtil
 	 * Returns the full cover image url for a game, using the localized cover of
 	 * the preferred region if available and the image proxy if enabled.
 	 */
-	public static function getCoverImageUrl($coverImageId, $localizedCovers): string
+	public static function getCoverImageUrl($coverImageId, $localizedCovers, bool $useLargeSize = false): string
 	{
 		$coverImageId = self::getLocalizedCoverImageId($coverImageId, $localizedCovers);
+		$urlBase = $useLargeSize ? self::COVER_URL_BASE_BIG : self::COVER_URL_BASE;
 
-		return self::getImageProxyLink(self::COVER_URL_BASE . $coverImageId . self::COVER_URL_FILETYPE);
+		return self::getImageProxyLink($urlBase . $coverImageId . self::COVER_URL_FILETYPE);
 	}
 
 	/**

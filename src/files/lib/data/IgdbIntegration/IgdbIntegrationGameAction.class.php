@@ -3,6 +3,7 @@
 namespace wcf\data\IgdbIntegration;
 
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
+use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
 use wcf\util\IgdbIntegrationUtil;
 use wcf\system\WCF;
 use wcf\data\user\UserEditor;
@@ -71,6 +72,17 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	const IGDB_IMPORT_STATE_KEY = 'igdbListImportState';
 
 	/**
+	 * Maximum number of results returned by the game search of the editor
+	 * button dialog.
+	 */
+	const GAME_SEARCH_RESULT_LIMIT = 20;
+
+	/**
+	 * Minimum length of the search string of the game search.
+	 */
+	const GAME_SEARCH_MIN_LENGTH = 2;
+
+	/**
 	 * @inheritDoc
 	 */
 	protected $permissionsCreate = ['admin.igdb_integration.can_manage_games'];
@@ -93,7 +105,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	/**
 	 * @inheritDoc
 	 */
-	protected $allowGuestAccess = ['getGameUserEditDialog', 'getGamePlayerListDialog'];
+	protected $allowGuestAccess = ['getGameUserEditDialog', 'getGamePlayerListDialog', 'searchGames'];
 
 	/**
 	 * @var DialogFormDocument
@@ -1094,5 +1106,52 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			'dialog' => $this->dialog->getHtml(),
 			'formId' => $this->dialog->getId(),
 		];
+	}
+
+	/**
+	 * Checks the parameters of the game search of the editor button dialog.
+	 */
+	public function validateSearchGames()
+	{
+		$this->readString('searchString');
+	}
+
+	/**
+	 * Returns the games matching the search string for the live search of the
+	 * editor button dialog.
+	 */
+	public function searchGames()
+	{
+		$searchString = StringUtil::trim($this->parameters['searchString']);
+		if (mb_strlen($searchString) < self::GAME_SEARCH_MIN_LENGTH) {
+			return ['games' => []];
+		}
+
+		$gameList = new IgdbIntegrationGameList();
+		$gameList->sqlSelects .= IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName";
+		// Search for all parts, separated with a space, like the game list page
+		foreach (explode(' ', $searchString) as $part) {
+			$gameList->getConditionBuilder()->add(
+				"(name LIKE ?
+				OR germanName LIKE ?)",
+				['%' . $part . '%', '%' . $part . '%']
+			);
+		}
+		$gameList->sqlOrderBy = 'displayName ASC';
+		$gameList->sqlLimit = self::GAME_SEARCH_RESULT_LIMIT;
+		$gameList->readObjects();
+
+		$games = [];
+		foreach ($gameList as $game) {
+			$games[] = [
+				'gameId' => $game->gameId,
+				'name' => $game->displayName,
+				'releaseYear' => $game->releaseYear,
+				'platforms' => $game->platforms,
+				'coverImageUrl' => IgdbIntegrationUtil::getCoverImageUrl($game->coverImageId, $game->localizedCovers),
+			];
+		}
+
+		return ['games' => $games];
 	}
 }
