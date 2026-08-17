@@ -135,9 +135,9 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
 			// Search for all parts, separated with a space
 			$parts = explode(' ', $filter['search']);
 			foreach ($parts as $part) {
-				$conditionSql .= " AND (name LIKE ? OR germanName LIKE ?)";
-				$conditionParams[] = '%' . $part . '%';
-				$conditionParams[] = '%' . $part . '%';
+				[$partSql, $partParams] = IgdbIntegrationUtil::getNameSearchCondition($part);
+				$conditionSql .= " AND " . $partSql;
+				$conditionParams = array_merge($conditionParams, $partParams);
 			}
 		}
 
@@ -164,11 +164,24 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
 		$pages = max(1, intval(ceil($filteredGameCount / $itemsPerPage)));
 		$pageNo = min($filter['pageNo'], $pages);
 
-		// The own rating is the primary sort field by default, all other
-		// fields use the display name to break ties
-		$orderBySql = $filter['sortField'] . ' ' . $filter['sortOrder'];
-		if ($filter['sortField'] != 'displayName') {
-			$orderBySql .= ', displayName ASC';
+		if ($filter['search'] !== '' && $filter['sortField'] == 'lastInteractionTime') {
+			// The "Relevance" sort keeps the ranking of the search itself,
+			// recently active games first within the same rank. Without a
+			// search it sorts by the last interaction only.
+			$orderBySql = IgdbIntegrationUtil::getNameSearchRelevanceSql($filter['search']) . ', g.lastInteractionTime DESC, g.gameId';
+		} else {
+			// The own rating is the primary sort field by default, all other
+			// fields use the display name to break ties
+			$orderBySql = $filter['sortField'] . ' ' . $filter['sortOrder'];
+			if ($filter['sortField'] != 'displayName') {
+				$orderBySql .= ', displayName ASC';
+			}
+
+			// When searching, the best name matches come first and the
+			// selected sort order only breaks ties
+			if ($filter['search'] !== '') {
+				$orderBySql = IgdbIntegrationUtil::getNameSearchRelevanceSql($filter['search']) . ', ' . $orderBySql;
+			}
 		}
 
 		$sql = "SELECT

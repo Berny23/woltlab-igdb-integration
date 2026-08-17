@@ -1931,13 +1931,12 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$gameList->sqlSelects .= IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName";
 		// Search for all parts, separated with a space, like the game list page
 		foreach (explode(' ', $searchString) as $part) {
-			$gameList->getConditionBuilder()->add(
-				"(name LIKE ?
-				OR germanName LIKE ?)",
-				['%' . $part . '%', '%' . $part . '%']
-			);
+			[$conditionSql, $conditionParams] = IgdbIntegrationUtil::getNameSearchCondition($part);
+			$gameList->getConditionBuilder()->add($conditionSql, $conditionParams);
 		}
-		$gameList->sqlOrderBy = 'displayName ASC';
+		// The best name matches come first so that the result limit cannot cut
+		// off the searched game itself
+		$gameList->sqlOrderBy = IgdbIntegrationUtil::getNameSearchRelevanceSql($searchString) . ', displayName ASC';
 		$gameList->sqlLimit = self::GAME_SEARCH_RESULT_LIMIT;
 		$gameList->readObjects();
 

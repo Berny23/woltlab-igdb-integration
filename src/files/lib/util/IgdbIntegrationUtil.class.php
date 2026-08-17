@@ -443,7 +443,10 @@ class IgdbIntegrationUtil
 			$gameCoverId = isset($game->cover) ? $game->cover->image_id : 'nocover';
 			$gameSlug = $game->slug ?? '';
 			$gameLocalizedCoversJson = JSON::encode($gameLocalizedCovers);
-			$gameAlternativeNamesJson = JSON::encode($gameAlternativeNames);
+			// Unescaped unicode keeps the aliases searchable with LIKE; the hex
+			// digits of \u escapes would otherwise match digit searches, e.g.
+			// "3" finding the "イ" of a Japanese alias
+			$gameAlternativeNamesJson = JSON::encode($gameAlternativeNames, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 			$statement->execute([$gameId, $gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId,
 								/* UPDATE starts here */
@@ -581,6 +584,66 @@ class IgdbIntegrationUtil
 	public static function validateRating($value)
 	{
 		return $value != 0;
+	}
+
+	/**
+	 * Returns the given string as it appears inside the alternativeNames JSON
+	 * array, without the surrounding quotes.
+	 */
+	private static function encodeAliasSearchString(string $value): string
+	{
+		return substr(JSON::encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 1, -1);
+	}
+
+	/**
+	 * Returns the SQL condition and its parameters that match one part of a
+	 * name search against all known names of a game, including its aliases,
+	 * e.g. "Dark Souls 3" for "Dark Souls III".
+	 */
+	public static function getNameSearchCondition(string $part): array
+	{
+		// alternativeNames holds a JSON array, so quotes and backslashes are
+		// stored escaped and need the same encoding to match
+		$jsonPart = self::encodeAliasSearchString($part);
+
+		return [
+			"(name LIKE ? OR germanName LIKE ? OR alternativeNames LIKE ?)",
+			['%' . $part . '%', '%' . $part . '%', '%' . $jsonPart . '%'],
+		];
+	}
+
+	/**
+	 * Returns the SQL expression that ranks a game by how well its names match
+	 * the full search string: exact match, then prefix match, then the search
+	 * string as a whole phrase, then everything the per-part conditions let
+	 * through. Lower is better, so it is meant for an ascending ORDER BY in
+	 * front of the user-defined sort order.
+	 */
+	public static function getNameSearchRelevanceSql(string $search): string
+	{
+		$db = WCF::getDB();
+		$name = $db->escapeString($search);
+
+		// An alias is exact if its full JSON entry including both quotes
+		// occurs in the column, and a prefix if the opening quote directly
+		// precedes the search string
+		$jsonSearch = self::encodeAliasSearchString($search);
+		$aliasExact = $db->escapeString('"' . $jsonSearch . '"');
+		$aliasPrefix = $db->escapeString('"' . $jsonSearch);
+		$aliasPhrase = $db->escapeString($jsonSearch);
+
+		return "CASE
+				WHEN name LIKE '" . $name . "'
+					OR germanName LIKE '" . $name . "'
+					OR alternativeNames LIKE '%" . $aliasExact . "%' THEN 0
+				WHEN name LIKE '" . $name . "%'
+					OR germanName LIKE '" . $name . "%'
+					OR alternativeNames LIKE '%" . $aliasPrefix . "%' THEN 1
+				WHEN name LIKE '%" . $name . "%'
+					OR germanName LIKE '%" . $name . "%'
+					OR alternativeNames LIKE '%" . $aliasPhrase . "%' THEN 2
+				ELSE 3
+				END";
 	}
 
 	/**

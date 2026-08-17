@@ -268,11 +268,8 @@ class IgdbIntegrationGameListPage extends SortablePage
 			// Search for all parts, separated with a space
 			$parts = explode(' ', $this->searchField);
 			foreach ($parts as $part) {
-				$this->objectList->getConditionBuilder()->add(
-					"(name LIKE ?
-					OR germanName LIKE ?)",
-					['%' . $part . '%', '%' . $part . '%']
-				);
+				[$conditionSql, $conditionParams] = IgdbIntegrationUtil::getNameSearchCondition($part);
+				$this->objectList->getConditionBuilder()->add($conditionSql, $conditionParams);
 			}
 		}
 
@@ -286,5 +283,31 @@ class IgdbIntegrationGameListPage extends SortablePage
 			}
 			$this->objectList->getConditionBuilder()->add('(' . implode(' OR ', $conditions) . ')', $parameters);
 		}
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function readObjects()
+	{
+		// readData() rebuilds sqlOrderBy from the sort field after
+		// initObjectList(), so the ranking has to be prepended here
+		if (!empty($this->searchField)) {
+			$relevanceSql = IgdbIntegrationUtil::getNameSearchRelevanceSql($this->searchField);
+
+			if ($this->sortField == 'lastInteractionTime') {
+				// The "Relevance" sort keeps the ranking of the search itself,
+				// recently active games first within the same rank. Without a
+				// search it sorts by the last interaction only.
+				$this->sqlOrderBy = $relevanceSql
+					. ', lastInteractionTime DESC, ' . $this->objectList->getDatabaseTableAlias() . '.gameId';
+			} else {
+				// The best name matches come first, the selected sort order
+				// only breaks ties
+				$this->sqlOrderBy = $relevanceSql . ($this->sqlOrderBy ? ', ' . $this->sqlOrderBy : '');
+			}
+		}
+
+		parent::readObjects();
 	}
 }
