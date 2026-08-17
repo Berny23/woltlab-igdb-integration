@@ -4,10 +4,13 @@ namespace wcf\system\interaction\admin;
 
 use wcf\acp\form\IgdbIntegrationGameEditForm;
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
+use wcf\system\endpoint\controller\core\igdbIntegration\RefreshGame;
 use wcf\system\interaction\AbstractInteractionProvider;
 use wcf\system\interaction\DeleteInteraction;
 use wcf\system\interaction\EditInteraction;
+use wcf\system\interaction\InteractionConfirmationType;
 use wcf\system\interaction\RpcInteraction;
+use wcf\system\WCF;
 use wcf\util\IgdbIntegrationUtil;
 
 /**
@@ -26,9 +29,14 @@ final class IgdbIntegrationGameInteractions extends AbstractInteractionProvider
 			new EditInteraction(IgdbIntegrationGameEditForm::class),
 			new RpcInteraction(
 				'refresh',
-				'core/igdb-integration/games/%s/refresh',
+				RefreshGame::ENDPOINT,
 				'wcf.igdb_integration.game.refresh',
-				isAvailableCallback: static fn () => IgdbIntegrationUtil::isConnectionDataValid()
+				confirmationType: InteractionConfirmationType::Custom,
+				confirmationMessage: static fn (IgdbIntegrationGame $game) => WCF::getLanguage()->getDynamicVariable(
+					'wcf.igdb_integration.game.refresh.confirmMessage',
+					['game' => $game]
+				),
+				isAvailableCallback: IgdbIntegrationUtil::isConnectionDataValid(...)
 			),
 			new DeleteInteraction('core/igdb-integration/games/%s'),
 		]);

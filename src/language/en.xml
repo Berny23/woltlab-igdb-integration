@@ -48,6 +48,8 @@
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Image URL]]></item>
 		<item name="wcf.igdb_integration.game.last_interaction"><![CDATA[Last user interaction]]></item>
 		<item name="wcf.igdb_integration.game.refresh"><![CDATA[Refresh from IGDB]]></item>
+		<item name="wcf.igdb_integration.game.refresh.confirmMessage"><![CDATA[Do you really want to refresh “{$game->name}” from IGDB? Manually edited game data will be overwritten.]]></item>
+		<item name="wcf.igdb_integration.game.refresh.bulkConfirmMessage"><![CDATA[Do you really want to refresh the selected games from IGDB? Manually edited game data will be overwritten.]]></item>
 	</category>
 
 	<!-- IGDB cover regions -->

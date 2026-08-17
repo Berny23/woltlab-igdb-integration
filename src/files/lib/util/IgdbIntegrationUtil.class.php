@@ -312,14 +312,17 @@ class IgdbIntegrationUtil
 
 	/**
 	 * Updates the game database with all IGDB games with the given IGDB ids.
-	 * Returns false if any request failed.
+	 * Returns the number of games received from IGDB (ids that IGDB no longer
+	 * knows are missing from that count), or null if the connection data is
+	 * invalid or any request failed.
 	 */
-	public static function updateDatabaseGamesByIds(array $gameIds): bool
+	public static function updateDatabaseGamesByIds(array $gameIds): ?int
 	{
 		if (!self::isConnectionDataValid() || empty($gameIds)) {
-			return false;
+			return null;
 		}
 
+		$receivedGameCount = 0;
 		foreach (array_chunk($gameIds, 400) as $chunk) {
 			$body = 'fields ' . self::GAME_FIELDS . ';
 					where id = (' . implode(',', array_map('intval', $chunk)) . ');
@@ -328,19 +331,20 @@ class IgdbIntegrationUtil
 			try {
 				$response = self::fetchIgdbGamesWithTokenRefresh($body);
 			} catch (Exception $ex) {
-				return false;
+				return null;
 			}
 
-			self::insertGamesFromResponse($response);
+			$receivedGameCount += self::insertGamesFromResponse($response);
 		}
 
-		return true;
+		return $receivedGameCount;
 	}
 
 	/**
 	 * Inserts or updates all games of an IGDB games response in the database.
+	 * Returns the number of games contained in the response.
 	 */
-	private static function insertGamesFromResponse($response)
+	private static function insertGamesFromResponse($response): int
 	{
 		$gamesJson = JSON::decode($response->getBody(), false);
 		$sql = "INSERT INTO wcf1_igdb_integration_game
@@ -446,6 +450,8 @@ class IgdbIntegrationUtil
 								$gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId]);
 		}
 		WCF::getDB()->commitTransaction();
+
+		return count($gamesJson);
 	}
 
 	/**

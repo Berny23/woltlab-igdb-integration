@@ -3,6 +3,7 @@
 use wcf\event\endpoint\ControllerCollecting;
 use wcf\system\endpoint\controller\core\igdbIntegration\DeleteGame;
 use wcf\system\endpoint\controller\core\igdbIntegration\RefreshGame;
+use wcf\system\endpoint\controller\core\igdbIntegration\RefreshGames;
 use wcf\system\event\EventHandler;
 
 return static function (): void {
@@ -11,6 +12,7 @@ return static function (): void {
 		static function (ControllerCollecting $event) {
 			$event->register(new DeleteGame());
 			$event->register(new RefreshGame());
+			$event->register(new RefreshGames());
 		}
 	);
 };

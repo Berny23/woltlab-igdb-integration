@@ -48,6 +48,8 @@
 		<item name="wcf.igdb_integration.game.cover_image_url"><![CDATA[Bild-URL]]></item>
 		<item name="wcf.igdb_integration.game.last_interaction"><![CDATA[Letzte Benutzerinteraktion]]></item>
 		<item name="wcf.igdb_integration.game.refresh"><![CDATA[Von IGDB aktualisieren]]></item>
+		<item name="wcf.igdb_integration.game.refresh.confirmMessage"><![CDATA[Möchte{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{else}st du{/if} „{$game->name}“ wirklich von IGDB aktualisieren? Manuell bearbeitete Spieldaten werden überschrieben.]]></item>
+		<item name="wcf.igdb_integration.game.refresh.bulkConfirmMessage"><![CDATA[Möchte{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{else}st du{/if} die ausgewählten Spiele wirklich von IGDB aktualisieren? Manuell bearbeitete Spieldaten werden überschrieben.]]></item>
 	</category>
 
 	<!-- IGDB cover regions -->
