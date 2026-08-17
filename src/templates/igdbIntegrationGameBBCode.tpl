@@ -56,6 +56,7 @@
 		Language.addObject({
 			'wcf.igdb_integration.dialog.game_user_edit_title': '{jslang}wcf.igdb_integration.dialog.game_user_edit_title{/jslang}',
 			'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}',
+			'wcf.igdb_integration.bbcode.author_rating': '{jslang}wcf.igdb_integration.bbcode.author_rating{/jslang}',
 			'wcf.igdb_integration.page.game_quick_add': '{jslang}wcf.igdb_integration.page.game_quick_add{/jslang}',
 			'wcf.igdb_integration.page.game_quick_remove': '{jslang}wcf.igdb_integration.page.game_quick_remove{/jslang}'
 		});

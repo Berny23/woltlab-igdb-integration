@@ -284,26 +284,14 @@
 	margin-left: 1px;
 }
 
-/* Highlight the edit and quick remove buttons in the primary color if the
-   current user owns the game */
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"],
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons:has(.igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"]) .igdbIntegrationGameEmbedEdit {
+/* Highlight all buttons in the primary color if the current user owns the
+   game, otherwise all buttons keep the default color */
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons:has(.igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"]) .button {
 	background-color: var(--wcfButtonPrimaryBackground);
 	color: var(--wcfButtonPrimaryText);
 }
 
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"]:hover,
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons:has(.igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"]) .igdbIntegrationGameEmbedEdit:hover {
-	background-color: var(--wcfButtonPrimaryBackgroundActive);
-	color: var(--wcfButtonPrimaryTextActive);
-}
-
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedPlayerList {
-	background-color: var(--wcfButtonPrimaryBackground);
-	color: var(--wcfButtonPrimaryText);
-}
-
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedPlayerList:hover {
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons:has(.igdbIntegrationGameEmbedQuickAdd[data-is-owned="1"]) .button:hover {
 	background-color: var(--wcfButtonPrimaryBackgroundActive);
 	color: var(--wcfButtonPrimaryTextActive);
 }

@@ -19,6 +19,7 @@ interface Response {
 	gameId: number;
 	isOwned: boolean;
 	playerCount: number;
+	currentUserRating?: number;
 }
 
 let initialized = false;
@@ -45,13 +46,35 @@ function updateEmbeds(response: Response) {
 		// only change through this page if the viewer is the author
 		if (embed.dataset.authorIsCurrentUser === '1') {
 			embed.classList.toggle('igdbIntegrationGameEmbedAuthorOwns', response.isOwned);
-			if (!response.isOwned) {
-				// The new rating is unknown after re-adding, so the stars stay
-				// hidden until the next page load
-				embed.querySelector('.igdbIntegrationGameEmbedAuthorRating')?.remove();
-			}
+			updateAuthorRating(embed, response);
 		}
 	});
+}
+
+function updateAuthorRating(embed: HTMLElement, response: Response) {
+	const rating = response.isOwned ? (response.currentUserRating ?? 0) : 0;
+
+	let ratingElement = embed.querySelector<HTMLElement>('.igdbIntegrationGameEmbedAuthorRating');
+	if (rating <= 0) {
+		ratingElement?.remove();
+		return;
+	}
+
+	if (ratingElement === null) {
+		ratingElement = document.createElement('p');
+		ratingElement.className = 'igdbIntegrationGameEmbedAuthorRating orange';
+		ratingElement.title = getPhrase('wcf.igdb_integration.bbcode.author_rating');
+		embed.querySelector('.igdbIntegrationGameEmbedButtons')?.before(ratingElement);
+	}
+
+	ratingElement.innerHTML = '';
+	for (let i = 0; i < rating; i++) {
+		// Add star icon
+		const starIcon = document.createElement('fa-icon');
+		starIcon.size = 16;
+		starIcon.setIcon('star', true);
+		ratingElement.appendChild(starIcon);
+	}
 }
 
 function showGamePlayerListDialog(embed: HTMLElement, gameId: number) {

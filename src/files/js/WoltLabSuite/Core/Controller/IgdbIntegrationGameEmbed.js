@@ -34,13 +34,31 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
             // only change through this page if the viewer is the author
             if (embed.dataset.authorIsCurrentUser === '1') {
                 embed.classList.toggle('igdbIntegrationGameEmbedAuthorOwns', response.isOwned);
-                if (!response.isOwned) {
-                    // The new rating is unknown after re-adding, so the stars stay
-                    // hidden until the next page load
-                    embed.querySelector('.igdbIntegrationGameEmbedAuthorRating')?.remove();
-                }
+                updateAuthorRating(embed, response);
             }
         });
+    }
+    function updateAuthorRating(embed, response) {
+        const rating = response.isOwned ? (response.currentUserRating ?? 0) : 0;
+        let ratingElement = embed.querySelector('.igdbIntegrationGameEmbedAuthorRating');
+        if (rating <= 0) {
+            ratingElement?.remove();
+            return;
+        }
+        if (ratingElement === null) {
+            ratingElement = document.createElement('p');
+            ratingElement.className = 'igdbIntegrationGameEmbedAuthorRating orange';
+            ratingElement.title = (0, Language_1.getPhrase)('wcf.igdb_integration.bbcode.author_rating');
+            embed.querySelector('.igdbIntegrationGameEmbedButtons')?.before(ratingElement);
+        }
+        ratingElement.innerHTML = '';
+        for (let i = 0; i < rating; i++) {
+            // Add star icon
+            const starIcon = document.createElement('fa-icon');
+            starIcon.size = 16;
+            starIcon.setIcon('star', true);
+            ratingElement.appendChild(starIcon);
+        }
     }
     function showGamePlayerListDialog(embed, gameId) {
         let form = new Dialog_1.default('gamePlayerListDialog' + gameId, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction', 'getGamePlayerListDialog', {
