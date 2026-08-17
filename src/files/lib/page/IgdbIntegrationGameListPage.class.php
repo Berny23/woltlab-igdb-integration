@@ -92,6 +92,11 @@ class IgdbIntegrationGameListPage extends SortablePage
 	private $gogImportAvailable = false;
 
 	/**
+	 * Whether the Playnite import is available for the current user.
+	 */
+	private $playniteImportAvailable = false;
+
+	/**
 	 * @inheritDoc
 	 */
 	public function readParameters()
@@ -155,6 +160,8 @@ class IgdbIntegrationGameListPage extends SortablePage
 		}
 		$this->gogImportAvailable = $connectionDataValid
 			&& WCF::getSession()->getPermission('user.igdb_integration.can_import_gog_games');
+		$this->playniteImportAvailable = $connectionDataValid
+			&& WCF::getSession()->getPermission('user.igdb_integration.can_import_playnite_games');
 	}
 
 	/**
@@ -224,13 +231,14 @@ class IgdbIntegrationGameListPage extends SortablePage
 			'availablePlatforms' => $availablePlatforms,
 			'platformFilter' => $platformPreselection,
 			'platformFilterParams' => $platformFilterParams,
-			'importBoxAvailable' => $this->steamImportAvailable || $this->gogImportAvailable || $this->igdbImportAvailable,
+			'importBoxAvailable' => $this->steamImportAvailable || $this->gogImportAvailable || $this->playniteImportAvailable || $this->igdbImportAvailable,
 			'igdbImportAvailable' => $this->igdbImportAvailable,
 			'steamImportAvailable' => $this->steamImportAvailable,
 			'steamImportAuthenticated' => $this->steamImportAuthenticated,
 			'steamImportAutoOpen' => $this->steamImportAutoOpen,
 			'steamImportError' => $this->steamImportError,
 			'gogImportAvailable' => $this->gogImportAvailable,
+			'playniteImportAvailable' => $this->playniteImportAvailable,
 			'steamAuthUrl' => LinkHandler::getInstance()->getLink('IgdbIntegrationSteamAuth'),
 			'steamGameListUrl' => LinkHandler::getInstance()->getLink('IgdbIntegrationGameList')
 		]);

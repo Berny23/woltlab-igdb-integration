@@ -98,6 +98,14 @@
 							<button type="button" class="button" id="gogImportButton">{lang}wcf.igdb_integration.page.gog_import_button{/lang}</button>
 						</div>
 					{/if}
+					{if $playniteImportAvailable}
+						<h3>{lang}wcf.igdb_integration.page.playnite_import{/lang}</h3>
+						<p>{lang}wcf.igdb_integration.page.playnite_import_info{/lang}</p>
+						<div class="formSubmit">
+							<input type="file" id="playniteImportFileInput" accept=".csv,text/csv" style="display: none;">
+							<button type="button" class="button" id="playniteImportButton">{lang}wcf.igdb_integration.page.playnite_import_button{/lang}</button>
+						</div>
+					{/if}
 					{if $igdbImportAvailable}
 						<h3>{lang}wcf.igdb_integration.page.igdb_import{/lang}</h3>
 						<p>{lang}wcf.igdb_integration.page.igdb_import_info{/lang}</p>
@@ -249,7 +257,11 @@
 				'wcf.igdb_integration.dialog.gog_import_result_failed': '{jslang}wcf.igdb_integration.dialog.gog_import_result_failed{/jslang}',
 				'wcf.igdb_integration.dialog.igdb_import_title': '{jslang}wcf.igdb_integration.dialog.igdb_import_title{/jslang}',
 				'wcf.igdb_integration.dialog.igdb_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.igdb_import_confirm{/jslang}',
-				'wcf.igdb_integration.dialog.igdb_import_invalid_file': '{jslang}wcf.igdb_integration.dialog.igdb_import_invalid_file{/jslang}'
+				'wcf.igdb_integration.dialog.igdb_import_invalid_file': '{jslang}wcf.igdb_integration.dialog.igdb_import_invalid_file{/jslang}',
+				'wcf.igdb_integration.dialog.playnite_import_title': '{jslang}wcf.igdb_integration.dialog.playnite_import_title{/jslang}',
+				'wcf.igdb_integration.dialog.playnite_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.playnite_import_confirm{/jslang}',
+				'wcf.igdb_integration.dialog.playnite_import_invalid_file': '{jslang}wcf.igdb_integration.dialog.playnite_import_invalid_file{/jslang}',
+				'wcf.igdb_integration.dialog.playnite_import_progress_title': '{jslang}wcf.igdb_integration.dialog.playnite_import_progress_title{/jslang}'
 			});
 			ControllerIgdbIntegrationGameImport.init({if $steamImportAutoOpen}true{else}false{/if}, '{unsafe:$steamGameListUrl|encodeJS}');
 		});

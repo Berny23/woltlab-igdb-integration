@@ -23,6 +23,9 @@
 		<item name="wcf.igdb_integration.page.gog_import"><![CDATA[GOG-Import]]></item>
 		<item name="wcf.igdb_integration.page.gog_import_info"><![CDATA[{if !LANGUAGE_USE_INFORMAL_VARIANT}Geben Sie Ihren{else}Gib deinen{/if} GOG-Benutzernamen ein, um {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihre{else}deine{/if} Spiele zu importieren. Es wird nur die öffentliche Spieleliste abgerufen und es werden keine Kontodaten dauerhaft gespeichert.]]></item>
 		<item name="wcf.igdb_integration.page.gog_import_button"><![CDATA[GOG-Bibliothek importieren]]></item>
+		<item name="wcf.igdb_integration.page.playnite_import"><![CDATA[Playnite-Import]]></item>
+		<item name="wcf.igdb_integration.page.playnite_import_info"><![CDATA[Exportiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihre{else}deine{/if} Spiele-Bibliothek, einschließlich der Spiele aller verbundenen Launcher, mit der Erweiterung <a href="https://playnite.link/addons.html#PlayniteLibraryExporter_7d089a0e-b862-44df-bca8-df3dc13165ee" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Playnite Library Exporter</a> als CSV-Datei und importiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Datei hier.]]></item>
+		<item name="wcf.igdb_integration.page.playnite_import_button"><![CDATA[CSV-Datei importieren]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import"><![CDATA[IGDB-Import]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import_info"><![CDATA[Exportiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} eine Liste {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihrer{else}deiner{/if} Spiele als CSV-Datei in den <a href="https://www.igdb.com" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Listen</a> und importiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Datei hier.]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import_button"><![CDATA[CSV-Datei importieren]]></item>
@@ -82,6 +85,10 @@
 		<item name="wcf.igdb_integration.dialog.gog_import_progress_title"><![CDATA[GOG-Bibliothek wird importiert…]]></item>
 		<item name="wcf.igdb_integration.dialog.gog_import_progress_pages"><![CDATA[GOG-Spieleliste wird abgerufen (Seite {#$current} von {#$total})…]]></item>
 		<item name="wcf.igdb_integration.dialog.gog_import_result_failed"><![CDATA[Die GOG-Bibliothek konnte nicht abgerufen werden. Bitte versuche{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} es erneut.]]></item>
+		<item name="wcf.igdb_integration.dialog.playnite_import_title"><![CDATA[Playnite-Bibliothek importieren]]></item>
+		<item name="wcf.igdb_integration.dialog.playnite_import_confirm"><![CDATA[Die Datei enthält <b>{#$count}</b> Spiele. Spiele, die sich bereits in der Bibliothek befinden, werden übersprungen. Je nach Größe der Bibliothek kann der Import einen Moment dauern. Import starten?]]></item>
+		<item name="wcf.igdb_integration.dialog.playnite_import_invalid_file"><![CDATA[Die ausgewählte Datei ist kein gültiger Playnite-Bibliotheksexport.]]></item>
+		<item name="wcf.igdb_integration.dialog.playnite_import_progress_title"><![CDATA[Playnite-Bibliothek wird importiert…]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_title"><![CDATA[IGDB-Liste importieren]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_confirm"><![CDATA[Die Datei enthält {#$count} Spiele. Spiele, die sich bereits in der Bibliothek befinden, werden übersprungen. Import starten?]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_invalid_file"><![CDATA[Die ausgewählte Datei ist kein gültiger IGDB-Listenexport.]]></item>
@@ -189,6 +196,7 @@
 		<item name="wcf.acp.group.option.user.igdb_integration.can_manage_own_games"><![CDATA[Kann eigene Spiele-Bibliothek verwalten]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_steam_games"><![CDATA[Kann eigene Spiele von Steam importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_gog_games"><![CDATA[Kann eigene Spiele von GOG importieren]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_import_playnite_games"><![CDATA[Kann eigene Spiele aus Playnite-Bibliotheksexporten importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_igdb_games"><![CDATA[Kann eigene Spiele aus IGDB-Listenexporten importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Kann alle Besitzer eines Spiels auflisten]]></item>
 	</category>
