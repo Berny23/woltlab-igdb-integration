@@ -2,7 +2,7 @@
 
 <a href="https://www.buymeacoffee.com/Berny23" title="Donate to this project using Buy Me A Coffee"><img src="https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg" alt="Buy Me A Coffee donate button" /></a>
 
-Allows you to automatically import and manage all games from IGDB within the WoltLab Suite front-end.
+Automatically populated game database via IGDB integration. Offers user libraries, ratings, trophies, activities, and points.
 
 ## Features
 
