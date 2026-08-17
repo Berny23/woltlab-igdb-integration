@@ -25,6 +25,7 @@ interface ReturnValues {
 }
 
 const FILTER_PARAMETER_REGEX = /[?&](?:gameSearch|gameSortField|gameSortOrder|gamePlatforms(?:\[\]|%5B%5D)|pageNo)=[^&#]*/g;
+const GAME_LIST_TAB_NAME = 'igdb_integration_game_list';
 
 let tabWatcherActive = false;
 let removedFilterParameters = '';
@@ -47,7 +48,7 @@ export function watchTabSelection() {
 		const hash = window.location.hash;
 		let url = window.location.href.replace(/#.*$/, '');
 
-		if (data.activeName === 'igdb_integration_game_list') {
+		if (data.activeName === GAME_LIST_TAB_NAME) {
 			// Restore the parameters that were removed when the tab was left,
 			// the displayed list still matches them
 			if (removedFilterParameters !== '') {
@@ -71,6 +72,31 @@ export function watchTabSelection() {
 			url = url.replace('&', '?');
 		}
 		window.history.replaceState(undefined, '', url + hash);
+	});
+}
+
+/**
+ * Only shows the sidebar filter box while the games tab is selected.
+ */
+export function watchFilterBoxVisibility() {
+	const filterBox = document.getElementById('igdbIntegrationGameListFilterBox');
+	if (filterBox === null) {
+		return;
+	}
+
+	// The server only preselects the games tab when filter parameters are
+	// present; a tab named in the URL hash is activated by the tab menu script
+	// alone, so the initial visibility has to be corrected here
+	const hashMatch = /^#+([^/]+)/.exec(window.location.hash);
+	if (hashMatch !== null) {
+		const tabContent = document.getElementById(hashMatch[1]);
+		if (tabContent !== null && tabContent.parentElement?.id === 'profileContent') {
+			filterBox.hidden = hashMatch[1] !== GAME_LIST_TAB_NAME;
+		}
+	}
+
+	EventHandler.add('com.woltlab.wcf.simpleTabMenu_profileContent', 'select', (data: { activeName: string }) => {
+		filterBox.hidden = data.activeName !== GAME_LIST_TAB_NAME;
 	});
 }
 

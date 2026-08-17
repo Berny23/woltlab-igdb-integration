@@ -1,5 +1,5 @@
 {if !$igdbGameListShowFilter|empty}
-	<section class="box">
+	<section class="box" id="igdbIntegrationGameListFilterBox"{if $__wcf->getUserProfileMenu()->getActiveMenuItem($user->userID)->getIdentifier() != 'igdb_integration_game_list'} hidden{/if}>
 		<form method="post" action="{$igdbGameListFormUrl}">
 			<h2 class="boxTitle">{lang}wcf.global.filter{/lang}</h2>
 
@@ -51,4 +51,20 @@
 			</div>
 		</form>
 	</section>
+	<script data-relocate="true">
+		(function () {
+			// Move the filter box to the very top of the sidebar, the core
+			// sidebar template only provides an insert position at the end of
+			// the box list
+			var filterBox = document.getElementById('igdbIntegrationGameListFilterBox');
+			var boxContainer = filterBox.closest('.boxContainer');
+			if (boxContainer !== null) {
+				boxContainer.prepend(filterBox);
+			}
+		})();
+
+		require(['WoltLabSuite/Core/Controller/IgdbIntegrationGameListUserProfile'], (ControllerIgdbIntegrationGameListUserProfile) => {
+			ControllerIgdbIntegrationGameListUserProfile.watchFilterBoxVisibility();
+		});
+	</script>
 {/if}
