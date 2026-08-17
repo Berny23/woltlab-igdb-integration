@@ -24,7 +24,7 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
     function buildNotice(type, text, names) {
         let html = '<woltlab-core-notice type="' + type + '">' + text;
         if (names !== undefined && names.length > 0) {
-            html += '<ul>' + names.map((name) => '<li>' + (0, StringUtil_1.escapeHTML)(name) + '</li>').join('') + '</ul>';
+            html += '<ul class="nativeList">' + names.map((name) => '<li>' + (0, StringUtil_1.escapeHTML)(name) + '</li>').join('') + '</ul>';
         }
         return html + '</woltlab-core-notice>';
     }
@@ -34,7 +34,10 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
             html = buildNotice('error', (0, Language_1.getPhrase)(failedPhrase));
         }
         else {
-            html = buildNotice('success', (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_imported', { count: result.importedCount }));
+            html = '';
+            if (result.importedCount > 0) {
+                html += buildNotice('success', (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_imported', { count: result.importedCount }));
+            }
             if (result.alreadyOwnedCount > 0) {
                 html += buildNotice('info', (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.steam_import_result_already_owned', { count: result.alreadyOwnedCount }));
             }

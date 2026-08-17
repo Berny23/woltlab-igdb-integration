@@ -70,10 +70,10 @@
 		<item name="wcf.igdb_integration.dialog.steam_import_progress_finalize"><![CDATA[Finalizing import…]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_result_title"><![CDATA[Import finished]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_result_failed"><![CDATA[The Steam library could not be retrieved. Please sign in through Steam again.]]></item>
-		<item name="wcf.igdb_integration.dialog.steam_import_result_imported"><![CDATA[{#$count} games have been added to your library.]]></item>
-		<item name="wcf.igdb_integration.dialog.steam_import_result_already_owned"><![CDATA[{#$count} games were already in your library.]]></item>
-		<item name="wcf.igdb_integration.dialog.steam_import_result_ambiguous"><![CDATA[{#$count} games were skipped because several entries share the same name. Please add the correct entry manually:]]></item>
-		<item name="wcf.igdb_integration.dialog.steam_import_result_unmatched"><![CDATA[{#$count} games could not be matched to an IGDB entry:]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_imported"><![CDATA[<b>{#$count} games</b> have been added to your library.]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_already_owned"><![CDATA[<b>{#$count} games</b> were already in your library.]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_ambiguous"><![CDATA[<b>{#$count} games</b> were skipped because several entries share the same name. Please add the correct entry manually:]]></item>
+		<item name="wcf.igdb_integration.dialog.steam_import_result_unmatched"><![CDATA[<b>{#$count} games</b> could not be matched to an IGDB entry:]]></item>
 		<item name="wcf.igdb_integration.dialog.gog_import_title"><![CDATA[Import GOG Library]]></item>
 		<item name="wcf.igdb_integration.dialog.gog_import_username"><![CDATA[GOG username]]></item>
 		<item name="wcf.igdb_integration.dialog.gog_import_confirm"><![CDATA[Found <b>{#$gogGameCount}</b> games for the GOG account <b>{$gogImportUsername}</b>.<br>Games that are already in your library are skipped. Depending on the size of the library, the import may take a moment.]]></item>

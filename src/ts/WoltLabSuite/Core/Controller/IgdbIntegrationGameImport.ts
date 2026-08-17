@@ -82,7 +82,7 @@ interface IgdbImportResult {
 function buildNotice(type: string, text: string, names?: string[]): string {
 	let html = '<woltlab-core-notice type="' + type + '">' + text;
 	if (names !== undefined && names.length > 0) {
-		html += '<ul>' + names.map((name) => '<li>' + escapeHTML(name) + '</li>').join('') + '</ul>';
+		html += '<ul class="nativeList">' + names.map((name) => '<li>' + escapeHTML(name) + '</li>').join('') + '</ul>';
 	}
 	return html + '</woltlab-core-notice>';
 }
@@ -92,7 +92,10 @@ function showResultDialog(result: ImportResult, failedPhrase = 'wcf.igdb_integra
 	if (result.failed) {
 		html = buildNotice('error', getPhrase(failedPhrase));
 	} else {
-		html = buildNotice('success', getPhrase('wcf.igdb_integration.dialog.steam_import_result_imported', { count: result.importedCount }));
+		html = '';
+		if (result.importedCount > 0) {
+			html += buildNotice('success', getPhrase('wcf.igdb_integration.dialog.steam_import_result_imported', { count: result.importedCount }));
+		}
 		if (result.alreadyOwnedCount > 0) {
 			html += buildNotice('info', getPhrase('wcf.igdb_integration.dialog.steam_import_result_already_owned', { count: result.alreadyOwnedCount }));
 		}
