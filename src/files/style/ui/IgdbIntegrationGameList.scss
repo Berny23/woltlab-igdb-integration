@@ -278,6 +278,15 @@
 	justify-content: center;
 	align-items: center;
 	gap: 5px;
+	/* Buttons carry `min-width: 0`, so on narrow screens the label would
+	   otherwise be broken up */
+	white-space: nowrap;
+}
+
+/* Keep the player count on one line by never shrinking the button below the
+   width of its icon and number */
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedButtons .igdbIntegrationGameEmbedPlayerList {
+	min-width: max-content;
 }
 
 /* Join the buttons into a split button; the quick add button keeps the
@@ -340,6 +349,7 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+
 /* Copy button of the game lists in the import result dialog */
 .igdbIntegrationImportResultHeader {
 	display: flex;
