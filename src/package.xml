@@ -5,8 +5,8 @@
 		<!-- de.berny23.igdb_integration -->
 		<packagename>IGDB Integration</packagename>
 		<packagedescription>Allows you to automatically	import and manage all games	from IGDB within the WoltLab Suite front-end.</packagedescription>
-		<version>2.1.0</version>
-		<date>2026-08-18</date>
+		<version>2.1.1</version>
+		<date>2026-08-20</date>
 	</packageinformation>
 	<authorinformation>
 		<author>Berny23</author>
@@ -37,15 +37,7 @@
 		<instruction type="templateListener" />
 		<instruction type="bbcode" />
 	</instructions>
-	<instructions type="update" fromversion="2.0.1">
+	<instructions type="update" fromversion="2.1.0">
 		<instruction type="file" />
-		<instruction type="database">acp/database/update_de.berny23.igdb_integration_2.1.0.php</instruction>
-		<instruction type="template" />
-		<instruction type="language" />
-		<instruction type="option" />
-		<instruction type="userGroupOption" />
-		<instruction type="eventListener" />
-		<instruction type="templateListener" />
-		<instruction type="bbcode" />
 	</instructions>
 </package>

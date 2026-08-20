@@ -6,6 +6,7 @@ use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
 use wcf\util\ArrayUtil;
 use wcf\util\HeaderUtil;
 use wcf\util\IgdbIntegrationUtil;
+use wcf\util\StringUtil;
 use wcf\system\cache\runtime\UserProfileRuntimeCache;
 use wcf\system\request\LinkHandler;
 use wcf\system\WCF;
@@ -196,7 +197,11 @@ class IgdbIntegrationGameListPage extends SortablePage
 		$topPlayerProfileLinks = array();
 		foreach ($topPlayers as $player) {
 			if (!empty($profiles[$player['userId']])) {
-				$topPlayerProfileLinks[$player['userId']] = $profiles[$player['userId']]->getAnchorTag();
+				$profile = $profiles[$player['userId']];
+				$topPlayerProfileLinks[$player['userId']] = StringUtil::getAnchorTag(
+					$profile->getLink() . '#igdb_integration_game_list',
+					$profile->username
+				);
 			}
 		}
 
