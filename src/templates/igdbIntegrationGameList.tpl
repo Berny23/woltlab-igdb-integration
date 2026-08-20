@@ -263,7 +263,9 @@
 				'wcf.igdb_integration.dialog.playnite_import_title': '{jslang}wcf.igdb_integration.dialog.playnite_import_title{/jslang}',
 				'wcf.igdb_integration.dialog.playnite_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.playnite_import_confirm{/jslang}',
 				'wcf.igdb_integration.dialog.playnite_import_invalid_file': '{jslang}wcf.igdb_integration.dialog.playnite_import_invalid_file{/jslang}',
-				'wcf.igdb_integration.dialog.playnite_import_progress_title': '{jslang}wcf.igdb_integration.dialog.playnite_import_progress_title{/jslang}'
+				'wcf.igdb_integration.dialog.playnite_import_progress_title': '{jslang}wcf.igdb_integration.dialog.playnite_import_progress_title{/jslang}',
+				'wcf.igdb_integration.dialog.import_result_copy': '{jslang}wcf.igdb_integration.dialog.import_result_copy{/jslang}',
+				'wcf.igdb_integration.dialog.import_result_copy_success': '{jslang}wcf.igdb_integration.dialog.import_result_copy_success{/jslang}'
 			});
 			ControllerIgdbIntegrationGameImport.init({if $steamImportAutoOpen}true{else}false{/if}, '{unsafe:$steamGameListUrl|encodeJS}');
 		});

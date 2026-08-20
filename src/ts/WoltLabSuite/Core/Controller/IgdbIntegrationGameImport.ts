@@ -10,7 +10,9 @@
  */
 
 import { dboAction } from "WoltLabSuite/Core/Ajax";
+import { copyTextToClipboard } from "WoltLabSuite/Core/Clipboard";
 import { dialogFactory } from "WoltLabSuite/Core/Component/Dialog";
+import { showSuccessSnackbar } from "WoltLabSuite/Core/Component/Snackbar";
 import { getPhrase } from "WoltLabSuite/Core/Language";
 import { escapeHTML } from "WoltLabSuite/Core/StringUtil";
 
@@ -80,11 +82,39 @@ interface IgdbImportResult {
 }
 
 function buildNotice(type: string, text: string, names?: string[]): string {
-	let html = '<woltlab-core-notice type="' + type + '">' + text;
+	let html = '<woltlab-core-notice type="' + type + '">';
 	if (names !== undefined && names.length > 0) {
-		html += '<ul class="nativeList">' + names.map((name) => '<li>' + escapeHTML(name) + '</li>').join('') + '</ul>';
+		// The copy button sits in the top right corner of the notice and
+		// copies the listed game names, one per line
+		html += '<div class="igdbIntegrationImportResultHeader"><span>' + text + '</span>'
+			+ '<button type="button" class="igdbIntegrationImportResultCopyButton jsTooltip" title="'
+			+ escapeHTML(getPhrase('wcf.igdb_integration.dialog.import_result_copy')) + '">'
+			+ '<fa-icon size="16" name="copy"></fa-icon></button></div>'
+			+ '<ul class="nativeList">' + names.map((name) => '<li>' + escapeHTML(name) + '</li>').join('') + '</ul>';
+	} else {
+		html += text;
 	}
 	return html + '</woltlab-core-notice>';
+}
+
+/**
+ * Makes the copy buttons of the game lists copy their list, one title per
+ * line.
+ */
+function initCopyButtons(content: HTMLElement): void {
+	content.querySelectorAll('.igdbIntegrationImportResultCopyButton').forEach((button) => {
+		button.addEventListener('click', () => {
+			const list = button.closest('woltlab-core-notice')?.querySelector('ul.nativeList');
+			if (list === null || list === undefined) {
+				return;
+			}
+
+			const names = Array.from(list.querySelectorAll('li')).map((item) => item.textContent ?? '');
+			void copyTextToClipboard(names.join('\n')).then(() => {
+				showSuccessSnackbar(getPhrase('wcf.igdb_integration.dialog.import_result_copy_success'));
+			});
+		});
+	});
 }
 
 function showResultDialog(result: ImportResult, failedPhrase = 'wcf.igdb_integration.dialog.steam_import_result_failed'): void {
@@ -108,6 +138,7 @@ function showResultDialog(result: ImportResult, failedPhrase = 'wcf.igdb_integra
 	}
 
 	const dialog = dialogFactory().fromHtml(html).asAlert();
+	initCopyButtons(dialog.content);
 	// Reload to show the imported games and the updated owner counts, without
 	// any filter parameters and without steamImport=1 reopening the dialog
 	dialog.addEventListener('afterClose', () => {

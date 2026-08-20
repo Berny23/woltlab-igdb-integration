@@ -8,7 +8,7 @@
  * @license		MIT License <https://choosealicense.com/licenses/mit/>
  * @module		WoltLabSuite/Core/Controller/IgdbIntegrationGameImport
  */
-define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Component/Dialog", "WoltLabSuite/Core/Language", "WoltLabSuite/Core/StringUtil"], function (require, exports, Ajax_1, Dialog_1, Language_1, StringUtil_1) {
+define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Clipboard", "WoltLabSuite/Core/Component/Dialog", "WoltLabSuite/Core/Component/Snackbar", "WoltLabSuite/Core/Language", "WoltLabSuite/Core/StringUtil"], function (require, exports, Ajax_1, Clipboard_1, Dialog_1, Snackbar_1, Language_1, StringUtil_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.init = init;
@@ -22,11 +22,38 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
      */
     const GOG_USERNAME_REGEX = /^[a-zA-Z0-9._+-]{1,60}$/;
     function buildNotice(type, text, names) {
-        let html = '<woltlab-core-notice type="' + type + '">' + text;
+        let html = '<woltlab-core-notice type="' + type + '">';
         if (names !== undefined && names.length > 0) {
-            html += '<ul class="nativeList">' + names.map((name) => '<li>' + (0, StringUtil_1.escapeHTML)(name) + '</li>').join('') + '</ul>';
+            // The copy button sits in the top right corner of the notice and
+            // copies the listed game names, one per line
+            html += '<div class="igdbIntegrationImportResultHeader"><span>' + text + '</span>'
+                + '<button type="button" class="igdbIntegrationImportResultCopyButton jsTooltip" title="'
+                + (0, StringUtil_1.escapeHTML)((0, Language_1.getPhrase)('wcf.igdb_integration.dialog.import_result_copy')) + '">'
+                + '<fa-icon size="16" name="copy"></fa-icon></button></div>'
+                + '<ul class="nativeList">' + names.map((name) => '<li>' + (0, StringUtil_1.escapeHTML)(name) + '</li>').join('') + '</ul>';
+        }
+        else {
+            html += text;
         }
         return html + '</woltlab-core-notice>';
+    }
+    /**
+     * Makes the copy buttons of the game lists copy their list, one title per
+     * line.
+     */
+    function initCopyButtons(content) {
+        content.querySelectorAll('.igdbIntegrationImportResultCopyButton').forEach((button) => {
+            button.addEventListener('click', () => {
+                const list = button.closest('woltlab-core-notice')?.querySelector('ul.nativeList');
+                if (list === null || list === undefined) {
+                    return;
+                }
+                const names = Array.from(list.querySelectorAll('li')).map((item) => item.textContent ?? '');
+                void (0, Clipboard_1.copyTextToClipboard)(names.join('\n')).then(() => {
+                    (0, Snackbar_1.showSuccessSnackbar)((0, Language_1.getPhrase)('wcf.igdb_integration.dialog.import_result_copy_success'));
+                });
+            });
+        });
     }
     function showResultDialog(result, failedPhrase = 'wcf.igdb_integration.dialog.steam_import_result_failed') {
         let html;
@@ -49,6 +76,7 @@ define(["require", "exports", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Compo
             }
         }
         const dialog = (0, Dialog_1.dialogFactory)().fromHtml(html).asAlert();
+        initCopyButtons(dialog.content);
         // Reload to show the imported games and the updated owner counts, without
         // any filter parameters and without steamImport=1 reopening the dialog
         dialog.addEventListener('afterClose', () => {

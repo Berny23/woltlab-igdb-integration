@@ -82,6 +82,8 @@
 		<item name="wcf.igdb_integration.dialog.steam_import_result_already_owned"><![CDATA[<b>{#$count} Spiele</b> befanden sich bereits in der Bibliothek.]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_result_ambiguous"><![CDATA[<b>{#$count} Spiele</b> wurden übersprungen, weil mehrere Einträge mit demselben Namen existieren. Der passende Eintrag muss manuell hinzugefügt werden:]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_result_unmatched"><![CDATA[<b>{#$count} Spiele</b> konnten keinem IGDB-Eintrag zugeordnet werden:]]></item>
+		<item name="wcf.igdb_integration.dialog.import_result_copy"><![CDATA[Liste kopieren]]></item>
+		<item name="wcf.igdb_integration.dialog.import_result_copy_success"><![CDATA[Die Liste wurde in die Zwischenablage kopiert.]]></item>
 		<item name="wcf.igdb_integration.dialog.gog_import_title"><![CDATA[GOG-Bibliothek importieren]]></item>
 		<item name="wcf.igdb_integration.dialog.gog_import_username"><![CDATA[GOG-Benutzername]]></item>
 		<item name="wcf.igdb_integration.dialog.gog_import_confirm"><![CDATA[Für das GOG-Konto <b>{$gogImportUsername}</b> wurden <b>{#$gogGameCount}</b> Spiele gefunden.<br>Spiele, die sich bereits in der Bibliothek befinden, werden übersprungen. Je nach Größe der Bibliothek kann der Import einen Moment dauern.]]></item>

@@ -340,3 +340,20 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+/* Copy button of the game lists in the import result dialog */
+.igdbIntegrationImportResultHeader {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.igdbIntegrationImportResultCopyButton {
+	flex-shrink: 0;
+	color: inherit;
+	opacity: 0.75;
+}
+
+.igdbIntegrationImportResultCopyButton:hover {
+	opacity: 1;
+}
