@@ -73,8 +73,8 @@
 	{if $importBoxAvailable}
 		<section id="importBox" class="box">
 			<details{if $steamImportAuthenticated || $steamImportError} open{/if}>
-				<summary>
-					<h2 class="boxTitle">{lang}wcf.igdb_integration.page.import{/lang}</h2>
+				<summary class="boxTitle">
+					<h2>{lang}wcf.igdb_integration.page.import{/lang}</h2>
 				</summary>
 				<div class="boxContent">
 					{if $steamImportAvailable}
