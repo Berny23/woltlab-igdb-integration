@@ -14,7 +14,7 @@
 		<item name="wcf.igdb_integration.page.player_toplist"><![CDATA[Spieler-Topliste]]></item>
 		<item name="wcf.igdb_integration.page.game_quick_add"><![CDATA[Zu meinen Spielen hinzufügen]]></item>
 		<item name="wcf.igdb_integration.page.game_quick_remove"><![CDATA[Aus meinen Spielen entfernen]]></item>
-		<item name="wcf.igdb_integration.page.import"><![CDATA[Spiele-Bibliothek importieren]]></item>
+		<item name="wcf.igdb_integration.page.import"><![CDATA[Bibliothek importieren]]></item>
 		<item name="wcf.igdb_integration.page.steam_import"><![CDATA[Steam-Import]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_info"><![CDATA[Melde{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie sich{else} dich{/if} über Steam an, um {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihre{else}deine{/if} Spiele zu importieren. Es wird nur die öffentliche Spieleliste abgerufen und es werden keine Kontodaten dauerhaft gespeichert.]]></item>
 		<item name="wcf.igdb_integration.page.steam_import_sign_in"><![CDATA[Über Steam anmelden]]></item>
