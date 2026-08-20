@@ -40,15 +40,7 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
                 playersElement.classList.remove('isOwned');
             }
         }
-        // Toggle the quick add button between adding and removing
-        var quickAddButton = document.getElementById('gameOverlayQuickAdd' + response.gameId);
-        if (quickAddButton !== null) {
-            quickAddButton.dataset.isOwned = response.isOwned ? '1' : '0';
-            quickAddButton.title = (0, Language_1.getPhrase)(response.isOwned
-                ? 'wcf.igdb_integration.page.game_quick_remove'
-                : 'wcf.igdb_integration.page.game_quick_add');
-            quickAddButton.querySelector('fa-icon')?.setIcon(response.isOwned ? 'minus' : 'plus', true);
-        }
+        (0, IgdbIntegrationGameDialog_1.updateQuickToggleButton)(response.gameId, response.isOwned);
     }
     async function showGameUserEditDialog(gameId) {
         // Call dialog form

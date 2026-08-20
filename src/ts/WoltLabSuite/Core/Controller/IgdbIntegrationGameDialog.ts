@@ -33,6 +33,22 @@ export async function confirmGameRemoval(gameTitle: string): Promise<boolean> {
 	return confirmationFactory().custom(question).withoutMessage();
 }
 
+/**
+ * Toggles the quick add button of a game box between adding and removing.
+ */
+export function updateQuickToggleButton(gameId: number, isOwned: boolean) {
+	const quickAddButton = document.getElementById('gameOverlayQuickAdd' + gameId);
+	if (quickAddButton === null) {
+		return;
+	}
+
+	quickAddButton.dataset.isOwned = isOwned ? '1' : '0';
+	quickAddButton.title = getPhrase(isOwned
+		? 'wcf.igdb_integration.page.game_quick_remove'
+		: 'wcf.igdb_integration.page.game_quick_add');
+	quickAddButton.querySelector('fa-icon')?.setIcon(isOwned ? 'minus' : 'plus', true);
+}
+
 export function initGameUserEditDialogEvents(content: HTMLElement) {
 	const ownedYes = content.querySelector('#isOwned') as HTMLInputElement | null;
 	const ownedNo = content.querySelector('#isOwned_no') as HTMLInputElement | null;

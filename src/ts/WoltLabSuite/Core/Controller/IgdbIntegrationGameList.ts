@@ -8,7 +8,7 @@
  */
 
 import { dboAction } from "WoltLabSuite/Core/Ajax";
-import { confirmGameRemoval, getGameDialogTitle, initGameUserEditDialogEvents } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
+import { confirmGameRemoval, getGameDialogTitle, initGameUserEditDialogEvents, updateQuickToggleButton } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
 import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
 import { getPhrase } from "WoltLabSuite/Core/Language";
 import { show as showNotification } from "WoltLabSuite/Core/Ui/Notification";
@@ -51,15 +51,7 @@ function updateGameBox(response: Response) {
 		}
 	}
 
-	// Toggle the quick add button between adding and removing
-	var quickAddButton = document.getElementById('gameOverlayQuickAdd' + response.gameId);
-	if (quickAddButton !== null) {
-		quickAddButton.dataset.isOwned = response.isOwned ? '1' : '0';
-		quickAddButton.title = getPhrase(response.isOwned
-			? 'wcf.igdb_integration.page.game_quick_remove'
-			: 'wcf.igdb_integration.page.game_quick_add');
-		quickAddButton.querySelector('fa-icon')?.setIcon(response.isOwned ? 'minus' : 'plus', true);
-	}
+	updateQuickToggleButton(response.gameId, response.isOwned);
 }
 
 async function showGameUserEditDialog(gameId: number) {

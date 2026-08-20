@@ -1807,30 +1807,32 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 		// Reload the game <-> user association for the game.
 
-		// Either calculate average rating and count users or get single rating of owner
-		if (is_null($this->ownerId)) {
-			$sql = "SELECT rating 
-					FROM wcf1_igdb_integration_game_user 
-					WHERE gameId = ?";
-			$statement = WCF::getDB()->prepare($sql);
-			$statement->execute([$gameId]);
-			$owners = $statement->fetchAll(\PDO::FETCH_COLUMN);
+		// Calculate average rating and count users of the game
+		$sql = "SELECT rating
+				FROM wcf1_igdb_integration_game_user
+				WHERE gameId = ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([$gameId]);
+		$ratings = $statement->fetchAll(\PDO::FETCH_COLUMN);
 
-			$ratingArray = array_filter($owners, "wcf\util\IgdbIntegrationUtil::validateRating");
-			$averageRating = count($ratingArray) ? array_sum($ratingArray) / count($ratingArray) : 0;
-			$playerCount = count($owners);
-		} else {
-			$sql = "SELECT rating 
-					FROM wcf1_igdb_integration_game_user 
+		$ratingArray = array_filter($ratings, "wcf\util\IgdbIntegrationUtil::validateRating");
+		$averageRating = count($ratingArray) ? array_sum($ratingArray) / count($ratingArray) : 0;
+		$playerCount = count($ratings);
+
+		// On a profile the rating of the profile owner is shown instead of the
+		// average rating, and the game is only listed while the owner owns it
+		$ownerOwnsGame = true;
+		if (!is_null($this->ownerId)) {
+			$sql = "SELECT rating
+					FROM wcf1_igdb_integration_game_user
 					WHERE gameId = ? AND userId = ?";
 			$statement = WCF::getDB()->prepare($sql);
 			$statement->execute([$gameId, $this->ownerId]);
 			$owner = $statement->fetchSingleRow();
 
-			// First check if owner still owns game
-			if ($owner) {
+			$ownerOwnsGame = !empty($owner);
+			if ($ownerOwnsGame) {
 				$ownerRating = $owner['rating'];
-				$playerCount = 1;
 			}
 		}
 
@@ -1840,8 +1842,9 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		return [
 			'gameId' => $gameId,
 			'isOwned' => $isOwned,
-			'playerCount' => $playerCount ?? -1,
-			'averageRating' => $averageRating ?? -1,
+			'playerCount' => $playerCount,
+			'ownerOwnsGame' => $ownerOwnsGame,
+			'averageRating' => $averageRating,
 			'ownRating' => $ownerRating ?? -1,
 			'gameCount' => $gameCount
 		];

@@ -86,19 +86,67 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
             countElement.textContent = (0, Language_1.getPhrase)('wcf.user.option.igdb_integration_game_count') + ': ' + gameCount;
         }
     }
-    async function quickRemoveGame(gameId, userId) {
-        if (!(await (0, IgdbIntegrationGameDialog_1.confirmGameRemoval)((0, IgdbIntegrationGameDialog_1.getGameDialogTitle)(gameId)))) {
+    /**
+     * Applies the values returned after a change to the game box of the profile
+     * list, which is removed once the profile owner does not own the game any more.
+     */
+    function updateGameBox(returnValues, userId) {
+        // The returned game count belongs to the current user, so only
+        // update the counter when viewing the own profile
+        if (userId === User_1.default.userId) {
+            updateGameCount(returnValues.gameCount);
+        }
+        if (!returnValues.ownerOwnsGame) {
+            // Remove game from profile list
+            document.getElementById('gameBox' + returnValues.gameId)?.remove();
             return;
         }
-        const returnValues = await (0, Ajax_1.dboAction)('quickRemoveGame', 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
+        // Insert returned values into page
+        var ratingElement = document.querySelector('#gameBox' + returnValues.gameId +
+            ' .gameOwnRating');
+        var playersElement = document.getElementById('gamePlayerCount' + returnValues.gameId);
+        if (ratingElement !== null && playersElement !== null) {
+            ratingElement.innerHTML = '';
+            playersElement.innerHTML = '';
+            playersElement.style.display = returnValues.playerCount <= 0 ? 'none' : '';
+            const userIcon = document.createElement('fa-icon');
+            userIcon.size = 16;
+            userIcon.setIcon('user', true);
+            playersElement.appendChild(userIcon);
+            playersElement.innerHTML += ' ' + returnValues.playerCount;
+            for (let i = 0; i < returnValues.ownRating; i++) {
+                // Add star icon
+                const starIcon = document.createElement('fa-icon');
+                starIcon.size = 16;
+                starIcon.setIcon('star', true);
+                ratingElement.appendChild(starIcon);
+            }
+            if (returnValues.isOwned) {
+                playersElement.classList.add('isOwned');
+            }
+            else {
+                playersElement.classList.remove('isOwned');
+            }
+        }
+        (0, IgdbIntegrationGameDialog_1.updateQuickToggleButton)(returnValues.gameId, returnValues.isOwned);
+    }
+    async function quickToggleGame(gameId, userId) {
+        const button = document.getElementById('gameOverlayQuickAdd' + gameId);
+        if (button === null) {
+            return;
+        }
+        const isRemoval = button.dataset.isOwned === '1';
+        if (isRemoval && !(await (0, IgdbIntegrationGameDialog_1.confirmGameRemoval)((0, IgdbIntegrationGameDialog_1.getGameDialogTitle)(gameId)))) {
+            return;
+        }
+        const actionName = isRemoval ? 'quickRemoveGame' : 'quickAddGame';
+        const returnValues = await (0, Ajax_1.dboAction)(actionName, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
             .payload({
             gameId: gameId,
             userId: userId,
         })
             .dispatch();
-        // Remove game from profile list and update the owned games count
-        document.getElementById('gameBox' + gameId)?.remove();
-        updateGameCount(returnValues.gameCount);
+        updateGameBox(returnValues, userId);
         (0, Notification_1.show)();
     }
     function init(gameId, userId) {
@@ -114,52 +162,14 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
             },
             submitActionName: 'submitGameUserEditDialog',
             successCallback(rawReturnValues) {
-                const returnValues = rawReturnValues;
-                // The returned game count belongs to the current user, so only
-                // update the counter when viewing the own profile
-                if (userId === User_1.default.userId) {
-                    updateGameCount(returnValues.gameCount);
-                }
-                if (returnValues.playerCount <= 0) {
-                    // Remove game from profile list
-                    document.getElementById('gameBox' + returnValues.gameId)?.remove();
-                }
-                else {
-                    // Insert returned values into page
-                    var ratingElement = document.querySelector('#gameBox' + returnValues.gameId +
-                        ' .gameOwnRating');
-                    var playersElement = document.getElementById('gamePlayerCount' + returnValues.gameId);
-                    if (ratingElement !== null && playersElement !== null) {
-                        ratingElement.innerHTML = '';
-                        playersElement.innerHTML = '';
-                        playersElement.style.display = returnValues.playerCount <= 0 ? 'none' : '';
-                        const userIcon = document.createElement('fa-icon');
-                        userIcon.size = 16;
-                        userIcon.setIcon('user', true);
-                        playersElement.appendChild(userIcon);
-                        playersElement.innerHTML += ' ' + returnValues.playerCount;
-                        for (let i = 0; i < returnValues.ownRating; i++) {
-                            // Add star icon
-                            const starIcon = document.createElement('fa-icon');
-                            starIcon.size = 16;
-                            starIcon.setIcon('star', true);
-                            ratingElement.appendChild(starIcon);
-                        }
-                        if (returnValues.isOwned) {
-                            playersElement.classList.add('isOwned');
-                        }
-                        else {
-                            playersElement.classList.remove('isOwned');
-                        }
-                    }
-                }
+                updateGameBox(rawReturnValues, userId);
             }
         });
         document.getElementById('gameOverlayEdit' + gameId)?.addEventListener('click', function () {
             gameUserEditDialog.open();
         });
-        document.getElementById('gameOverlayQuickRemove' + gameId)?.addEventListener('click', function () {
-            void quickRemoveGame(gameId, userId);
+        document.getElementById('gameOverlayQuickAdd' + gameId)?.addEventListener('click', function () {
+            void quickToggleGame(gameId, userId);
         });
         document.getElementById('gamePlayerCount' + gameId)?.addEventListener('click', function () {
             void (0, IgdbIntegrationGameList_1.showGamePlayerListDialog)(gameId);

@@ -12,6 +12,7 @@ define(["require", "exports", "WoltLabSuite/Core/Component/Confirmation", "WoltL
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getGameDialogTitle = getGameDialogTitle;
     exports.confirmGameRemoval = confirmGameRemoval;
+    exports.updateQuickToggleButton = updateQuickToggleButton;
     exports.initGameUserEditDialogEvents = initGameUserEditDialogEvents;
     function getGameDialogTitle(gameId) {
         // Use the game name and release year as the dialog title: "NAME (YEAR)"
@@ -30,6 +31,20 @@ define(["require", "exports", "WoltLabSuite/Core/Component/Confirmation", "WoltL
             ? (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_quick_remove_confirm', { gameTitle: gameTitle })
             : (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_quick_remove_confirm_indeterminate');
         return (0, Confirmation_1.confirmationFactory)().custom(question).withoutMessage();
+    }
+    /**
+     * Toggles the quick add button of a game box between adding and removing.
+     */
+    function updateQuickToggleButton(gameId, isOwned) {
+        const quickAddButton = document.getElementById('gameOverlayQuickAdd' + gameId);
+        if (quickAddButton === null) {
+            return;
+        }
+        quickAddButton.dataset.isOwned = isOwned ? '1' : '0';
+        quickAddButton.title = (0, Language_1.getPhrase)(isOwned
+            ? 'wcf.igdb_integration.page.game_quick_remove'
+            : 'wcf.igdb_integration.page.game_quick_add');
+        quickAddButton.querySelector('fa-icon')?.setIcon(isOwned ? 'minus' : 'plus', true);
     }
     function initGameUserEditDialogEvents(content) {
         const ownedYes = content.querySelector('#isOwned');

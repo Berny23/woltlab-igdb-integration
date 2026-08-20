@@ -8,7 +8,7 @@
  */
 
 import { dboAction } from "WoltLabSuite/Core/Ajax";
-import { confirmGameRemoval, getGameDialogTitle, initGameUserEditDialogEvents } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
+import { confirmGameRemoval, getGameDialogTitle, initGameUserEditDialogEvents, updateQuickToggleButton } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
 import { showGamePlayerListDialog } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameList";
 import * as EventHandler from "WoltLabSuite/Core/Event/Handler";
 import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
@@ -19,6 +19,7 @@ import User from "WoltLabSuite/Core/User";
 interface ReturnValues {
 	gameId: number;
 	playerCount: number;
+	ownerOwnsGame: boolean;
 	ownRating: number;
 	isOwned: boolean;
 	gameCount: number;
@@ -107,21 +108,79 @@ function updateGameCount(gameCount: number) {
 	}
 }
 
-async function quickRemoveGame(gameId: number, userId: number) {
-	if (!(await confirmGameRemoval(getGameDialogTitle(gameId)))) {
+/**
+ * Applies the values returned after a change to the game box of the profile
+ * list, which is removed once the profile owner does not own the game any more.
+ */
+function updateGameBox(returnValues: ReturnValues, userId: number) {
+	// The returned game count belongs to the current user, so only
+	// update the counter when viewing the own profile
+	if (userId === User.userId) {
+		updateGameCount(returnValues.gameCount);
+	}
+
+	if (!returnValues.ownerOwnsGame) {
+		// Remove game from profile list
+
+		document.getElementById('gameBox' + returnValues.gameId)?.remove();
+
 		return;
 	}
 
-	const returnValues = await dboAction('quickRemoveGame', 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
+	// Insert returned values into page
+
+	var ratingElement = document.querySelector('#gameBox' + returnValues.gameId +
+		' .gameOwnRating')
+	var playersElement = document.getElementById('gamePlayerCount' + returnValues.gameId);
+
+	if (ratingElement !== null && playersElement !== null) {
+		ratingElement.innerHTML = '';
+		playersElement.innerHTML = '';
+		playersElement.style.display = returnValues.playerCount <= 0 ? 'none' : '';
+		const userIcon = document.createElement('fa-icon');
+		userIcon.size = 16;
+		userIcon.setIcon('user', true);
+		playersElement.appendChild(userIcon);
+		playersElement.innerHTML += ' ' + returnValues.playerCount;
+
+		for (let i = 0; i < returnValues.ownRating; i++) {
+			// Add star icon
+			const starIcon = document.createElement('fa-icon');
+			starIcon.size = 16;
+			starIcon.setIcon('star', true);
+			ratingElement.appendChild(starIcon);
+		}
+
+		if (returnValues.isOwned) {
+			playersElement.classList.add('isOwned');
+		} else {
+			playersElement.classList.remove('isOwned');
+		}
+	}
+
+	updateQuickToggleButton(returnValues.gameId, returnValues.isOwned);
+}
+
+async function quickToggleGame(gameId: number, userId: number) {
+	const button = document.getElementById('gameOverlayQuickAdd' + gameId);
+	if (button === null) {
+		return;
+	}
+
+	const isRemoval = button.dataset.isOwned === '1';
+	if (isRemoval && !(await confirmGameRemoval(getGameDialogTitle(gameId)))) {
+		return;
+	}
+
+	const actionName = isRemoval ? 'quickRemoveGame' : 'quickAddGame';
+	const returnValues = await dboAction(actionName, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
 		.payload({
 			gameId: gameId,
 			userId: userId,
 		})
 		.dispatch() as ReturnValues;
 
-	// Remove game from profile list and update the owned games count
-	document.getElementById('gameBox' + gameId)?.remove();
-	updateGameCount(returnValues.gameCount);
+	updateGameBox(returnValues, userId);
 
 	showNotification();
 }
@@ -142,50 +201,7 @@ export function init(gameId: number, userId: number) {
 		},
 		submitActionName: 'submitGameUserEditDialog',
 		successCallback(rawReturnValues) {
-			const returnValues = rawReturnValues as ReturnValues;
-
-			// The returned game count belongs to the current user, so only
-			// update the counter when viewing the own profile
-			if (userId === User.userId) {
-				updateGameCount(returnValues.gameCount);
-			}
-
-			if (returnValues.playerCount <= 0) {
-				// Remove game from profile list
-
-				document.getElementById('gameBox' + returnValues.gameId)?.remove();
-			} else {
-				// Insert returned values into page
-
-				var ratingElement = document.querySelector('#gameBox' + returnValues.gameId +
-					' .gameOwnRating')
-				var playersElement = document.getElementById('gamePlayerCount' + returnValues.gameId);
-
-				if (ratingElement !== null && playersElement !== null) {
-					ratingElement.innerHTML = '';
-					playersElement.innerHTML = '';
-					playersElement.style.display = returnValues.playerCount <= 0 ? 'none' : '';
-					const userIcon = document.createElement('fa-icon');
-					userIcon.size = 16;
-					userIcon.setIcon('user', true);
-					playersElement.appendChild(userIcon);
-					playersElement.innerHTML += ' ' + returnValues.playerCount;
-
-					for (let i = 0; i < returnValues.ownRating; i++) {
-						// Add star icon
-						const starIcon = document.createElement('fa-icon');
-						starIcon.size = 16;
-						starIcon.setIcon('star', true);
-						ratingElement.appendChild(starIcon);
-					}
-
-					if (returnValues.isOwned) {
-						playersElement.classList.add('isOwned');
-					} else {
-						playersElement.classList.remove('isOwned');
-					}
-				}
-			}
+			updateGameBox(rawReturnValues as ReturnValues, userId);
 		}
 	}
 	);
@@ -193,8 +209,8 @@ export function init(gameId: number, userId: number) {
 	document.getElementById('gameOverlayEdit' + gameId)?.addEventListener('click', function () {
 		gameUserEditDialog.open();
 	});
-	document.getElementById('gameOverlayQuickRemove' + gameId)?.addEventListener('click', function () {
-		void quickRemoveGame(gameId, userId);
+	document.getElementById('gameOverlayQuickAdd' + gameId)?.addEventListener('click', function () {
+		void quickToggleGame(gameId, userId);
 	});
 	document.getElementById('gamePlayerCount' + gameId)?.addEventListener('click', function () {
 		void showGamePlayerListDialog(gameId);
