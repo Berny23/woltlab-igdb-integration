@@ -74,7 +74,11 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
         if (button === null) {
             return;
         }
-        const actionName = button.dataset.isOwned === '1' ? 'quickRemoveGame' : 'quickAddGame';
+        const isRemoval = button.dataset.isOwned === '1';
+        if (isRemoval && !(await (0, IgdbIntegrationGameDialog_1.confirmGameRemoval)((0, IgdbIntegrationGameDialog_1.getGameDialogTitle)(gameId)))) {
+            return;
+        }
+        const actionName = isRemoval ? 'quickRemoveGame' : 'quickAddGame';
         const returnValues = await (0, Ajax_1.dboAction)(actionName, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
             .payload({
             gameId: gameId,

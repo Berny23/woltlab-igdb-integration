@@ -8,7 +8,7 @@
  */
 
 import { dboAction } from "WoltLabSuite/Core/Ajax";
-import { getGameDialogTitle, initGameUserEditDialogEvents } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
+import { confirmGameRemoval, getGameDialogTitle, initGameUserEditDialogEvents } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
 import { showGamePlayerListDialog } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameList";
 import * as EventHandler from "WoltLabSuite/Core/Event/Handler";
 import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
@@ -108,6 +108,10 @@ function updateGameCount(gameCount: number) {
 }
 
 async function quickRemoveGame(gameId: number, userId: number) {
+	if (!(await confirmGameRemoval(getGameDialogTitle(gameId)))) {
+		return;
+	}
+
 	const returnValues = await dboAction('quickRemoveGame', 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
 		.payload({
 			gameId: gameId,

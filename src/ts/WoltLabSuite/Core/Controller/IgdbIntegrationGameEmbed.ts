@@ -10,7 +10,7 @@
  */
 
 import { dboAction } from "WoltLabSuite/Core/Ajax";
-import { initGameUserEditDialogEvents } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
+import { confirmGameRemoval, initGameUserEditDialogEvents } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
 import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
 import { getPhrase } from "WoltLabSuite/Core/Language";
 import { show as showNotification } from "WoltLabSuite/Core/Ui/Notification";
@@ -117,8 +117,13 @@ function showGameUserEditDialog(embed: HTMLElement, gameId: number) {
 	form.open();
 }
 
-async function quickToggleGame(button: HTMLElement, gameId: number) {
-	const actionName = button.dataset.isOwned === '1' ? 'quickRemoveGame' : 'quickAddGame';
+async function quickToggleGame(button: HTMLElement, embed: HTMLElement, gameId: number) {
+	const isRemoval = button.dataset.isOwned === '1';
+	if (isRemoval && !(await confirmGameRemoval(embed.dataset.gameTitle || ''))) {
+		return;
+	}
+
+	const actionName = isRemoval ? 'quickRemoveGame' : 'quickAddGame';
 	const returnValues = await dboAction(actionName, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
 		.payload({
 			gameId: gameId,
@@ -154,7 +159,7 @@ export function setup() {
 		if (quickAddButton !== null) {
 			const embed = quickAddButton.closest<HTMLElement>('.igdbIntegrationGameEmbed');
 			if (embed !== null) {
-				void quickToggleGame(quickAddButton, parseInt(embed.dataset.gameId || '0', 10));
+				void quickToggleGame(quickAddButton, embed, parseInt(embed.dataset.gameId || '0', 10));
 			}
 			return;
 		}

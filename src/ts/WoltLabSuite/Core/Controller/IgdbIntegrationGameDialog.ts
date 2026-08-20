@@ -8,6 +8,9 @@
  * @module		WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog
  */
 
+import { confirmationFactory } from "WoltLabSuite/Core/Component/Confirmation";
+import { getPhrase } from "WoltLabSuite/Core/Language";
+
 export function getGameDialogTitle(gameId: number): string {
 	// Use the game name and release year as the dialog title: "NAME (YEAR)"
 	const gameName = document.querySelector('#gameBox' + gameId + ' .gameInfo > h3')?.textContent?.trim();
@@ -17,6 +20,17 @@ export function getGameDialogTitle(gameId: number): string {
 
 	const releaseYear = document.querySelector('#gameBox' + gameId + ' .gameInfo > small')?.textContent?.trim();
 	return releaseYear ? gameName + ' (' + releaseYear + ')' : gameName;
+}
+
+/**
+ * Asks the user to confirm that the game is removed.
+ */
+export async function confirmGameRemoval(gameTitle: string): Promise<boolean> {
+	const question = gameTitle
+		? getPhrase('wcf.igdb_integration.dialog.game_quick_remove_confirm', { gameTitle: gameTitle })
+		: getPhrase('wcf.igdb_integration.dialog.game_quick_remove_confirm_indeterminate');
+
+	return confirmationFactory().custom(question).withoutMessage();
 }
 
 export function initGameUserEditDialogEvents(content: HTMLElement) {

@@ -87,6 +87,9 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
         }
     }
     async function quickRemoveGame(gameId, userId) {
+        if (!(await (0, IgdbIntegrationGameDialog_1.confirmGameRemoval)((0, IgdbIntegrationGameDialog_1.getGameDialogTitle)(gameId)))) {
+            return;
+        }
         const returnValues = await (0, Ajax_1.dboAction)('quickRemoveGame', 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
             .payload({
             gameId: gameId,

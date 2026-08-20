@@ -7,10 +7,11 @@
  * @license		MIT License <https://choosealicense.com/licenses/mit/>
  * @module		WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog
  */
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "WoltLabSuite/Core/Component/Confirmation", "WoltLabSuite/Core/Language"], function (require, exports, Confirmation_1, Language_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.getGameDialogTitle = getGameDialogTitle;
+    exports.confirmGameRemoval = confirmGameRemoval;
     exports.initGameUserEditDialogEvents = initGameUserEditDialogEvents;
     function getGameDialogTitle(gameId) {
         // Use the game name and release year as the dialog title: "NAME (YEAR)"
@@ -20,6 +21,15 @@ define(["require", "exports"], function (require, exports) {
         }
         const releaseYear = document.querySelector('#gameBox' + gameId + ' .gameInfo > small')?.textContent?.trim();
         return releaseYear ? gameName + ' (' + releaseYear + ')' : gameName;
+    }
+    /**
+     * Asks the user to confirm that the game is removed.
+     */
+    async function confirmGameRemoval(gameTitle) {
+        const question = gameTitle
+            ? (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_quick_remove_confirm', { gameTitle: gameTitle })
+            : (0, Language_1.getPhrase)('wcf.igdb_integration.dialog.game_quick_remove_confirm_indeterminate');
+        return (0, Confirmation_1.confirmationFactory)().custom(question).withoutMessage();
     }
     function initGameUserEditDialogEvents(content) {
         const ownedYes = content.querySelector('#isOwned');

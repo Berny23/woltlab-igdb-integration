@@ -58,7 +58,9 @@
 			'wcf.igdb_integration.dialog.game_player_list_title': '{jslang}wcf.igdb_integration.dialog.game_player_list_title{/jslang}',
 			'wcf.igdb_integration.bbcode.author_rating': '{jslang}wcf.igdb_integration.bbcode.author_rating{/jslang}',
 			'wcf.igdb_integration.page.game_quick_add': '{jslang}wcf.igdb_integration.page.game_quick_add{/jslang}',
-			'wcf.igdb_integration.page.game_quick_remove': '{jslang}wcf.igdb_integration.page.game_quick_remove{/jslang}'
+			'wcf.igdb_integration.page.game_quick_remove': '{jslang}wcf.igdb_integration.page.game_quick_remove{/jslang}',
+			'wcf.igdb_integration.dialog.game_quick_remove_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.game_quick_remove_confirm{/jslang}',
+			'wcf.igdb_integration.dialog.game_quick_remove_confirm_indeterminate': '{jslang}wcf.igdb_integration.dialog.game_quick_remove_confirm_indeterminate{/jslang}'
 		});
 		ControllerIgdbIntegrationGameEmbed.setup();
 	});

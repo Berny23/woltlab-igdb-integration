@@ -8,7 +8,7 @@
  */
 
 import { dboAction } from "WoltLabSuite/Core/Ajax";
-import { getGameDialogTitle, initGameUserEditDialogEvents } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
+import { confirmGameRemoval, getGameDialogTitle, initGameUserEditDialogEvents } from "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog";
 import FormBuilderDialog from "WoltLabSuite/Core/Form/Builder/Dialog";
 import { getPhrase } from "WoltLabSuite/Core/Language";
 import { show as showNotification } from "WoltLabSuite/Core/Ui/Notification";
@@ -92,7 +92,12 @@ async function quickToggleGame(gameId: number) {
 		return;
 	}
 
-	const actionName = button.dataset.isOwned === '1' ? 'quickRemoveGame' : 'quickAddGame';
+	const isRemoval = button.dataset.isOwned === '1';
+	if (isRemoval && !(await confirmGameRemoval(getGameDialogTitle(gameId)))) {
+		return;
+	}
+
+	const actionName = isRemoval ? 'quickRemoveGame' : 'quickAddGame';
 	const returnValues = await dboAction(actionName, 'wcf\\data\\IgdbIntegration\\IgdbIntegrationGameAction')
 		.payload({
 			gameId: gameId,

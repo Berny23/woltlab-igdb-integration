@@ -65,6 +65,8 @@
 		<item name="wcf.igdb_integration.dialog.game_user_edit_is_owned"><![CDATA[Owned]]></item>
 		<item name="wcf.igdb_integration.dialog.game_user_edit_title"><![CDATA[Game Details]]></item>
 		<item name="wcf.igdb_integration.dialog.game_player_list_title"><![CDATA[Owners]]></item>
+		<item name="wcf.igdb_integration.dialog.game_quick_remove_confirm"><![CDATA[Do you really want to remove “{@$gameTitle}” from your library?]]></item>
+		<item name="wcf.igdb_integration.dialog.game_quick_remove_confirm_indeterminate"><![CDATA[Do you really want to remove this game from your library?]]></item>
 		<item name="wcf.igdb_integration.dialog.game_igdb_link"><![CDATA[View on IGDB]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_title"><![CDATA[Import Steam Library]]></item>
 		<item name="wcf.igdb_integration.dialog.steam_import_confirm"><![CDATA[Found <b>{#$steamGameCount}</b> games for the Steam account with the ID <b>{$steamImportSteamId}</b>.<br>Games that are already in your library are skipped. Depending on the size of the library, the import may take a moment.]]></item>
