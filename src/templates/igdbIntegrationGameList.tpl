@@ -65,7 +65,7 @@
 
 				<div class="formSubmit">
 					<input type="submit" value="{lang}wcf.global.button.submit{/lang}" accesskey="s">
-					<a href="{link controller='IgdbIntegrationGameList'}{/link}" class="button">{lang}wcf.global.button.reset{/lang}</a>
+					<a href="{$resetUrl}" class="button">{lang}wcf.global.button.reset{/lang}</a>
 				</div>
 			</div>
 		</form>

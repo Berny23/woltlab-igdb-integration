@@ -141,7 +141,7 @@ class IgdbIntegrationGameListPage extends SortablePage
 			exit;
 		}
 
-		if (isset($_REQUEST['searchField']) && !isset($_REQUEST['pageNo']) && WCF::getSession()->getPermission('user.igdb_integration.can_search_igdb')) {
+		if ($this->searchField !== '' && !isset($_REQUEST['pageNo']) && WCF::getSession()->getPermission('user.igdb_integration.can_search_igdb')) {
 			// Search for games on IGDB and update local database
 			$result = IgdbIntegrationUtil::updateDatabaseGamesByName($this->searchField);
 			$this->showIgdbError = !$result;
@@ -227,6 +227,14 @@ class IgdbIntegrationGameListPage extends SortablePage
 			$platformFilterParams .= '&platforms[]=' . rawurlencode($platform);
 		}
 
+		// The reset link keeps all unrelated parameters like the page number,
+		// but empties every filter parameter
+		$resetParameters = IgdbIntegrationUtil::getPreservedRequestParameters(
+			['searchField', 'platforms', 'sortField', 'sortOrder']
+		);
+		$resetParameters .= ($resetParameters !== '' ? '&' : '')
+			. 'searchField=&platforms[]=&sortField=&sortOrder=';
+
 		WCF::getTPL()->assign([
 			'searchField' => $this->searchField,
 			'showIgdbError' => $this->showIgdbError,
@@ -236,6 +244,7 @@ class IgdbIntegrationGameListPage extends SortablePage
 			'availablePlatforms' => $availablePlatforms,
 			'platformFilter' => $platformPreselection,
 			'platformFilterParams' => $platformFilterParams,
+			'resetUrl' => LinkHandler::getInstance()->getLink('IgdbIntegrationGameList', [], $resetParameters),
 			'importBoxAvailable' => $this->steamImportAvailable || $this->gogImportAvailable || $this->playniteImportAvailable || $this->igdbImportAvailable,
 			'igdbImportAvailable' => $this->igdbImportAvailable,
 			'steamImportAvailable' => $this->steamImportAvailable,

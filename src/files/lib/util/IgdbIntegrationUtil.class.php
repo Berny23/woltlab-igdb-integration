@@ -784,6 +784,23 @@ class IgdbIntegrationUtil
 	}
 
 	/**
+	 * Returns the query parameters of the current request as a string, without
+	 * the given parameters, to keep things like the page number.
+	 */
+	public static function getPreservedRequestParameters(array $excludedParameters): string
+	{
+		$parameters = $_GET;
+		foreach (array_keys($parameters) as $key) {
+			// The controller route is already part of every generated link
+			if (str_contains((string)$key, '/') || in_array((string)$key, $excludedParameters, true)) {
+				unset($parameters[$key]);
+			}
+		}
+
+		return http_build_query($parameters, '', '&');
+	}
+
+	/**
 	 * Returns the link to a given image url via image proxy
 	 * @see https://www.woltlab.com/community/thread/297027-image-proxy-fehlerhaft/?postID=1903894#post1903894
 	 */

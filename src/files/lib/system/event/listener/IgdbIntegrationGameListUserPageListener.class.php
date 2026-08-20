@@ -62,13 +62,21 @@ class IgdbIntegrationGameListUserPageListener implements IParameterizedEventList
 			);
 		}
 
+		// The reset link keeps all unrelated parameters like the page number,
+		// but empties every filter parameter
+		$resetParameters = IgdbIntegrationUtil::getPreservedRequestParameters(
+			['gameSearch', 'gamePlatforms', 'gameSortField', 'gameSortOrder']
+		);
+		$resetParameters .= ($resetParameters !== '' ? '&' : '')
+			. 'gameSearch=&gamePlatforms%5B%5D=&gameSortField=&gameSortOrder=';
+
 		// The filter box is pointless on profiles without any owned games
 		WCF::getTPL()->assign([
 			'igdbGameListShowFilter' => $eventObj->user->IgdbIntegrationGameCount > 0,
 			'igdbGameListFilter' => $filter,
 			'igdbGameListAvailablePlatforms' => $availablePlatforms,
 			'igdbGameListFormUrl' => $profileLink,
-			'igdbGameListResetUrl' => $profileLink . '#igdb_integration_game_list'
+			'igdbGameListResetUrl' => $profileLink . $separator . $resetParameters . '#igdb_integration_game_list'
 		]);
 	}
 }
