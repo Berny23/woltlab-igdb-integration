@@ -204,8 +204,18 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	{
 		$gameUserRow = $this->getGameUserRow($this->game->gameId, WCF::getUser()->userID);
 
+		// The large cover is shown next to or above the game data, but only if
+		// the game has a cover at all
+		$coverImageUrl = '';
+		if (IgdbIntegrationUtil::getLocalizedCoverImageId($this->game->coverImageId, $this->game->localizedCovers) !== '') {
+			$coverImageUrl = IgdbIntegrationUtil::getCoverImageUrl($this->game->coverImageId, $this->game->localizedCovers, true, true);
+		}
+
 		$this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId)
 			->appendChildren([
+				TemplateFormNode::create('cover')
+					->templateName('__igdbIntegrationGameCover')
+					->variables(['coverImageUrl' => $coverImageUrl]),
 				TextFormField::create('platforms')
 					->label('wcf.igdb_integration.game.platforms')
 					->value($this->game->platforms)

@@ -46,7 +46,40 @@ define(["require", "exports", "WoltLabSuite/Core/Component/Confirmation", "WoltL
             : 'wcf.igdb_integration.page.game_quick_add');
         quickAddButton.querySelector('fa-icon')?.setIcon(isOwned ? 'minus' : 'plus', true);
     }
+    /**
+     * Keeps the dialog centered together with its cover panel. On wide screens,
+     * the cover is positioned left of the dialog container and spans its full
+     * height, so its width depends on the dialog height and the dialog has to be
+     * shifted right by half of it. The width is passed to the stylesheet as a
+     * custom property.
+     */
+    function initGameDialogCover(content) {
+        const cover = content.querySelector('.igdbIntegrationGameDialogCover');
+        const container = content.closest('.dialogContainer');
+        if (cover === null || container === null || cover.dataset.igdbObserved === '1') {
+            return;
+        }
+        cover.dataset.igdbObserved = '1';
+        container.classList.add('igdbIntegrationGameDialogContainer');
+        const updateOffset = () => {
+            // The panel is taken out of the flow only on wide screens, in the
+            // stacked layout the dialog stays centered as usual
+            const isSidePanel = getComputedStyle(cover).position === 'absolute';
+            container.style.setProperty('--igdbCoverWidth', isSidePanel ? cover.offsetWidth + 'px' : '0px');
+        };
+        updateOffset();
+        const observer = new ResizeObserver(() => {
+            if (!container.isConnected) {
+                observer.disconnect();
+                return;
+            }
+            updateOffset();
+        });
+        observer.observe(cover);
+        observer.observe(container);
+    }
     function initGameUserEditDialogEvents(content) {
+        initGameDialogCover(content);
         const ownedYes = content.querySelector('#isOwned');
         const ownedNo = content.querySelector('#isOwned_no');
         const ratingContainer = content.querySelector('#ratingContainer');

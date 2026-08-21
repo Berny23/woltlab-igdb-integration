@@ -202,6 +202,56 @@
 	margin-top: 0.5rem;
 }
 
+/* Cover of the game detail dialog. On narrow screens it is shown above the
+   game data inside the dialog */
+.igdbIntegrationGameDialogCover {
+	width: 200px;
+	max-width: 100%;
+	margin: 0 auto 20px;
+}
+
+.igdbIntegrationGameDialogCover img {
+	display: block;
+	width: 100%;
+	border-radius: var(--wcfBorderRadiusContainer);
+}
+
+/* On wide screens the cover becomes a separate panel left of the dialog that
+   spans the full dialog height including the header and the button row. The
+   dialog container is the positioned ancestor and not the scrolling content
+   area, so the panel is not clipped. IGDB covers are practically always 3:4
+   (528x704 pixels for "t_cover_big_2x"), so the width follows from the height
+   and the rare deviating cover is cropped slightly */
+@media (min-width: 1025px) {
+	.igdbIntegrationGameDialogCover {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		right: calc(100% + 10px);
+		width: auto;
+		max-width: none;
+		margin: 0;
+		aspect-ratio: 3 / 4;
+		border-radius: var(--wcfBorderRadiusContainer);
+		box-shadow: var(--wcfBoxShadow);
+		background-color: var(--wcfContentBackground);
+		overflow: hidden;
+	}
+
+	.igdbIntegrationGameDialogCover img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 0;
+	}
+
+	/* Shift the dialog right by half the panel width, so that panel and
+	   dialog are centered as a unit. The width is set by the script */
+	.dialogContainer.igdbIntegrationGameDialogContainer {
+		left: calc(50% + (var(--igdbCoverWidth, 0px) + 10px) / 2);
+	}
+}
+
 /* Game box embedded into messages via the [igdbgame] bbcode */
 .igdbIntegrationGameEmbed.embeddedContent {
 	display: flex;

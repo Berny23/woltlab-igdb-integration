@@ -30,6 +30,8 @@ class IgdbIntegrationUtil
 	const TWITCH_URL_BASE = 'https://id.twitch.tv/oauth2/token';
 	const COVER_URL_BASE = 'https://images.igdb.com/igdb/image/upload/t_cover_med/';
 	const COVER_URL_BASE_BIG = 'https://images.igdb.com/igdb/image/upload/t_cover_big/';
+	// Retina (DPR 2.0) variant, IGDB offers it for every size by appending "_2x"
+	const COVER_URL_BASE_BIG_2X = 'https://images.igdb.com/igdb/image/upload/t_cover_big_2x/';
 	const COVER_URL_FILETYPE = '.jpg';
 	const STEAM_API_URL_BASE = 'https://api.steampowered.com/';
 	const GOG_URL_BASE = 'https://www.gog.com/';
@@ -659,12 +661,17 @@ class IgdbIntegrationUtil
 
 	/**
 	 * Returns the full cover image url for a game, using the localized cover of
-	 * the preferred region if available and the image proxy if enabled.
+	 * the preferred region if available and the image proxy if enabled. The
+	 * retina variant is only available in combination with the large size.
 	 */
-	public static function getCoverImageUrl($coverImageId, $localizedCovers, bool $useLargeSize = false): string
+	public static function getCoverImageUrl($coverImageId, $localizedCovers, bool $useLargeSize = false, bool $useRetinaSize = false): string
 	{
 		$coverImageId = self::getLocalizedCoverImageId($coverImageId, $localizedCovers);
-		$urlBase = $useLargeSize ? self::COVER_URL_BASE_BIG : self::COVER_URL_BASE;
+		if ($useLargeSize) {
+			$urlBase = $useRetinaSize ? self::COVER_URL_BASE_BIG_2X : self::COVER_URL_BASE_BIG;
+		} else {
+			$urlBase = self::COVER_URL_BASE;
+		}
 
 		return self::getImageProxyLink($urlBase . $coverImageId . self::COVER_URL_FILETYPE);
 	}
