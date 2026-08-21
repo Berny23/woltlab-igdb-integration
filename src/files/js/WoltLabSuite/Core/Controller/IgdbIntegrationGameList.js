@@ -9,6 +9,7 @@
 define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/Core/Controller/IgdbIntegrationGameDialog", "WoltLabSuite/Core/Form/Builder/Dialog", "WoltLabSuite/Core/Language", "WoltLabSuite/Core/Ui/Notification"], function (require, exports, tslib_1, Ajax_1, IgdbIntegrationGameDialog_1, Dialog_1, Language_1, Notification_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
+    exports.showGameUserEditDialog = showGameUserEditDialog;
     exports.showGamePlayerListDialog = showGamePlayerListDialog;
     exports.init = init;
     Dialog_1 = tslib_1.__importDefault(Dialog_1);

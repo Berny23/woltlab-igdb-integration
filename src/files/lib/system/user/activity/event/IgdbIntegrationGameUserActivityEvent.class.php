@@ -33,20 +33,25 @@ class IgdbIntegrationGameUserActivityEvent extends SingletonFactory implements I
 			$gameIds[] = $event->objectID;
 		}
 
-		// Fetch the localized names of the games
+		// Fetch the localized names and release year of the games
 		$games = [];
 		if (!empty($gameIds)) {
 			$conditions = new PreparedStatementConditionBuilder();
 			$conditions->add('gameId IN (?)', [$gameIds]);
-			$sql = "SELECT gameId, " . IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName
+			$sql = "SELECT gameId, " . IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName, releaseYear
 					FROM wcf1_igdb_integration_game
 					" . $conditions;
 			$statement = WCF::getDB()->prepare($sql);
 			$statement->execute($conditions->getParameters());
-			$games = $statement->fetchMap('gameId', 'displayName');
-		}
+			while ($row = $statement->fetchArray()) {
+				$gameName = $row['displayName'];
+				if (!empty($row['releaseYear'])) {
+					$gameName .= ' (' . $row['releaseYear'] . ')';
+				}
 
-		$gameListLink = LinkHandler::getInstance()->getLink('IgdbIntegrationGameList');
+				$games[$row['gameId']] = $gameName;
+			}
+		}
 
 		foreach ($events as $event) {
 			if (!isset($games[$event->objectID])) {
@@ -88,7 +93,12 @@ class IgdbIntegrationGameUserActivityEvent extends SingletonFactory implements I
 				);
 			}
 
-			$event->setLink($gameListLink);
+			// The game list opens the dialog of this game on its own
+			$event->setLink(LinkHandler::getInstance()->getLink(
+				'IgdbIntegrationGameList',
+				[],
+				'gameId=' . intval($event->objectID)
+			));
 		}
 	}
 }

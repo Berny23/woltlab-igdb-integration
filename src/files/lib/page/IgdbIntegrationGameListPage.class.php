@@ -57,6 +57,12 @@ class IgdbIntegrationGameListPage extends SortablePage
 	private $platformFilter = [];
 
 	/**
+	 * The id of a single game the list is limited to, e.g. when coming from a
+	 * user activity event. Its dialog is opened automatically.
+	 */
+	private $gameId = 0;
+
+	/**
 	 * Show error message if retreiving IGDB data resulted in an error.
 	 */
 	private $showIgdbError = false;
@@ -124,6 +130,11 @@ class IgdbIntegrationGameListPage extends SortablePage
 		$this->platformFilter = [];
 		if (isset($_REQUEST['platforms']) && is_array($_REQUEST['platforms'])) {
 			$this->platformFilter = array_filter(ArrayUtil::trim($_REQUEST['platforms']));
+		}
+
+		$this->gameId = 0;
+		if (isset($_REQUEST['gameId'])) {
+			$this->gameId = max(0, intval($_REQUEST['gameId']));
 		}
 
 		if (!empty($_POST)) {
@@ -230,13 +241,18 @@ class IgdbIntegrationGameListPage extends SortablePage
 		// The reset link keeps all unrelated parameters like the page number,
 		// but empties every filter parameter
 		$resetParameters = IgdbIntegrationUtil::getPreservedRequestParameters(
-			['searchField', 'platforms', 'sortField', 'sortOrder']
+			['searchField', 'platforms', 'sortField', 'sortOrder', 'gameId']
 		);
 		$resetParameters .= ($resetParameters !== '' ? '&' : '')
-			. 'searchField=&platforms[]=&sortField=&sortOrder=';
+			. 'searchField=&platforms[]=&sortField=&sortOrder=&gameId=';
+
+		// Only open the dialog if the requested game is really on the page,
+		// e.g. not when it has been deleted in the meantime
+		$openGameId = isset($coverImageUrls[$this->gameId]) ? $this->gameId : 0;
 
 		WCF::getTPL()->assign([
 			'searchField' => $this->searchField,
+			'openGameId' => $openGameId,
 			'showIgdbError' => $this->showIgdbError,
 			'coverImageUrls' => $coverImageUrls,
 			'topPlayers' => $topPlayers,
@@ -277,6 +293,14 @@ class IgdbIntegrationGameListPage extends SortablePage
 												AND gu.userId = " . intval(WCF::getUser()->userID) . ")
 											THEN 1 ELSE 0 END
 											AS isOwned";
+
+		if ($this->gameId) {
+			// A single game is requested, e.g. by a user activity event
+			$this->objectList->getConditionBuilder()->add(
+				$this->objectList->getDatabaseTableAlias() . '.gameId = ?',
+				[$this->gameId]
+			);
+		}
 
 		if (!empty($this->searchField)) {
 			// Search for all parts, separated with a space

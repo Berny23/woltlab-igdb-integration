@@ -227,6 +227,9 @@
 		{foreach from=$objects item=game}
 			ControllerIgdbIntegrationGameList.init({unsafe:$game->gameId});
 		{/foreach}
+		{if $openGameId}
+			ControllerIgdbIntegrationGameList.showGameUserEditDialog({unsafe:$openGameId});
+		{/if}
 	});
 </script>
 

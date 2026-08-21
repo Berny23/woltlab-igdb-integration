@@ -54,7 +54,7 @@ function updateGameBox(response: Response) {
 	updateQuickToggleButton(response.gameId, response.isOwned);
 }
 
-async function showGameUserEditDialog(gameId: number) {
+export async function showGameUserEditDialog(gameId: number) {
 	// Call dialog form
 	let form = new FormBuilderDialog(
 		'gameUserEditDialog' + gameId,
