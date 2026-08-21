@@ -212,6 +212,28 @@ class IgdbIntegrationUtil
 
 		self::insertGamesFromResponse($response);
 
+		// A trailing year like "doom 2016" is a hint to find the game of that
+		// year. The plain search above still runs, because the year may be part
+		// of the title itself ("FIFA 2000"), and the date window is widened by
+		// a year for offsets and regional delays.
+		$yearSearch = self::parseSearchYear($name);
+		if ($yearSearch !== null) {
+			[$title, $year] = $yearSearch;
+			$body = 'search "' . str_replace(['"', '\\'], '', $title) . '";
+					fields ' . self::GAME_FIELDS . ';
+					where first_release_date >= ' . gmmktime(0, 0, 0, 1, 1, $year - 1)
+						. ' & first_release_date < ' . gmmktime(0, 0, 0, 1, 1, $year + 2) . ';
+					limit ' . IGDB_INTEGRATION_GENERAL_RESULT_LIMIT . ';';
+
+			try {
+				$response = self::fetchIgdbGamesWithTokenRefresh($body);
+			} catch (Exception $ex) {
+				return false;
+			}
+
+			self::insertGamesFromResponse($response);
+		}
+
 		if ($includeAliasMatches) {
 			return self::updateDatabaseGamesByAlternativeName($name);
 		}
@@ -615,6 +637,52 @@ class IgdbIntegrationUtil
 	}
 
 	/**
+	 * Splits a search string that ends with a release year into the title and
+	 * the year, e.g. "doom 2016" or "prey (2017)". Returns null if there is no
+	 * trailing year or nothing in front of it ("1942" is a title by itself).
+	 */
+	public static function parseSearchYear(string $search): ?array
+	{
+		if (!preg_match('/^(.+?)(?:\s+|\s*[(\[])((?:19|20)\d{2})[)\]]?$/u', trim($search), $matches)) {
+			return null;
+		}
+
+		$title = trim($matches[1]);
+		if ($title === '') {
+			return null;
+		}
+
+		return [$title, (int)$matches[2]];
+	}
+
+	/**
+	 * Returns the list of [sql, params] conditions for a search string, one
+	 * per space-separated part, all of which have to match. A trailing year
+	 * ("doom 2016") is also satisfied by a release within a year of it, the
+	 * same window the IGDB search uses, so its results actually show up.
+	 */
+	public static function getSearchConditions(string $search): array
+	{
+		$conditions = [];
+
+		$yearSearch = self::parseSearchYear($search);
+		if ($yearSearch !== null) {
+			[$search, $year] = $yearSearch;
+			[$conditionSql, $conditionParams] = self::getNameSearchCondition((string)$year);
+			$conditions[] = [
+				'(' . $conditionSql . ' OR releaseYear BETWEEN ? AND ?)',
+				array_merge($conditionParams, [$year - 1, $year + 1]),
+			];
+		}
+
+		foreach (explode(' ', $search) as $part) {
+			$conditions[] = self::getNameSearchCondition($part);
+		}
+
+		return $conditions;
+	}
+
+	/**
 	 * Returns the SQL expression that ranks a game by how well its names match
 	 * the full search string: exact match, then prefix match, then the search
 	 * string as a whole phrase, then everything the per-part conditions let
@@ -622,6 +690,31 @@ class IgdbIntegrationUtil
 	 * front of the user-defined sort order.
 	 */
 	public static function getNameSearchRelevanceSql(string $search): string
+	{
+		$yearSearch = self::parseSearchYear($search);
+		if ($yearSearch !== null) {
+			// "doom 2016": The full string ranks titles containing the year
+			// ("FIFA 2004") first, then the title alone, where ties are ranked
+			// by how close the release is to the year
+			[$title, $year] = $yearSearch;
+
+			return self::getNameRelevanceSql($search)
+				. ', ' . self::getNameRelevanceSql($title)
+				. ', CASE
+					WHEN releaseYear = ' . $year . ' THEN 0
+					WHEN releaseYear BETWEEN ' . ($year - 1) . ' AND ' . ($year + 1) . ' THEN 1
+					ELSE 2
+					END';
+		}
+
+		return self::getNameRelevanceSql($search);
+	}
+
+	/**
+	 * Returns the ranking expression of getNameSearchRelevanceSql() for a
+	 * single name without year handling.
+	 */
+	private static function getNameRelevanceSql(string $search): string
 	{
 		$db = WCF::getDB();
 		$name = $db->escapeString($search);

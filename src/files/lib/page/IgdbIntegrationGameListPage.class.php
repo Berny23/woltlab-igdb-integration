@@ -304,9 +304,7 @@ class IgdbIntegrationGameListPage extends SortablePage
 
 		if (!empty($this->searchField)) {
 			// Search for all parts, separated with a space
-			$parts = explode(' ', $this->searchField);
-			foreach ($parts as $part) {
-				[$conditionSql, $conditionParams] = IgdbIntegrationUtil::getNameSearchCondition($part);
+			foreach (IgdbIntegrationUtil::getSearchConditions($this->searchField) as [$conditionSql, $conditionParams]) {
 				$this->objectList->getConditionBuilder()->add($conditionSql, $conditionParams);
 			}
 		}

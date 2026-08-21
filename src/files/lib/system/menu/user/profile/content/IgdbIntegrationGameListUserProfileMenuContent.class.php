@@ -133,9 +133,7 @@ class IgdbIntegrationGameListUserProfileMenuContent extends SingletonFactory imp
 
 		if ($filter['search'] !== '') {
 			// Search for all parts, separated with a space
-			$parts = explode(' ', $filter['search']);
-			foreach ($parts as $part) {
-				[$partSql, $partParams] = IgdbIntegrationUtil::getNameSearchCondition($part);
+			foreach (IgdbIntegrationUtil::getSearchConditions($filter['search']) as [$partSql, $partParams]) {
 				$conditionSql .= " AND " . $partSql;
 				$conditionParams = array_merge($conditionParams, $partParams);
 			}

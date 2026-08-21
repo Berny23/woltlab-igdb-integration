@@ -1943,8 +1943,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$gameList = new IgdbIntegrationGameList();
 		$gameList->sqlSelects .= IgdbIntegrationUtil::getDisplayNameSql() . " AS displayName";
 		// Search for all parts, separated with a space, like the game list page
-		foreach (explode(' ', $searchString) as $part) {
-			[$conditionSql, $conditionParams] = IgdbIntegrationUtil::getNameSearchCondition($part);
+		foreach (IgdbIntegrationUtil::getSearchConditions($searchString) as [$conditionSql, $conditionParams]) {
 			$gameList->getConditionBuilder()->add($conditionSql, $conditionParams);
 		}
 		// The best name matches come first so that the result limit cannot cut
