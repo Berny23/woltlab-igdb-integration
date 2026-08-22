@@ -48,6 +48,14 @@
 				<minvalue>0</minvalue>
 				<maxvalue>500</maxvalue>
 			</option>
+			<option name="igdb_integration_general_refresh_interval">
+				<categoryname>igdb_integration_general</categoryname>
+				<optiontype>integer</optiontype>
+				<defaultvalue>28</defaultvalue>
+				<minvalue>1</minvalue>
+				<maxvalue>365</maxvalue>
+				<suffix>days</suffix>
+			</option>
 			<option name="igdb_integration_general_games_per_page">
 				<categoryname>igdb_integration_general</categoryname>
 				<optiontype>integer</optiontype>

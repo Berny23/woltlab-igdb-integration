@@ -202,6 +202,11 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	public function getGameUserEditDialog()
 	{
+		// Games that have not been fetched from IGDB for a while may be missing
+		// data added there in the meantime, e.g. localized covers or store
+		// links. The record is refreshed at most once per refresh interval
+		$this->game = IgdbIntegrationUtil::refreshGameIfStale($this->game);
+
 		$gameUserRow = $this->getGameUserRow($this->game->gameId, WCF::getUser()->userID);
 
 		// The large cover is shown next to or above the game data, but only if

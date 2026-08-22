@@ -44,6 +44,10 @@ return [
 			// GOG store slug from IGDB's external game links, empty if unknown
 			NotNullVarchar255DatabaseTableColumn::create('gogSlug')
 				->defaultValue(''),
+			// Time of the last fetch of the IGDB record, 0 if the game predates
+			// this column
+			NotNullInt10DatabaseTableColumn::create('lastFetchTime')
+				->defaultValue(0),
 			NotNullInt10DatabaseTableColumn::create('lastInteractionTime')
 				->defaultValue(0),
 			NotNullInt10DatabaseTableColumn::create('playerCount')

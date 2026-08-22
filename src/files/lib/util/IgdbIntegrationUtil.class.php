@@ -11,6 +11,7 @@ use GuzzleHttp\Psr7\Request;
 use \wcf\system\WCF;
 use \wcf\data\option\OptionEditor;
 use \wcf\data\option\Option;
+use wcf\data\IgdbIntegration\IgdbIntegrationGame;
 use wcf\system\user\activity\point\UserActivityPointHandler;
 use wcf\system\user\group\assignment\UserGroupAssignmentHandler;
 
@@ -365,6 +366,56 @@ class IgdbIntegrationUtil
 	}
 
 	/**
+	 * Returns whether the data of the given game has never been fetched from
+	 * IGDB or is older than the configured refresh interval.
+	 */
+	public static function isGameDataStale(IgdbIntegrationGame $game): bool
+	{
+		$intervalDays = defined('IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL') ? intval(IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL) : 28;
+
+		return intval($game->lastFetchTime) + $intervalDays * 86400 < TIME_NOW;
+	}
+
+	/**
+	 * Fetches the IGDB record of the given game if it is stale, so that games
+	 * added long ago get their current data (e.g. localized covers or store
+	 * links added on IGDB in the meantime) on view without a manual refresh.
+	 * Returns the game with the current data. Failures are ignored, the known
+	 * data is shown instead.
+	 *
+	 * Like the search, this only requests data from IGDB for users who are
+	 * allowed to, everyone else sees the data that is already known.
+	 */
+	public static function refreshGameIfStale(IgdbIntegrationGame $game): IgdbIntegrationGame
+	{
+		if (!WCF::getSession()->getPermission('user.igdb_integration.can_search_igdb')) {
+			return $game;
+		}
+
+		if (!self::isConnectionDataValid() || !self::isGameDataStale($game)) {
+			return $game;
+		}
+
+		$receivedGameCount = self::updateDatabaseGamesByIds([$game->gameId]);
+		if ($receivedGameCount === 0) {
+			// IGDB no longer knows this id; remember the attempt so that the
+			// request is not repeated on every view
+			$sql = "UPDATE wcf1_igdb_integration_game
+					SET lastFetchTime = ?
+					WHERE gameId = ?";
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute([TIME_NOW, $game->gameId]);
+		}
+		if ($receivedGameCount === null) {
+			// Request failed, e.g. IGDB down or the queue congested; the next
+			// view retries
+			return $game;
+		}
+
+		return new IgdbIntegrationGame($game->gameId);
+	}
+
+	/**
 	 * Inserts or updates all games of an IGDB games response in the database.
 	 * Returns the number of games contained in the response.
 	 */
@@ -384,7 +435,8 @@ class IgdbIntegrationUtil
 					localizedCovers = ?,
 					steamAppId = ?,
 					gogId = ?,
-					gogSlug = ?
+					gogSlug = ?,
+					lastFetchTime = ?
 				ON DUPLICATE KEY UPDATE
 					name = ?,
 					germanName = ?,
@@ -397,7 +449,8 @@ class IgdbIntegrationUtil
 					localizedCovers = ?,
 					steamAppId = COALESCE(?, steamAppId),
 					gogId = COALESCE(?, gogId),
-					gogSlug = IF(? = '', gogSlug, ?)";
+					gogSlug = IF(? = '', gogSlug, ?),
+					lastFetchTime = ?";
 		$statement = WCF::getDB()->prepare($sql);
 		foreach ($gamesJson as $game) {
 			$gamePlatforms = '';
@@ -476,9 +529,11 @@ class IgdbIntegrationUtil
 			// "3" finding the "イ" of a Japanese alias
 			$gameAlternativeNamesJson = JSON::encode($gameAlternativeNames, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-			$statement->execute([$gameId, $gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId, $gameGogSlug,
+			// Every request delivers the full record, so any response resets the
+			// refresh interval of the games it contains
+			$statement->execute([$gameId, $gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId, $gameGogSlug, TIME_NOW,
 								/* UPDATE starts here */
-								$gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId, $gameGogSlug, $gameGogSlug]);
+								$gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId, $gameGogSlug, $gameGogSlug, TIME_NOW]);
 		}
 		WCF::getDB()->commitTransaction();
 

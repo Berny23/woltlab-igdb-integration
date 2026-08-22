@@ -177,6 +177,8 @@
 		<item name="wcf.acp.option.igdb_integration_auth_steam_api_key"><![CDATA[Steam-Web-API-Schlüssel]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_steam_api_key.description"><![CDATA[Wird für den Steam-Bibliotheksimport der Benutzer benötigt. Ein kostenloser Schlüssel kann auf der <a href="https://steamcommunity.com/dev/apikey" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Steam-Web-API-Schlüssel-Seite</a> erstellt werden. Wenn das Feld leer ist, ist der Steam-Import deaktiviert.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. Ergebnisse pro IGDB-Suche]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_refresh_interval"><![CDATA[Aktualisierungsintervall der Spieldetails]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_refresh_interval.description"><![CDATA[Beim Öffnen des Detail-Dialogs eines Spiels wird der IGDB-Datensatz (inklusive der Shop-Verknüpfungen und weiterer Metadaten) höchstens einmal innerhalb dieses Zeitraums abgerufen. Manuelle Aktualisierungen in der ACP sind davon nicht betroffen.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page"><![CDATA[Spiele pro Seite]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page.description"><![CDATA[Dies ist der <b>Standardwert</b>. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_game_sort_field"><![CDATA[Feld für Spielsortierung]]></item>
@@ -201,7 +203,7 @@
 		<item name="wcf.acp.group.option.category.mod.igdb_integration"><![CDATA[IGDB-Integration]]></item>
 		<item name="wcf.acp.group.option.category.admin.igdb_integration"><![CDATA[IGDB-Integration]]></item>
 		<item name="wcf.acp.group.option.admin.igdb_integration.can_manage_games"><![CDATA[Kann alle Spiele editieren oder löschen]]></item>
-		<item name="wcf.acp.group.option.user.igdb_integration.can_search_igdb"><![CDATA[Kann beim Suchen aktuelle Daten von IGDB abrufen]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_search_igdb"><![CDATA[Kann aktuelle Daten von IGDB abrufen]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_manage_own_games"><![CDATA[Kann eigene Spiele-Bibliothek verwalten]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_steam_games"><![CDATA[Kann eigene Spiele von Steam importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_gog_games"><![CDATA[Kann eigene Spiele von GOG importieren]]></item>
