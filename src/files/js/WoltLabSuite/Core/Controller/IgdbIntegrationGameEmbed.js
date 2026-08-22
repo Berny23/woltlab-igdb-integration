@@ -114,9 +114,11 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
         initialized = true;
         document.addEventListener('click', (event) => {
             const target = event.target;
-            const editButton = target.closest('.igdbIntegrationGameEmbedEdit');
-            if (editButton !== null) {
-                const embed = editButton.closest('.igdbIntegrationGameEmbed');
+            // The cover is a second, larger target for the details dialog next to
+            // the button, matching the cover of the game list
+            const editTarget = target.closest('.igdbIntegrationGameEmbedEdit, .igdbIntegrationGameEmbedCover');
+            if (editTarget !== null) {
+                const embed = editTarget.closest('.igdbIntegrationGameEmbed');
                 if (embed !== null) {
                     showGameUserEditDialog(embed, parseInt(embed.dataset.gameId || '0', 10));
                 }

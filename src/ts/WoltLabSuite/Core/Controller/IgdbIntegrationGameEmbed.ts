@@ -146,9 +146,11 @@ export function setup() {
 	document.addEventListener('click', (event) => {
 		const target = event.target as HTMLElement;
 
-		const editButton = target.closest<HTMLElement>('.igdbIntegrationGameEmbedEdit');
-		if (editButton !== null) {
-			const embed = editButton.closest<HTMLElement>('.igdbIntegrationGameEmbed');
+		// The cover is a second, larger target for the details dialog next to
+		// the button, matching the cover of the game list
+		const editTarget = target.closest<HTMLElement>('.igdbIntegrationGameEmbedEdit, .igdbIntegrationGameEmbedCover');
+		if (editTarget !== null) {
+			const embed = editTarget.closest<HTMLElement>('.igdbIntegrationGameEmbed');
 			if (embed !== null) {
 				showGameUserEditDialog(embed, parseInt(embed.dataset.gameId || '0', 10));
 			}

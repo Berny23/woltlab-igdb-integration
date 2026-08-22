@@ -5,7 +5,8 @@
 	<span class="igdbIntegrationGameEmbedOwnedBadge" title="{lang}wcf.igdb_integration.bbcode.author_owns{/lang}">
 		{icon size=24 name='user-check' type='solid'}
 	</span>
-	<img class="igdbIntegrationGameEmbedCover" src="{$coverImageUrl}" alt="" loading="lazy">
+	<img class="igdbIntegrationGameEmbedCover pointer" src="{$coverImageUrl}" alt="" loading="lazy"
+		title="{lang}wcf.igdb_integration.dialog.game_user_edit_title{/lang}">
 	<div class="igdbIntegrationGameEmbedInfo">
 		<h3 class="igdbIntegrationGameEmbedTitle">{$displayName}</h3>
 		<small class="igdbIntegrationGameEmbedYear">{$game->releaseYear}</small>
