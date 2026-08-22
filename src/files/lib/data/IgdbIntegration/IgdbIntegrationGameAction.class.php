@@ -225,11 +225,9 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 					->value($this->game->summary)
 					->rows(4)
 					->immutable(),
-				TemplateFormNode::create('igdbLink')
-					->templateName('__igdbIntegrationGameLink')
-					->variables([
-						'gameUrl' => $this->game->slug ? 'https://www.igdb.com/games/' . rawurlencode($this->game->slug) : ''
-					])
+				TemplateFormNode::create('gameLinks')
+					->templateName('__igdbIntegrationGameLinks')
+					->variables(['gameLinks' => IgdbIntegrationUtil::getGameLinks($this->game)])
 			]);
 		if (WCF::getSession()->getPermission('user.igdb_integration.can_manage_own_games')) {
 			$this->dialog->appendChildren([

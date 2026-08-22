@@ -41,6 +41,9 @@ return [
 			// GOG product id from IGDB's external game links, NULL if unknown
 			BigintDatabaseTableColumn::create('gogId')
 				->length(20),
+			// GOG store slug from IGDB's external game links, empty if unknown
+			NotNullVarchar255DatabaseTableColumn::create('gogSlug')
+				->defaultValue(''),
 			NotNullInt10DatabaseTableColumn::create('lastInteractionTime')
 				->defaultValue(0),
 			NotNullInt10DatabaseTableColumn::create('playerCount')

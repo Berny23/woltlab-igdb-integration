@@ -12,10 +12,7 @@
 		{if $game->platforms}
 			<small class="igdbIntegrationGameEmbedPlatforms">{$game->platforms}</small>
 		{/if}
-		{if $gameUrl}
-			<a href="{$gameUrl}" class="externalURL igdbIntegrationGameEmbedLink"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if}
-				rel="nofollow noopener">{lang}wcf.igdb_integration.dialog.game_igdb_link{/lang}</a>
-		{/if}
+		{include file='__igdbIntegrationGameLinks' gameLinksInline=true}
 		{if $authorOwns && $authorRating > 0}
 			<p class="igdbIntegrationGameEmbedAuthorRating orange" title="{lang}wcf.igdb_integration.bbcode.author_rating{/lang}">
 				{section name=ratingStars loop=$authorRating}{icon size=16 name='star' type='solid'}{/section}

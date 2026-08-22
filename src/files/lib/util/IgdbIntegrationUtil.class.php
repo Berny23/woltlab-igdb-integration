@@ -60,7 +60,7 @@ class IgdbIntegrationUtil
 	/**
 	 * Fields requested for every game fetched from IGDB.
 	 */
-	const GAME_FIELDS = 'id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id,slug,game_localizations.cover.image_id,game_localizations.region,external_games.uid,external_games.external_game_source';
+	const GAME_FIELDS = 'id,name,alternative_names.comment,alternative_names.name,first_release_date,platforms.abbreviation,platforms.name,summary,cover.image_id,slug,game_localizations.cover.image_id,game_localizations.region,external_games.uid,external_games.external_game_source,external_games.url';
 
 	/**
 	 * Roman numeral words replaced during title normalization.
@@ -383,7 +383,8 @@ class IgdbIntegrationUtil
 					slug = ?,
 					localizedCovers = ?,
 					steamAppId = ?,
-					gogId = ?
+					gogId = ?,
+					gogSlug = ?
 				ON DUPLICATE KEY UPDATE
 					name = ?,
 					germanName = ?,
@@ -395,7 +396,8 @@ class IgdbIntegrationUtil
 					slug = ?,
 					localizedCovers = ?,
 					steamAppId = COALESCE(?, steamAppId),
-					gogId = COALESCE(?, gogId)";
+					gogId = COALESCE(?, gogId),
+					gogSlug = IF(? = '', gogSlug, ?)";
 		$statement = WCF::getDB()->prepare($sql);
 		foreach ($gamesJson as $game) {
 			$gamePlatforms = '';
@@ -447,6 +449,7 @@ class IgdbIntegrationUtil
 			// links backfilled by the imports survive later IGDB refreshes
 			$gameSteamAppId = null;
 			$gameGogId = null;
+			$gameGogSlug = '';
 			if (isset($game->external_games)) {
 				foreach ($game->external_games as $externalGame) {
 					if (!isset($externalGame->external_game_source) || empty($externalGame->uid)) {
@@ -456,6 +459,7 @@ class IgdbIntegrationUtil
 						$gameSteamAppId = intval($externalGame->uid);
 					} elseif ($gameGogId === null && $externalGame->external_game_source == self::EXTERNAL_GAME_SOURCE_GOG) {
 						$gameGogId = intval($externalGame->uid);
+						$gameGogSlug = self::getGogSlugFromUrl($externalGame->url ?? '');
 					}
 				}
 			}
@@ -472,9 +476,9 @@ class IgdbIntegrationUtil
 			// "3" finding the "イ" of a Japanese alias
 			$gameAlternativeNamesJson = JSON::encode($gameAlternativeNames, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-			$statement->execute([$gameId, $gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId,
+			$statement->execute([$gameId, $gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId, $gameGogSlug,
 								/* UPDATE starts here */
-								$gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId]);
+								$gameName, $gameGermanName, $gameAlternativeNamesJson, $gameYear, $gamePlatforms, $gameSummary, $gameCoverId, $gameSlug, $gameLocalizedCoversJson, $gameSteamAppId, $gameGogId, $gameGogSlug, $gameGogSlug]);
 		}
 		WCF::getDB()->commitTransaction();
 
@@ -750,6 +754,42 @@ class IgdbIntegrationUtil
 		$name = self::getLocalizedGameNameColumn();
 
 		return "CASE WHEN " . $name . " = '' THEN name ELSE " . $name . " END";
+	}
+
+	/**
+	 * Extracts the store slug from a GOG store url as delivered by IGDB's
+	 * external game links, e.g. "https://www.gog.com/game/the_witcher" or
+	 * "https://www.gog.com/en/game/the_witcher". Returns an empty string if
+	 * the url has no recognizable slug.
+	 */
+	public static function getGogSlugFromUrl(string $url): string
+	{
+		if (preg_match('~gog\.com/(?:[a-z]{2}/)?game/([a-z0-9_\-]+)~i', $url, $matches)) {
+			return $matches[1];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Returns the external store and database links of a game in display order
+	 * (IGDB, Steam, GOG) as an array of [name => url], omitting links whose
+	 * ids are unknown.
+	 */
+	public static function getGameLinks($game): array
+	{
+		$links = [];
+		if ($game->slug) {
+			$links['igdb'] = 'https://www.igdb.com/games/' . rawurlencode($game->slug);
+		}
+		if ($game->steamAppId) {
+			$links['steam'] = 'https://store.steampowered.com/app/' . intval($game->steamAppId) . '/';
+		}
+		if ($game->gogSlug) {
+			$links['gog'] = self::GOG_URL_BASE . 'game/' . rawurlencode($game->gogSlug);
+		}
+
+		return $links;
 	}
 
 	/**

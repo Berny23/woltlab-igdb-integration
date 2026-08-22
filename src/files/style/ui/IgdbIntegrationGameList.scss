@@ -312,9 +312,43 @@
 	font-size: var(--wcfFontSizeDefault);
 }
 
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedLink {
+/* Store/database links (IGDB, Steam, GOG) in the details dialog and the bbcode */
+.igdbIntegrationGameLinks {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px 15px;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGameLinks {
 	margin-top: 5px;
-	align-self: flex-start;
+}
+
+.igdbIntegrationGameLink {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.igdbIntegrationGameLinkIcon {
+	/* The "!important" is required because of WoltLab's ".messageBody > .messageText img" */
+	width: auto !important;
+	height: 1.3em !important;
+	flex-shrink: 0;
+}
+
+/* The icons are plain black/white vectors, pick the one matching the scheme */
+.igdbIntegrationGameLinkIconDark {
+	display: none;
+}
+
+html[data-color-scheme="dark"] {
+	.igdbIntegrationGameLinkIconLight {
+		display: none;
+	}
+
+	.igdbIntegrationGameLinkIconDark {
+		display: inline;
+	}
 }
 
 .igdbIntegrationGameEmbed .igdbIntegrationGameEmbedAuthorRating {

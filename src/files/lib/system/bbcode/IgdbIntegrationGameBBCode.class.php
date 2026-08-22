@@ -109,7 +109,8 @@ final class IgdbIntegrationGameBBCode extends AbstractBBCode
 		}
 
 		$displayName = $this->getDisplayName($game);
-		$gameUrl = $game->slug ? 'https://www.igdb.com/games/' . \rawurlencode($game->slug) : '';
+		$gameLinks = IgdbIntegrationUtil::getGameLinks($game);
+		$gameUrl = $gameLinks['igdb'] ?? '';
 
 		if ($parser->getOutputType() == 'text/html') {
 			$authorUserId = $this->getActiveMessageAuthorId();
@@ -119,7 +120,7 @@ final class IgdbIntegrationGameBBCode extends AbstractBBCode
 				'game' => $game,
 				'displayName' => $displayName,
 				'coverImageUrl' => IgdbIntegrationUtil::getCoverImageUrl($game->coverImageId, $game->localizedCovers, true),
-				'gameUrl' => $gameUrl,
+				'gameLinks' => $gameLinks,
 				'isOwned' => $this->isOwned($gameId),
 				'authorOwns' => $authorGameRow !== null,
 				'authorRating' => \intval($authorGameRow['rating'] ?? 0),
