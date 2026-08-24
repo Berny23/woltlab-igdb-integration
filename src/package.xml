@@ -42,5 +42,6 @@
 		<instruction type="database">acp/database/update_de.berny23.igdb_integration_2.1.1.php</instruction>
 		<instruction type="template" />
 		<instruction type="language" />
+		<instruction type="option" />
 	</instructions>
 </package>
