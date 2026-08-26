@@ -177,6 +177,7 @@
 		<item name="wcf.acp.option.igdb_integration_auth_steam_api_key"><![CDATA[Steam Web API Key]]></item>
 		<item name="wcf.acp.option.igdb_integration_auth_steam_api_key.description"><![CDATA[Required for the Steam library import of users. A free key can be created on the <a href="https://steamcommunity.com/dev/apikey" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Steam Web API key page</a>. If empty, the Steam import is disabled.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_result_limit"><![CDATA[Max. results per IGDB search]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_result_limit.description"><![CDATA[IGDB returns at most 500 results per search.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_refresh_interval"><![CDATA[Refresh interval of game details]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_refresh_interval.description"><![CDATA[When a game’s details dialog is opened, the IGDB record (including the store links and other metadata) is fetched at most once within this interval. Manual refreshes in the ACP are not affected.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page"><![CDATA[Games per page]]></item>
