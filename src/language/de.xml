@@ -53,6 +53,8 @@
 		<item name="wcf.igdb_integration.game.refresh"><![CDATA[Von IGDB aktualisieren]]></item>
 		<item name="wcf.igdb_integration.game.refresh.confirmMessage"><![CDATA[Möchte{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{else}st du{/if} „{$game->name}“ wirklich von IGDB aktualisieren? Manuell bearbeitete Spieldaten werden überschrieben.]]></item>
 		<item name="wcf.igdb_integration.game.refresh.bulkConfirmMessage"><![CDATA[Möchte{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{else}st du{/if} die ausgewählten Spiele wirklich von IGDB aktualisieren? Manuell bearbeitete Spieldaten werden überschrieben.]]></item>
+		<item name="wcf.igdb_integration.game.refresh.missing_title"><![CDATA[Nicht auf IGDB gefundene Spiele]]></item>
+		<item name="wcf.igdb_integration.game.refresh.missing_message"><![CDATA[IGDB kennt die folgenden Spiele nicht mehr, z. B. weil sie dort gelöscht oder zusammengeführt wurden. Ihre gespeicherten Daten wurden beibehalten. Sollen diese Spiele gelöscht werden?]]></item>
 	</category>
 
 	<!-- IGDB cover regions -->

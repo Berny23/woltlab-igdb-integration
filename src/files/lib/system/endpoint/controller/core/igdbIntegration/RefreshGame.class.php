@@ -10,12 +10,13 @@ use wcf\http\Helper;
 use wcf\system\endpoint\IController;
 use wcf\system\endpoint\PostRequest;
 use wcf\system\exception\PermissionDeniedException;
-use wcf\system\exception\UserInputException;
 use wcf\system\WCF;
 use wcf\util\IgdbIntegrationUtil;
 
 /**
- * Refreshes the data of the game with the given ID from IGDB.
+ * Refreshes the data of the game with the given ID from IGDB. Responds with
+ * the game under `missingGames` if IGDB no longer knows it, so that the
+ * caller can offer to delete it.
  *
  * @author      Berny23
  * @copyright   2026 Berny23
@@ -44,15 +45,16 @@ final class RefreshGame implements IController
 			throw new PermissionDeniedException();
 		}
 
-		$receivedGameCount = IgdbIntegrationUtil::updateDatabaseGamesByIds([$game->gameId]);
-		if ($receivedGameCount === null) {
+		$receivedGameIds = IgdbIntegrationUtil::updateDatabaseGamesByIds([$game->gameId]);
+		if ($receivedGameIds === null) {
 			throw new \RuntimeException('The IGDB API request failed.');
 		}
-		if ($receivedGameCount === 0) {
-			// IGDB no longer knows this id, e.g. because the game was deleted or merged there.
-			throw new UserInputException('id', 'notFoundOnIgdb');
-		}
 
-		return new JsonResponse([]);
+		// IGDB no longer knows this id, e.g. because the game was deleted or merged there
+		$missingGameIds = empty($receivedGameIds) ? [$game->gameId] : [];
+
+		return new JsonResponse([
+			'missingGames' => IgdbIntegrationUtil::loadGameSummaries($missingGameIds),
+		]);
 	}
 }

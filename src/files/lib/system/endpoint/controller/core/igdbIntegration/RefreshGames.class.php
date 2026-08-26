@@ -16,7 +16,8 @@ use wcf\util\IgdbIntegrationUtil;
 
 /**
  * Refreshes the data of all games with the given IDs from IGDB, batching up
- * to 400 ids per IGDB API request.
+ * to 400 ids per IGDB API request. Responds with the games IGDB no longer
+ * knows under `missingGames`, so that the caller can offer to delete them.
  *
  * @author      Berny23
  * @copyright   2026 Berny23
@@ -50,16 +51,17 @@ final class RefreshGames implements IController
 			throw new UserInputException('gameIds');
 		}
 
-		$receivedGameCount = IgdbIntegrationUtil::updateDatabaseGamesByIds($gameIds);
-		if ($receivedGameCount === null) {
+		$receivedGameIds = IgdbIntegrationUtil::updateDatabaseGamesByIds($gameIds);
+		if ($receivedGameIds === null) {
 			throw new \RuntimeException('The IGDB API request failed.');
 		}
-		if ($receivedGameCount === 0) {
-			// IGDB no longer knows any of the ids, e.g. because the games were deleted or merged there.
-			throw new UserInputException('gameIds', 'notFoundOnIgdb');
-		}
 
-		return new JsonResponse([]);
+		// IGDB no longer knows these ids, e.g. because the games were deleted or merged there
+		$missingGameIds = array_diff($gameIds, $receivedGameIds);
+
+		return new JsonResponse([
+			'missingGames' => IgdbIntegrationUtil::loadGameSummaries($missingGameIds),
+		]);
 	}
 
 	/**

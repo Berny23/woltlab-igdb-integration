@@ -15,6 +15,7 @@ use wcf\data\IgdbIntegration\IgdbIntegrationGame;
 use wcf\system\database\util\PreparedStatementConditionBuilder;
 use wcf\system\user\activity\point\UserActivityPointHandler;
 use wcf\system\user\group\assignment\UserGroupAssignmentHandler;
+use function wcf\functions\exception\logThrowable;
 
 /**
  * A utility class for API interactions with IGDB.
@@ -343,34 +344,75 @@ class IgdbIntegrationUtil
 	 * Updates the game database with all IGDB games with the given IGDB ids.
 	 * Requested ids that IGDB no longer knows are stamped as fetched anyway,
 	 * so they are not requested again before the refresh interval passes.
-	 * Returns the number of games received from IGDB (the unknown ids are
-	 * missing from that count), or null if the connection data is invalid or
+	 * Returns the ids of the games received from IGDB (the unknown ids are
+	 * missing from that list), or null if the connection data is invalid or
 	 * any request failed. The chunks completed before a failure stay updated.
+	 *
+	 * If a deadline (unix time) is given, no further chunk is started after
+	 * it has passed; the ids of the remaining chunks are then neither fetched
+	 * nor stamped, so a later call picks them up again.
 	 */
-	public static function updateDatabaseGamesByIds(array $gameIds): ?int
+	public static function updateDatabaseGamesByIds(array $gameIds, ?float $deadline = null): ?array
 	{
 		if (!self::isConnectionDataValid() || empty($gameIds)) {
 			return null;
 		}
 
-		$receivedGameCount = 0;
-		foreach (array_chunk($gameIds, 400) as $chunk) {
+		$receivedGameIds = [];
+		foreach (array_chunk($gameIds, 400) as $index => $chunk) {
+			if ($index > 0 && $deadline !== null && microtime(true) >= $deadline) {
+				break;
+			}
+
+			$chunkIds = array_map('intval', $chunk);
 			$body = 'fields ' . self::GAME_FIELDS . ';
-					where id = (' . implode(',', array_map('intval', $chunk)) . ');
+					where id = (' . implode(',', $chunkIds) . ');
 					limit 500;';
 
 			try {
 				$response = self::fetchIgdbGamesWithTokenRefresh($body);
 			} catch (Exception $ex) {
+				logThrowable($ex);
 				return null;
 			}
 
-			$receivedGameIds = self::insertGamesFromResponse($response);
-			$receivedGameCount += count($receivedGameIds);
-			self::markGamesAsFetched(array_diff(array_map('intval', $chunk), $receivedGameIds));
+			$receivedChunkIds = self::insertGamesFromResponse($response);
+			self::markGamesAsFetched(array_diff($chunkIds, $receivedChunkIds));
+			$receivedGameIds = array_merge($receivedGameIds, $receivedChunkIds);
 		}
 
-		return $receivedGameCount;
+		return $receivedGameIds;
+	}
+
+	/**
+	 * Returns id, name and release year of the given games, sorted by name.
+	 * Meant for listing the games a refresh could not find on IGDB.
+	 */
+	public static function loadGameSummaries(array $gameIds): array
+	{
+		if (empty($gameIds)) {
+			return [];
+		}
+
+		$conditionBuilder = new PreparedStatementConditionBuilder();
+		$conditionBuilder->add('gameId IN (?)', [array_values($gameIds)]);
+		$sql = "SELECT gameId, name, releaseYear
+				FROM wcf1_igdb_integration_game
+				" . $conditionBuilder . "
+				ORDER BY name ASC, gameId ASC";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute($conditionBuilder->getParameters());
+
+		$games = [];
+		while ($row = $statement->fetchArray()) {
+			$games[] = [
+				'gameId' => intval($row['gameId']),
+				'name' => $row['name'],
+				'releaseYear' => $row['releaseYear'] !== null ? intval($row['releaseYear']) : null,
+			];
+		}
+
+		return $games;
 	}
 
 	/**
@@ -396,15 +438,14 @@ class IgdbIntegrationUtil
 	/**
 	 * Refreshes the IGDB records of the stalest games in the database, never
 	 * fetched games (lastFetchTime 0) first, limited to the given count. Meant
-	 * for the nightly refresh cronjob. Returns the number of games received,
-	 * or null if the connection data is invalid or a request failed.
+	 * for the nightly refresh cronjob, which runs inside a time-limited PHP
+	 * request: the refresh stops starting new IGDB requests once 60% of the
+	 * execution time limit is used up, the remaining games are simply picked
+	 * up in the next run. Returns the number of games received, or null if
+	 * the connection data is invalid or a request failed.
 	 */
 	public static function refreshStalestGames(int $limit): ?int
 	{
-		if ($limit <= 0) {
-			return 0;
-		}
-
 		$sql = "SELECT gameId
 				FROM wcf1_igdb_integration_game
 				WHERE lastFetchTime < ?
@@ -417,7 +458,15 @@ class IgdbIntegrationUtil
 			return 0;
 		}
 
-		return self::updateDatabaseGamesByIds($gameIds);
+		$deadline = null;
+		$maxExecutionTime = intval(ini_get('max_execution_time'));
+		if ($maxExecutionTime > 0) {
+			$deadline = floatval($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)) + $maxExecutionTime * 0.6;
+		}
+
+		$receivedGameIds = self::updateDatabaseGamesByIds($gameIds, $deadline);
+
+		return $receivedGameIds === null ? null : count($receivedGameIds);
 	}
 
 	/**
@@ -460,10 +509,7 @@ class IgdbIntegrationUtil
 			return $game;
 		}
 
-		// An id IGDB no longer knows is stamped as fetched by the update, so
-		// the request is not repeated on every view
-		$receivedGameCount = self::updateDatabaseGamesByIds([$game->gameId]);
-		if ($receivedGameCount === null) {
+		if (self::updateDatabaseGamesByIds([$game->gameId]) === null) {
 			// Request failed, e.g. IGDB down or the queue congested; the next
 			// view retries
 			return $game;
@@ -510,6 +556,8 @@ class IgdbIntegrationUtil
 					gogSlug = IF(? = '', gogSlug, ?),
 					lastFetchTime = ?";
 		$statement = WCF::getDB()->prepare($sql);
+		// One transaction per response instead of one autocommit per game
+		WCF::getDB()->beginTransaction();
 		foreach ($gamesJson as $game) {
 			$gamePlatforms = '';
 			if (isset($game->platforms)) {

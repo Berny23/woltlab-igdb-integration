@@ -24,6 +24,12 @@ use wcf\system\WCF;
 final class DeleteGame implements IController
 {
 	/**
+	 * Endpoint template for interaction providers and scripts; must match the
+	 * route in the attribute above.
+	 */
+	public const ENDPOINT = 'core/igdb-integration/games/{id}';
+
+	/**
 	 * @inheritDoc
 	 */
 	public function __invoke(ServerRequestInterface $request, array $variables): ResponseInterface

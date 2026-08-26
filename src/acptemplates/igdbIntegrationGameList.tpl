@@ -17,4 +17,15 @@
 	{unsafe:$gridView->render()}
 </div>
 
+<script data-relocate="true">
+	require(['Language'], (Language) => {
+		Language.addObject({
+			'wcf.igdb_integration.game.refresh.missing_title': '{jslang}wcf.igdb_integration.game.refresh.missing_title{/jslang}',
+			'wcf.igdb_integration.game.refresh.missing_message': '{jslang}wcf.igdb_integration.game.refresh.missing_message{/jslang}',
+			'wcf.global.button.delete': '{jslang}wcf.global.button.delete{/jslang}',
+			'wcf.global.success.delete': '{jslang}wcf.global.success.delete{/jslang}'
+		});
+	});
+</script>
+
 {include file='footer'}

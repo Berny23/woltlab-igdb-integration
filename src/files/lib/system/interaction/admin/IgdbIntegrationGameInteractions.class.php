@@ -8,8 +8,8 @@ use wcf\system\endpoint\controller\core\igdbIntegration\RefreshGame;
 use wcf\system\interaction\AbstractInteractionProvider;
 use wcf\system\interaction\DeleteInteraction;
 use wcf\system\interaction\EditInteraction;
+use wcf\system\interaction\IgdbIntegrationRefreshInteraction;
 use wcf\system\interaction\InteractionConfirmationType;
-use wcf\system\interaction\RpcInteraction;
 use wcf\system\WCF;
 use wcf\util\IgdbIntegrationUtil;
 
@@ -27,7 +27,7 @@ final class IgdbIntegrationGameInteractions extends AbstractInteractionProvider
 	{
 		$this->addInteractions([
 			new EditInteraction(IgdbIntegrationGameEditForm::class),
-			new RpcInteraction(
+			new IgdbIntegrationRefreshInteraction(
 				'refresh',
 				RefreshGame::ENDPOINT,
 				'wcf.igdb_integration.game.refresh',

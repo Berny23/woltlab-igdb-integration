@@ -32,8 +32,9 @@ class IgdbIntegrationGameRefreshCronjob extends AbstractCronjob
 
 		if (IgdbIntegrationUtil::refreshStalestGames($limit) === null) {
 			// Surfaces the failure in the cronjob log instead of a silent
-			// "successful" run, e.g. expired credentials or IGDB down
-			throw new \RuntimeException('The IGDB request of the nightly game refresh failed, see the exception log for the cause. The games fetched before the failure are kept, the rest is retried in the next run.');
+			// "successful" run; the request exception itself was logged by
+			// the util
+			throw new \RuntimeException('The IGDB request of the nightly game refresh failed, the preceding entry of the exception log has the cause. The games fetched before the failure are kept, the rest is retried in the next run.');
 		}
 	}
 }
