@@ -79,6 +79,7 @@
 		<item name="wcf.igdb_integration.dialog.game_user_edit_title"><![CDATA[Game Details]]></item>
 		<item name="wcf.igdb_integration.dialog.game_player_list_title"><![CDATA[Owners]]></item>
 		<item name="wcf.igdb_integration.dialog.game_cover_original"><![CDATA[Open original cover in a new tab]]></item>
+		<item name="wcf.igdb_integration.dialog.game_platform_filter"><![CDATA[Show all games for this platform]]></item>
 		<item name="wcf.igdb_integration.dialog.game_quick_remove_confirm"><![CDATA[Do you really want to remove “{@$gameTitle}” from your library?]]></item>
 		<item name="wcf.igdb_integration.dialog.game_quick_remove_confirm_indeterminate"><![CDATA[Do you really want to remove this game from your library?]]></item>
 		<item name="wcf.igdb_integration.dialog.game_link_igdb"><![CDATA[Metadata from IGDB]]></item>

@@ -4,6 +4,7 @@ namespace wcf\data\IgdbIntegration;
 
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
 use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
+use wcf\util\ArrayUtil;
 use wcf\util\IgdbIntegrationOgdbUtil;
 use wcf\util\IgdbIntegrationUtil;
 use wcf\system\WCF;
@@ -16,7 +17,6 @@ use wcf\system\event\EventHandler;
 use wcf\system\form\builder\DialogFormDocument;
 use wcf\system\form\builder\field\BooleanFormField;
 use wcf\system\form\builder\field\RatingFormField;
-use wcf\system\form\builder\field\TextFormField;
 use wcf\system\form\builder\field\DescriptionFormField;
 use wcf\system\form\builder\TemplateFormNode;
 use wcf\system\exception\PermissionDeniedException;
@@ -248,10 +248,9 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 				TemplateFormNode::create('cover')
 					->templateName('__igdbIntegrationGameCover')
 					->variables(['coverImageUrl' => $coverImageUrl, 'coverOriginalUrl' => $coverOriginalUrl]),
-				TextFormField::create('platforms')
-					->label('wcf.igdb_integration.game.platforms')
-					->value($this->game->platforms)
-					->immutable(),
+				TemplateFormNode::create('platforms')
+					->templateName('__igdbIntegrationGamePlatforms')
+					->variables(['platforms' => array_filter(ArrayUtil::trim(explode(',', $this->game->platforms)))]),
 				DescriptionFormField::create('summary')
 					->label('wcf.igdb_integration.game.summary')
 					->value($this->game->summary)

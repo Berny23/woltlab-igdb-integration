@@ -140,5 +140,42 @@ define(["require", "exports", "tslib", "WoltLabSuite/Core/Ajax", "WoltLabSuite/C
                 }
             }
         });
+        setupPlatformListDragScrolling();
+    }
+    /**
+     * Lets the single-line platform list of the embed be scrolled by dragging
+     * it with the mouse. Touch devices scroll it natively, so only mouse
+     * pointers are handled.
+     */
+    function setupPlatformListDragScrolling() {
+        let list = null;
+        let startX = 0;
+        let startScrollLeft = 0;
+        document.addEventListener('pointerdown', (event) => {
+            if (event.pointerType !== 'mouse' || event.button !== 0) {
+                return;
+            }
+            list = event.target.closest('.igdbIntegrationGameEmbed .igdbIntegrationGamePlatformList');
+            if (list === null || list.scrollWidth <= list.clientWidth) {
+                list = null;
+                return;
+            }
+            startX = event.clientX;
+            startScrollLeft = list.scrollLeft;
+            list.setPointerCapture(event.pointerId);
+            list.classList.add('igdbIntegrationGamePlatformListDragging');
+            event.preventDefault();
+        });
+        document.addEventListener('pointermove', (event) => {
+            if (list !== null) {
+                list.scrollLeft = startScrollLeft - (event.clientX - startX);
+            }
+        });
+        const stopDragging = () => {
+            list?.classList.remove('igdbIntegrationGamePlatformListDragging');
+            list = null;
+        };
+        document.addEventListener('pointerup', stopDragging);
+        document.addEventListener('pointercancel', stopDragging);
     }
 });

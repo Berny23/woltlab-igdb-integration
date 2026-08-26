@@ -303,13 +303,61 @@
 	overflow-wrap: anywhere;
 }
 
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedYear,
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedPlatforms {
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedYear {
 	color: var(--wcfContentDimmedText);
+	font-size: var(--wcfFontSizeDefault);
 }
 
-.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedYear {
-	font-size: var(--wcfFontSizeDefault);
+/* Platform badges in the details dialog, wrapping to as many lines as needed */
+.igdbIntegrationGamePlatformList {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+/* In the bbcode, the badges stay on one line. Overflowing badges fade out at
+   the right edge and can be reached by scrolling horizontally (touch swipe,
+   mouse drag via the script, wheel). The scrollbar is hidden. The selector
+   outweighs the list margins of the message content styles */
+.igdbIntegrationGameEmbed .igdbIntegrationGameEmbedInfo ul.igdbIntegrationGamePlatformList {
+	flex-wrap: nowrap;
+	margin: 5px 0 5px;
+	padding: 0;
+	overflow-x: auto;
+	scrollbar-width: none;
+	-webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+	mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+	font-size: var(--wcfFontSizeSmall);
+	cursor: grab;
+	user-select: none;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGamePlatformList.igdbIntegrationGamePlatformListDragging {
+	cursor: grabbing;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGamePlatformList::-webkit-scrollbar {
+	display: none;
+}
+
+.igdbIntegrationGameEmbed .igdbIntegrationGamePlatformList li {
+	flex-shrink: 0;
+	margin: 0;
+}
+
+/* The last badge would otherwise always sit under the fade, even when scrolled
+   to the end */
+.igdbIntegrationGameEmbed .igdbIntegrationGamePlatformList li:last-child {
+	margin-right: 40px;
+}
+
+/* Plain badges without hover effect in the bbcode */
+.igdbIntegrationGameEmbed .igdbIntegrationGamePlatform {
+	font-size: inherit;
+	pointer-events: none;
 }
 
 /* Store/database links (IGDB, Steam, GOG) in the details dialog and the bbcode */

@@ -11,7 +11,7 @@
 		<h3 class="igdbIntegrationGameEmbedTitle">{$displayName}</h3>
 		<small class="igdbIntegrationGameEmbedYear">{$game->releaseYear}</small>
 		{if $game->platforms}
-			<small class="igdbIntegrationGameEmbedPlatforms">{$game->platforms}</small>
+			{include file='__igdbIntegrationGamePlatforms' platforms=', '|explode:$game->platforms platformsInline=true}
 		{/if}
 		{include file='__igdbIntegrationGameLinks' gameLinksInline=true}
 		{if $authorOwns && $authorRating > 0}
