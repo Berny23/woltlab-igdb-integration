@@ -33,6 +33,9 @@ class IgdbIntegrationUtil
 	const COVER_URL_BASE_BIG = 'https://images.igdb.com/igdb/image/upload/t_cover_big/';
 	// Retina (DPR 2.0) variant, IGDB offers it for every size by appending "_2x"
 	const COVER_URL_BASE_BIG_2X = 'https://images.igdb.com/igdb/image/upload/t_cover_big_2x/';
+	// Unscaled upload, only used as link target and never embedded, because
+	// the dimensions and file size are arbitrary
+	const COVER_URL_BASE_ORIGINAL = 'https://images.igdb.com/igdb/image/upload/t_original/';
 	const COVER_URL_FILETYPE = '.jpg';
 	const STEAM_API_URL_BASE = 'https://api.steampowered.com/';
 	const GOG_URL_BASE = 'https://www.gog.com/';
@@ -455,11 +458,13 @@ class IgdbIntegrationUtil
 		foreach ($gamesJson as $game) {
 			$gamePlatforms = '';
 			if (isset($game->platforms)) {
+				// The display name is preferred over the abbreviation, because
+				// abbreviations are inconsistent across platforms
 				foreach ($game->platforms as $platform) {
-					if (isset($platform->abbreviation)) {
-						$gamePlatforms .= $platform->abbreviation . ', ';
-					} elseif (isset($platform->name)) {
+					if (isset($platform->name)) {
 						$gamePlatforms .= $platform->name . ', ';
+					} elseif (isset($platform->abbreviation)) {
+						$gamePlatforms .= $platform->abbreviation . ', ';
 					}
 				}
 				$gamePlatforms = substr($gamePlatforms, 0, -2); // Remove last separator
@@ -862,6 +867,18 @@ class IgdbIntegrationUtil
 		}
 
 		return self::getImageProxyLink($urlBase . $coverImageId . self::COVER_URL_FILETYPE);
+	}
+
+	/**
+	 * Returns the url of the unscaled cover image for a game, using the
+	 * localized cover of the preferred region if available. Meant as a link
+	 * target, so the image proxy is not used.
+	 */
+	public static function getOriginalCoverImageUrl($coverImageId, $localizedCovers): string
+	{
+		$coverImageId = self::getLocalizedCoverImageId($coverImageId, $localizedCovers);
+
+		return self::COVER_URL_BASE_ORIGINAL . $coverImageId . self::COVER_URL_FILETYPE;
 	}
 
 	/**

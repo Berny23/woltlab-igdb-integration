@@ -15,8 +15,9 @@ final class IgdbIntegrationOgdbUtil
 {
 	/**
 	 * IGDB platform tokens that count as "PC" for the purpose of an OGDB
-	 * import. IGDB stores the platform abbreviation if there is one, else the
-	 * full platform name, so both are listed for every platform.
+	 * import. Since 2.1.2 the full platform name is stored, earlier versions
+	 * stored the abbreviation if there was one. Both are listed for every
+	 * platform, so games that were not refreshed since still match.
 	 */
 	const PC_PLATFORMS = ['PC', 'PC (Microsoft Windows)', 'DOS', 'Linux', 'Mac'];
 

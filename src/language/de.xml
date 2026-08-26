@@ -68,6 +68,7 @@
 		<item name="wcf.igdb_integration.dialog.game_user_edit_is_owned"><![CDATA[Im Besitz]]></item>
 		<item name="wcf.igdb_integration.dialog.game_user_edit_title"><![CDATA[Spiel-Details]]></item>
 		<item name="wcf.igdb_integration.dialog.game_player_list_title"><![CDATA[Besitzer]]></item>
+		<item name="wcf.igdb_integration.dialog.game_cover_original"><![CDATA[Original-Cover in neuem Tab öffnen]]></item>
 		<item name="wcf.igdb_integration.dialog.game_quick_remove_confirm"><![CDATA[Möchte{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{else}st du{/if} „{@$gameTitle}“ wirklich aus {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihrer{else}deiner{/if} Bibliothek entfernen?]]></item>
 		<item name="wcf.igdb_integration.dialog.game_quick_remove_confirm_indeterminate"><![CDATA[Möchte{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{else}st du{/if} dieses Spiel wirklich aus {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihrer{else}deiner{/if} Bibliothek entfernen?]]></item>
 		<item name="wcf.igdb_integration.dialog.game_link_igdb"><![CDATA[Metadaten von IGDB]]></item>

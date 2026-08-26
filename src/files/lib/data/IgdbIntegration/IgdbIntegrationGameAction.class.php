@@ -231,15 +231,17 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		// The large cover is shown next to or above the game data, but only if
 		// the game has a cover at all
 		$coverImageUrl = '';
+		$coverOriginalUrl = '';
 		if (IgdbIntegrationUtil::getLocalizedCoverImageId($this->game->coverImageId, $this->game->localizedCovers) !== '') {
 			$coverImageUrl = IgdbIntegrationUtil::getCoverImageUrl($this->game->coverImageId, $this->game->localizedCovers, true, true);
+			$coverOriginalUrl = IgdbIntegrationUtil::getOriginalCoverImageUrl($this->game->coverImageId, $this->game->localizedCovers);
 		}
 
 		$this->dialog = DialogFormDocument::create('personGameEditDialog' . $this->game->gameId)
 			->appendChildren([
 				TemplateFormNode::create('cover')
 					->templateName('__igdbIntegrationGameCover')
-					->variables(['coverImageUrl' => $coverImageUrl]),
+					->variables(['coverImageUrl' => $coverImageUrl, 'coverOriginalUrl' => $coverOriginalUrl]),
 				TextFormField::create('platforms')
 					->label('wcf.igdb_integration.game.platforms')
 					->value($this->game->platforms)
@@ -1813,11 +1815,12 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		}
 
 		if ($platformsByKey === null) {
-			// Token match to not confuse "PC" with platforms like "PC-FX". Games
-			// without platform data (some smaller IGDB entries, e.g. "Hellgrinder")
-			// are included as well, because excluding them would make their titles
-			// unmatchable
-			$platformPattern = '(^|, )(PC|Mac|Linux)(,|$)';
+			// Token match to not confuse "PC" with platforms like "PC-FX". The
+			// bare "PC" is the abbreviation stored by versions before 2.1.2, kept
+			// for games that were not refreshed since. Games without platform
+			// data (some smaller IGDB entries, e.g. "Hellgrinder") are included
+			// as well, because excluding them would make their titles unmatchable
+			$platformPattern = '(^|, )(PC|PC \\(Microsoft Windows\\)|Mac|Linux)(,|$)';
 			$sql = "SELECT gameId, name, alternativeNames, platforms, " . $externalIdColumn . " AS externalId
 					FROM wcf1_igdb_integration_game
 					WHERE platforms REGEXP ?
