@@ -329,7 +329,7 @@
 	gap: 5px;
 }
 
-.igdbIntegrationGameLinkIcon {
+.igdbIntegrationGameLinks>.igdbIntegrationGameLink>.igdbIntegrationGameLinkIcon {
 	/* The "!important" is required because of WoltLab's ".messageBody > .messageText img" */
 	width: auto !important;
 	height: 1.3em !important;
