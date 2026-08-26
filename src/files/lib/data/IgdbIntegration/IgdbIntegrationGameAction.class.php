@@ -4,6 +4,7 @@ namespace wcf\data\IgdbIntegration;
 
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
 use wcf\data\IgdbIntegration\IgdbIntegrationGameList;
+use wcf\util\IgdbIntegrationOgdbUtil;
 use wcf\util\IgdbIntegrationUtil;
 use wcf\system\WCF;
 use wcf\data\user\UserEditor;
@@ -42,7 +43,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	/**
 	 * Maximum number of per-title IGDB search requests during a Steam import.
 	 */
-	const STEAM_IMPORT_SEARCH_LIMIT = 100;
+	const STEAM_IMPORT_SEARCH_LIMIT = 500;
 
 	/**
 	 * Number of per-title IGDB search requests per import step. The searches
@@ -71,7 +72,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	/**
 	 * Maximum number of per-title IGDB search requests during a GOG import.
 	 */
-	const GOG_IMPORT_SEARCH_LIMIT = 100;
+	const GOG_IMPORT_SEARCH_LIMIT = 500;
 
 	/**
 	 * Number of per-title IGDB search requests per GOG import step.
@@ -96,7 +97,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 * matching path and the budget has to cover large libraries. The limit
 	 * only bounds the import time of pathological files.
 	 */
-	const PLAYNITE_IMPORT_SEARCH_LIMIT = 1000;
+	const PLAYNITE_IMPORT_SEARCH_LIMIT = 2000;
 
 	/**
 	 * Number of per-title IGDB search requests per Playnite import step.
@@ -104,7 +105,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	const PLAYNITE_IMPORT_SEARCHES_PER_STEP = 5;
 
 	/**
-	 * Maximum number of games accepted from a Playnite library export file.
+	 * Maximum number of games accepted from a library export file (Playnite,
+	 * OGDB).
 	 */
 	const PLAYNITE_IMPORT_MAX_GAMES = 100000;
 
@@ -112,6 +114,23 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 * Session variable holding the state of a running Playnite import.
 	 */
 	const PLAYNITE_IMPORT_STATE_KEY = 'igdbPlayniteImportState';
+
+	/**
+	 * Maximum number of per-title IGDB search requests during an OGDB import.
+	 * OGDB exports list physical releases and store purchases, most of which
+	 * carry no usable external id. 
+	*/
+	const OGDB_IMPORT_SEARCH_LIMIT = 5000;
+
+	/**
+	 * Number of per-title IGDB search requests per OGDB import step.
+	 */
+	const OGDB_IMPORT_SEARCHES_PER_STEP = 5;
+
+	/**
+	 * Session variable holding the state of a running OGDB import.
+	 */
+	const OGDB_IMPORT_STATE_KEY = 'igdbOgdbImportState';
 
 	/**
 	 * Number of IGDB game ids fetched from IGDB per import step. Ids are
@@ -978,10 +997,160 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	public function validateStartPlayniteImport()
 	{
+		$this->validateStartLibraryImport('user.igdb_integration.can_import_playnite_games');
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::startLibraryImport()
+	 */
+	public function startPlayniteImport()
+	{
+		return $this->startLibraryImport(self::PLAYNITE_IMPORT_STATE_KEY);
+	}
+
+	/**
+	 * Checks for permission to run a step of a started Playnite import.
+	 */
+	public function validateProcessPlayniteImportBatch()
+	{
+		$this->validateLibraryImportStep(
+			'user.igdb_integration.can_import_playnite_games',
+			self::PLAYNITE_IMPORT_STATE_KEY,
+			'playniteImportState'
+		);
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::processLibraryImportBatch()
+	 */
+	public function processPlayniteImportBatch()
+	{
+		return $this->processLibraryImportBatch(self::PLAYNITE_IMPORT_STATE_KEY);
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessPlayniteImportBatch()
+	 */
+	public function validateProcessPlayniteImportSearch()
+	{
+		$this->validateProcessPlayniteImportBatch();
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::processLibraryImportSearch()
+	 */
+	public function processPlayniteImportSearch()
+	{
+		return $this->processLibraryImportSearch(
+			self::PLAYNITE_IMPORT_STATE_KEY,
+			self::PLAYNITE_IMPORT_SEARCH_LIMIT,
+			self::PLAYNITE_IMPORT_SEARCHES_PER_STEP
+		);
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessPlayniteImportBatch()
+	 */
+	public function validateFinishPlayniteImport()
+	{
+		$this->validateProcessPlayniteImportBatch();
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::finishLibraryImport()
+	 */
+	public function finishPlayniteImport()
+	{
+		return $this->finishLibraryImport(self::PLAYNITE_IMPORT_STATE_KEY);
+	}
+
+	/**
+	 * Checks for permission to start an OGDB collection import and parses the
+	 * submitted game list. The client has already stripped the edition and
+	 * store suffixes of the OGDB titles and extracted the Steam app ids and
+	 * GOG product ids from the manufacturer codes, so the entries have the
+	 * same shape as the ones of a Playnite export.
+	 */
+	public function validateStartOgdbImport()
+	{
+		$this->validateStartLibraryImport('user.igdb_integration.can_import_ogdb_games');
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::startLibraryImport()
+	 */
+	public function startOgdbImport()
+	{
+		return $this->startLibraryImport(self::OGDB_IMPORT_STATE_KEY);
+	}
+
+	/**
+	 * Checks for permission to run a step of a started OGDB import.
+	 */
+	public function validateProcessOgdbImportBatch()
+	{
+		$this->validateLibraryImportStep(
+			'user.igdb_integration.can_import_ogdb_games',
+			self::OGDB_IMPORT_STATE_KEY,
+			'ogdbImportState'
+		);
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::processLibraryImportBatch()
+	 */
+	public function processOgdbImportBatch()
+	{
+		return $this->processLibraryImportBatch(self::OGDB_IMPORT_STATE_KEY);
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessOgdbImportBatch()
+	 */
+	public function validateProcessOgdbImportSearch()
+	{
+		$this->validateProcessOgdbImportBatch();
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::processLibraryImportSearch()
+	 */
+	public function processOgdbImportSearch()
+	{
+		return $this->processLibraryImportSearch(
+			self::OGDB_IMPORT_STATE_KEY,
+			self::OGDB_IMPORT_SEARCH_LIMIT,
+			self::OGDB_IMPORT_SEARCHES_PER_STEP
+		);
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessOgdbImportBatch()
+	 */
+	public function validateFinishOgdbImport()
+	{
+		$this->validateProcessOgdbImportBatch();
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::finishLibraryImport()
+	 */
+	public function finishOgdbImport()
+	{
+		return $this->finishLibraryImport(self::OGDB_IMPORT_STATE_KEY);
+	}
+
+	/**
+	 * Checks for the given import permission and parses the submitted game
+	 * list of a library export (Playnite, OGDB) into the three pools of Steam
+	 * app ids, GOG product ids and name-only entries.
+	 */
+	protected function validateStartLibraryImport(string $permission)
+	{
 		if (!WCF::getUser()->userID) {
 			throw new PermissionDeniedException();
 		}
-		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_playnite_games']);
+		WCF::getSession()->checkPermissions([$permission]);
 
 		// Unlike the Steam import, only the IGDB credentials are required
 		if (!IgdbIntegrationUtil::isConnectionDataValid()) {
@@ -1002,7 +1171,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		}
 
 		// Each entry is a [steam app id or 0, GOG product id or 0, name]
-		// triple. Entries with an external id are collected first, so that a
+		// triple, optionally followed by the OGDB system name of the release.
+		// Entries with an external id are collected first, so that a
 		// name-only duplicate of the same game from another launcher is
 		// dropped in favor of the entry that can be matched exactly. The pools
 		// stay separate because a Steam app id and a GOG product id may share
@@ -1010,9 +1180,12 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$steamGames = [];
 		$gogGames = [];
 		$otherGames = [];
+		$otherPlatforms = [];
+		$otherSystemNames = [];
 		$seenNames = [];
+		$seenOtherGames = [];
 		foreach ($entries as $entry) {
-			if (!is_array($entry) || count($entry) !== 3) {
+			if (!is_array($entry) || count($entry) < 3 || count($entry) > 4) {
 				continue;
 			}
 			$steamAppId = intval($entry[0]);
@@ -1023,7 +1196,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			}
 		}
 		foreach ($entries as $entry) {
-			if (!is_array($entry) || count($entry) !== 3) {
+			if (!is_array($entry) || count($entry) < 3 || count($entry) > 4) {
 				continue;
 			}
 			$gogId = intval($entry[1]);
@@ -1035,21 +1208,50 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			}
 		}
 		foreach ($entries as $index => $entry) {
-			if (!is_array($entry) || count($entry) !== 3) {
+			if (!is_array($entry) || count($entry) < 3 || count($entry) > 4) {
 				continue;
 			}
 			$name = StringUtil::trim((string)$entry[2]);
-			if (intval($entry[0]) <= 0 && intval($entry[1]) <= 0 && $name !== ''
-				&& !isset($seenNames[mb_strtolower($name)])) {
-				// The synthetic keys must never collide with an external id
-				$otherGames['n' . $index] = $name;
-				$seenNames[mb_strtolower($name)] = true;
+			if (intval($entry[0]) > 0 || intval($entry[1]) > 0 || $name === '') {
+				continue;
+			}
+
+			// OGDB releases carry their system, which restricts the title
+			// matching to the mapped IGDB platforms. Store entries (Steam,
+			// GOG) are PC releases, so they only replace name-only entries
+			// of PC systems or of unknown systems; the same title on a
+			// console stays a separate entry
+			$systemName = isset($entry[3]) ? StringUtil::trim((string)$entry[3]) : '';
+			$platforms = $systemName !== '' ? IgdbIntegrationOgdbUtil::getIgdbPlatforms($systemName) : null;
+			if (isset($seenNames[mb_strtolower($name)]) && IgdbIntegrationOgdbUtil::isPcPlatformList($platforms)) {
+				continue;
+			}
+
+			// Several releases of the same game for the same platforms (e.g.
+			// the CD-ROM and the download version) are matched only once
+			$duplicateKey = mb_strtolower($name) . '|' . ($platforms === null ? '*' : implode('|', $platforms));
+			if (isset($seenOtherGames[$duplicateKey])) {
+				continue;
+			}
+			$seenOtherGames[$duplicateKey] = true;
+
+			// The synthetic keys must never collide with an external id
+			$key = 'n' . $index;
+			$otherGames[$key] = $name;
+			if ($platforms !== null) {
+				$otherPlatforms[$key] = $platforms;
+			}
+			if ($systemName !== '') {
+				$otherSystemNames[$key] = $systemName;
 			}
 		}
 
 		if (empty($steamGames) && empty($gogGames) && empty($otherGames)) {
 			throw new UserInputException('gameList');
 		}
+
+		$this->parameters['otherPlatforms'] = $otherPlatforms;
+		$this->parameters['otherSystemNames'] = $otherSystemNames;
 
 		$this->parameters['steamGames'] = array_slice($steamGames, 0, self::PLAYNITE_IMPORT_MAX_GAMES, true);
 		$this->parameters['gogGames'] = array_slice(
@@ -1067,16 +1269,18 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * Starts the import of a Playnite library export: matches the games
-	 * against the local database and prepares the IGDB request batches for
-	 * the following import steps.
+	 * Starts the import of a library export: matches the games against the
+	 * local database and prepares the IGDB request batches for the following
+	 * import steps.
 	 */
-	public function startPlayniteImport()
+	protected function startLibraryImport(string $stateKey)
 	{
 		$state = [
 			'remaining' => $this->parameters['steamGames'],      // Steam app id => name
 			'remainingGog' => $this->parameters['gogGames'],     // GOG product id => name
 			'remainingNames' => $this->parameters['otherGames'], // synthetic key => name
+			'platforms' => $this->parameters['otherPlatforms'],  // synthetic key => IGDB platform tokens, if known
+			'systemNames' => $this->parameters['otherSystemNames'], // synthetic key => OGDB system name, if given
 			'ambiguous' => [],                                   // list of names
 			'stats' => ['imported' => 0, 'alreadyOwned' => 0],
 			'searchQueue' => null,                               // filled on the first search step
@@ -1087,11 +1291,11 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		// Match everything that needs no IGDB request: games already linked to
 		// a Steam app id or GOG product id and games with the exact same
 		// normalized title
-		$this->matchPlayniteRemaining($state, false);
+		$this->matchLibraryRemaining($state, false);
 
 		// The remaining Steam app ids and GOG product ids are fetched from
-		// IGDB in batches; the games of other launchers can only be matched
-		// by title
+		// IGDB in batches; the games of other sources can only be matched by
+		// title
 		$state['batches'] = [];
 		foreach (array_chunk(array_keys($state['remaining']), self::PLAYNITE_IMPORT_BATCH_SIZE) as $chunk) {
 			$state['batches'][] = ['steamAppId', $chunk];
@@ -1100,7 +1304,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$state['batches'][] = ['gogId', $chunk];
 		}
 
-		WCF::getSession()->register(self::PLAYNITE_IMPORT_STATE_KEY, $state);
+		WCF::getSession()->register($stateKey, $state);
 
 		return [
 			'failed' => false,
@@ -1112,28 +1316,29 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * Checks for permission to run a step of a started Playnite import.
+	 * Checks for the given permission and for a started library import in the
+	 * session.
 	 */
-	public function validateProcessPlayniteImportBatch()
+	protected function validateLibraryImportStep(string $permission, string $stateKey, string $errorField)
 	{
 		if (!WCF::getUser()->userID) {
 			throw new PermissionDeniedException();
 		}
-		WCF::getSession()->checkPermissions(['user.igdb_integration.can_import_playnite_games']);
+		WCF::getSession()->checkPermissions([$permission]);
 
-		if (!is_array(WCF::getSession()->getVar(self::PLAYNITE_IMPORT_STATE_KEY))) {
+		if (!is_array(WCF::getSession()->getVar($stateKey))) {
 			// No import has been started in this session
-			throw new UserInputException('playniteImportState');
+			throw new UserInputException($errorField);
 		}
 	}
 
 	/**
 	 * Fetches the next batch of Steam app ids or GOG product ids from IGDB
-	 * and matches the new local data against the remaining Playnite games.
+	 * and matches the new local data against the remaining library games.
 	 */
-	public function processPlayniteImportBatch()
+	protected function processLibraryImportBatch(string $stateKey)
 	{
-		$state = WCF::getSession()->getVar(self::PLAYNITE_IMPORT_STATE_KEY);
+		$state = WCF::getSession()->getVar($stateKey);
 
 		$batch = array_shift($state['batches']);
 		if ($batch !== null) {
@@ -1152,10 +1357,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 				}
 			}
 
-			$this->matchPlayniteRemaining($state, false);
+			$this->matchLibraryRemaining($state, false);
 		}
 
-		WCF::getSession()->register(self::PLAYNITE_IMPORT_STATE_KEY, $state);
+		WCF::getSession()->register($stateKey, $state);
 
 		return [
 			'remainingBatches' => count($state['batches']),
@@ -1163,20 +1368,12 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * @see IgdbIntegrationGameAction::validateProcessPlayniteImportBatch()
-	 */
-	public function validateProcessPlayniteImportSearch()
-	{
-		$this->validateProcessPlayniteImportBatch();
-	}
-
-	/**
 	 * Searches IGDB for a few of the remaining unmatched titles and matches
 	 * the results. The client repeats this step until it reports completion.
 	 */
-	public function processPlayniteImportSearch()
+	protected function processLibraryImportSearch(string $stateKey, int $searchLimit, int $searchesPerStep)
 	{
-		$state = WCF::getSession()->getVar(self::PLAYNITE_IMPORT_STATE_KEY);
+		$state = WCF::getSession()->getVar($stateKey);
 
 		if ($state['searchQueue'] === null) {
 			// All pools share the search budget; the key prefixes keep the id
@@ -1192,20 +1389,20 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			// The synthetic keys are already prefixed with 'n'
 			$queue += $state['remainingNames'];
 
-			$state['searchQueue'] = array_slice($queue, 0, self::PLAYNITE_IMPORT_SEARCH_LIMIT, true);
+			$state['searchQueue'] = array_slice($queue, 0, $searchLimit, true);
 			$state['searchTotal'] = count($state['searchQueue']);
 		}
 
 		if (IgdbIntegrationUtil::isConnectionDataValid()) {
 			$searchedThisStep = [];
-			while (!empty($state['searchQueue']) && count($searchedThisStep) < self::PLAYNITE_IMPORT_SEARCHES_PER_STEP) {
+			while (!empty($state['searchQueue']) && count($searchedThisStep) < $searchesPerStep) {
 				$key = (string)array_key_first($state['searchQueue']);
 				$name = $state['searchQueue'][$key];
 				unset($state['searchQueue'][$key]);
 				$state['searched']++;
 
 				// May have been matched by a search result of a previous step
-				if (!$this->isPlayniteGameRemaining($state, $key)) {
+				if (!$this->isLibraryGameRemaining($state, $key)) {
 					continue;
 				}
 
@@ -1215,7 +1412,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			}
 
 			// The search results may contain the store link or the exact title
-			$this->matchPlayniteRemaining($state, false);
+			$this->matchLibraryRemaining($state, false);
 
 			// Titles that the search results did not match may be the alias of
 			// a differently named game (e.g. "Overwatch 2" for "Overwatch"),
@@ -1224,19 +1421,19 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			// fetched game is matched directly from the local database
 			$aliasQueried = false;
 			foreach ($searchedThisStep as $key => $name) {
-				if ($this->isPlayniteGameRemaining($state, (string)$key)) {
+				if ($this->isLibraryGameRemaining($state, (string)$key)) {
 					IgdbIntegrationUtil::updateDatabaseGamesByAlternativeName($name);
 					$aliasQueried = true;
 				}
 			}
 			if ($aliasQueried) {
-				$this->matchPlayniteRemaining($state, false);
+				$this->matchLibraryRemaining($state, false);
 			}
 		} else {
 			$state['searchQueue'] = [];
 		}
 
-		WCF::getSession()->register(self::PLAYNITE_IMPORT_STATE_KEY, $state);
+		WCF::getSession()->register($stateKey, $state);
 
 		return [
 			'searched' => $state['searched'],
@@ -1246,34 +1443,34 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * @see IgdbIntegrationGameAction::validateProcessPlayniteImportBatch()
-	 */
-	public function validateFinishPlayniteImport()
-	{
-		$this->validateProcessPlayniteImportBatch();
-	}
-
-	/**
 	 * Runs the roman numeral matching pass as a last resort, synchronizes all
 	 * computed values and returns the import summary.
 	 */
-	public function finishPlayniteImport()
+	protected function finishLibraryImport(string $stateKey)
 	{
-		$state = WCF::getSession()->getVar(self::PLAYNITE_IMPORT_STATE_KEY);
+		$state = WCF::getSession()->getVar($stateKey);
 
-		$this->matchPlayniteRemaining($state, true);
+		$this->matchLibraryRemaining($state, true);
 
 		if ($state['stats']['imported'] > 0) {
 			IgdbIntegrationUtil::updateAllGameStats();
 		}
 		$gameCount = $this->updateUserGameCount(WCF::getUser()->userID);
 
-		WCF::getSession()->unregister(self::PLAYNITE_IMPORT_STATE_KEY);
+		WCF::getSession()->unregister($stateKey);
 
+		// Name-only entries of a known system are listed with their system,
+		// because the same title may be listed for several systems
+		$unmatchedOtherNames = [];
+		foreach ($state['remainingNames'] as $key => $name) {
+			$unmatchedOtherNames[] = isset($state['systemNames'][$key])
+				? $name . ' (' . $state['systemNames'][$key] . ')'
+				: $name;
+		}
 		$unmatchedNames = array_merge(
 			array_values($state['remaining']),
 			array_values($state['remainingGog']),
-			array_values($state['remainingNames'])
+			$unmatchedOtherNames
 		);
 		sort($unmatchedNames, SORT_NATURAL | SORT_FLAG_CASE);
 		$ambiguousNames = array_values($state['ambiguous']);
@@ -1290,10 +1487,10 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * Returns whether the game behind a prefixed search queue key of the
-	 * Playnite import is still unmatched in its pool.
+	 * Returns whether the game behind a prefixed search queue key of a
+	 * library import is still unmatched in its pool.
 	 */
-	protected function isPlayniteGameRemaining(array $state, string $key): bool
+	protected function isLibraryGameRemaining(array $state, string $key): bool
 	{
 		$prefix = substr($key, 0, 1);
 		if ($prefix === 's') {
@@ -1307,13 +1504,13 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	}
 
 	/**
-	 * Matches all pools of remaining Playnite games and inserts the hits:
+	 * Matches all pools of remaining library games and inserts the hits:
 	 * entries with a Steam app id or GOG product id by their external id and
-	 * by title, entries of other launchers by title only. Each pool uses its
+	 * by title, entries of other sources by title only. Each pool uses its
 	 * own working arrays, because a Steam app id and a GOG product id may
 	 * share the same integer value.
 	 */
-	protected function matchPlayniteRemaining(array &$state, bool $convertRomanNumerals)
+	protected function matchLibraryRemaining(array &$state, bool $convertRomanNumerals)
 	{
 		$matchedSteam = $matchedGog = $matchedNames = [];
 		$ambiguousSteam = $ambiguousGog = $ambiguousNames = [];
@@ -1325,9 +1522,15 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$this->matchRemainingByName($state['remaining'], $matchedSteam, $ambiguousSteam, $convertRomanNumerals);
 		$this->matchRemainingByName($state['remainingGog'], $matchedGog, $ambiguousGog, $convertRomanNumerals, 'gogId');
 		// The synthetic keys of the name-only pool are no external ids, so
-		// they must not be backfilled into the game table
-		$this->matchRemainingByName($state['remainingNames'], $matchedNames, $ambiguousNames, $convertRomanNumerals, 'steamAppId', false);
+		// they must not be backfilled into the game table. Entries of a known
+		// system are only matched against games of the mapped platforms
+		$this->matchRemainingByName($state['remainingNames'], $matchedNames, $ambiguousNames, $convertRomanNumerals, 'steamAppId', false, $state['platforms']);
 
+		foreach ($ambiguousNames as $key => $name) {
+			if (isset($state['systemNames'][$key])) {
+				$ambiguousNames[$key] = $name . ' (' . $state['systemNames'][$key] . ')';
+			}
+		}
 		$state['ambiguous'] = array_merge(
 			$state['ambiguous'],
 			array_values($ambiguousSteam),
@@ -1596,24 +1799,37 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 * same-named remaster) are moved to $ambiguous, because the stores provide no year.
 	 * $backfillExternalId must be disabled if the keys of $remaining are no real
 	 * external ids, e.g. for the name-only pool of the Playnite import.
+	 *
+	 * Store games are PC games, so by default only PC, Mac and Linux games are
+	 * candidates. If $platformsByKey is given (OGDB import), the candidates of
+	 * an entry are the games of its IGDB platform tokens instead, and entries
+	 * without tokens (unknown system) are matched against games of any
+	 * platform.
 	 */
-	protected function matchRemainingByName(array &$remaining, array &$matched, array &$ambiguous, bool $convertRomanNumerals, string $externalIdColumn = 'steamAppId', bool $backfillExternalId = true)
+	protected function matchRemainingByName(array &$remaining, array &$matched, array &$ambiguous, bool $convertRomanNumerals, string $externalIdColumn = 'steamAppId', bool $backfillExternalId = true, ?array $platformsByKey = null)
 	{
 		if (empty($remaining)) {
 			return;
 		}
 
-		// Token match to not confuse "PC" with platforms like "PC-FX". Games
-		// without platform data (some smaller IGDB entries, e.g. "Hellgrinder")
-		// are included as well, because excluding them would make their titles
-		// unmatchable
-		$platformPattern = '(^|, )(PC|Mac|Linux)(,|$)';
-		$sql = "SELECT gameId, name, alternativeNames, " . $externalIdColumn . " AS externalId
-				FROM wcf1_igdb_integration_game
-				WHERE platforms REGEXP ?
-					OR platforms = ''";
-		$statement = WCF::getDB()->prepare($sql);
-		$statement->execute([$platformPattern]);
+		if ($platformsByKey === null) {
+			// Token match to not confuse "PC" with platforms like "PC-FX". Games
+			// without platform data (some smaller IGDB entries, e.g. "Hellgrinder")
+			// are included as well, because excluding them would make their titles
+			// unmatchable
+			$platformPattern = '(^|, )(PC|Mac|Linux)(,|$)';
+			$sql = "SELECT gameId, name, alternativeNames, platforms, " . $externalIdColumn . " AS externalId
+					FROM wcf1_igdb_integration_game
+					WHERE platforms REGEXP ?
+						OR platforms = ''";
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute([$platformPattern]);
+		} else {
+			$sql = "SELECT gameId, name, alternativeNames, platforms, " . $externalIdColumn . " AS externalId
+					FROM wcf1_igdb_integration_game";
+			$statement = WCF::getDB()->prepare($sql);
+			$statement->execute();
+		}
 
 		$gamesByTitle = [];
 		$gamesByAlternativeTitle = [];
@@ -1651,6 +1867,19 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			$candidates = $gamesByTitle[$title] ?? $gamesByAlternativeTitle[$title] ?? null;
 			if ($candidates === null) {
 				continue;
+			}
+
+			// Entries of a known system only match the games of its platforms;
+			// a title that exists for other platforms only stays unmatched, so
+			// that a later IGDB search can still find the right version
+			if ($platformsByKey !== null && isset($platformsByKey[$externalId])) {
+				$platforms = $platformsByKey[$externalId];
+				$candidates = array_values(array_filter($candidates, function ($candidate) use ($platforms) {
+					return IgdbIntegrationOgdbUtil::gameHasPlatform((string)$candidate['platforms'], $platforms);
+				}));
+				if (empty($candidates)) {
+					continue;
+				}
 			}
 
 			$gameIds = array_unique(array_column($candidates, 'gameId'));

@@ -1,7 +1,7 @@
 /**
  * Provides the game import box on the game list page: importing the owned
- * games of a Steam account or a public GOG profile and importing IGDB list
- * and Playnite library export files.
+ * games of a Steam account or a public GOG profile and importing IGDB list,
+ * Playnite library and OGDB collection export files.
  *
  * @author		Berny23
  * @copyright	2026 Berny23
@@ -501,15 +501,18 @@ function parsePlayniteLibraryExport(text: string): Array<[number, number, string
 }
 
 /**
- * Runs all Playnite import steps sequentially while showing the progress,
- * then presents the summary.
+ * Runs all steps of a library export import (Playnite, OGDB) sequentially
+ * while showing the progress, then presents the summary. The action prefix
+ * selects the server-side import, e.g. 'Playnite' for startPlayniteImport,
+ * processPlayniteImportBatch, processPlayniteImportSearch and
+ * finishPlayniteImport.
  */
-async function runPlayniteImportSteps(games: Array<[number, number, string]>): Promise<void> {
-	const start = (await dboAction('startPlayniteImport', ACTION_CLASS)
+async function runLibraryImportSteps(games: Array<[number, number, string] | [number, number, string, string]>, actionPrefix: string, progressTitlePhrase: string): Promise<void> {
+	const start = (await dboAction('start' + actionPrefix + 'Import', ACTION_CLASS)
 		.payload({ gameList: JSON.stringify(games) })
 		.dispatch()) as StartResult;
 
-	const progress = createProgressDialog(start.batchCount + 2, 'wcf.igdb_integration.dialog.playnite_import_progress_title');
+	const progress = createProgressDialog(start.batchCount + 2, progressTitlePhrase);
 
 	try {
 		// Phase 1: batched IGDB requests for the Steam app ids and GOG
@@ -519,7 +522,7 @@ async function runPlayniteImportSteps(games: Array<[number, number, string]>): P
 				current: batch,
 				total: start.batchCount,
 			});
-			await dboAction('processPlayniteImportBatch', ACTION_CLASS).dispatch();
+			await dboAction('process' + actionPrefix + 'ImportBatch', ACTION_CLASS).dispatch();
 			progress.bar.value = batch;
 		}
 
@@ -527,7 +530,7 @@ async function runPlayniteImportSteps(games: Array<[number, number, string]>): P
 		// only known after the first step
 		let search: SearchResult;
 		do {
-			search = (await dboAction('processPlayniteImportSearch', ACTION_CLASS).dispatch()) as SearchResult;
+			search = (await dboAction('process' + actionPrefix + 'ImportSearch', ACTION_CLASS).dispatch()) as SearchResult;
 			progress.bar.max = start.batchCount + Math.ceil(search.searchTotal / 5) + 1;
 			progress.bar.value = start.batchCount + Math.ceil(search.searched / 5);
 			if (search.searchTotal > 0) {
@@ -540,7 +543,7 @@ async function runPlayniteImportSteps(games: Array<[number, number, string]>): P
 
 		// Phase 3: roman numeral pass and summary
 		progress.text.textContent = getPhrase('wcf.igdb_integration.dialog.steam_import_progress_finalize');
-		const result = (await dboAction('finishPlayniteImport', ACTION_CLASS).dispatch()) as ImportResult;
+		const result = (await dboAction('finish' + actionPrefix + 'Import', ACTION_CLASS).dispatch()) as ImportResult;
 		progress.bar.value = progress.bar.max;
 
 		progress.dialog.close();
@@ -563,9 +566,142 @@ async function handlePlayniteLibraryFile(file: File): Promise<void> {
 		.fromHtml('<p>' + getPhrase('wcf.igdb_integration.dialog.playnite_import_confirm', { count: games.length }) + '</p>')
 		.asConfirmation();
 	dialog.addEventListener('primary', () => {
-		void runPlayniteImportSteps(games);
+		void runLibraryImportSteps(games, 'Playnite', 'wcf.igdb_integration.dialog.playnite_import_progress_title');
 	});
 	dialog.show(getPhrase('wcf.igdb_integration.dialog.playnite_import_title'));
+}
+
+/**
+ * Strips the trailing edition, packaging and store suffixes that OGDB appends
+ * to its release titles in parentheses or brackets, e.g. "Alan Wake (GOG)",
+ * "Half-Life (Game of the Year Edition)" or "Aliens versus Predator 2 (Gold
+ * Edition) [Mini Box]", so that the different releases of a game collapse to
+ * the title IGDB knows. Suffixes are only removed while a title remains.
+ */
+function stripOgdbTitleSuffixes(name: string): string {
+	let title = name.replace(/\s+/g, ' ').trim();
+	let stripped: string;
+	while ((stripped = title.replace(/\s*(\([^()]*\)|\[[^[\]]*\])$/, '')) !== title && stripped.trim() !== '') {
+		title = stripped.trim();
+	}
+
+	return title;
+}
+
+/**
+ * Pattern of a Steam app id in the OGDB manufacturer code column, e.g.
+ * "appid 735580", "AppID 391220", "app-id 225020" or "app: 41010". Steam
+ * package ids ("subid", "bundleid") are no app ids and are ignored.
+ */
+const OGDB_STEAM_APP_ID_REGEX = /(?:^|[^a-z])app(?:[-\s]*id)?\s*:?\s*(\d+)/i;
+
+/**
+ * Pattern of a GOG product id in the OGDB manufacturer code column, e.g.
+ * "ID 1207659037" or "Product-ID 1132748633".
+ */
+const OGDB_GOG_ID_REGEX = /(?:^|[^a-z])id\s*:?\s*(\d+)/i;
+
+/**
+ * Columns of an OGDB collection export that are required for matching the
+ * games. The manufacturer code contains Steam app ids and GOG product ids.
+ */
+const OGDB_REQUIRED_COLUMNS = ['gamename', 'systemname', 'mancode'];
+
+/**
+ * Extracts the games from an OGDB collection export file as [steam app id or
+ * 0, GOG product id or 0, name, system name] tuples, or null if the file is
+ * not a valid export or lacks a required column. OGDB lists every release of
+ * a game separately (physical editions, store versions, bundle contents), so
+ * the entries are deduplicated by the stripped title and system; entries
+ * with a Steam app id or GOG product id from the manufacturer code column win
+ * because they can be matched exactly. The server maps the systems to IGDB
+ * platforms and merges the releases of the same title and platforms.
+ */
+function parseOgdbCollectionExport(text: string): Array<[number, number, string, string]> | null {
+	const rows = parseCsv(text.replace(/^﻿/, ''));
+	if (rows.length < 2) {
+		return null;
+	}
+
+	const header = rows[0].map((column) => column.trim().toLowerCase());
+	if (OGDB_REQUIRED_COLUMNS.some((column) => !header.includes(column))) {
+		return null;
+	}
+	const nameIndex = header.indexOf('gamename');
+	const systemNameIndex = header.indexOf('systemname');
+	const manCodeIndex = header.indexOf('mancode');
+
+	const games = new Map<string, [number, number, string, string]>();
+	for (let i = 1; i < rows.length; i++) {
+		const rawName = (rows[i][nameIndex] ?? '').trim();
+		const name = stripOgdbTitleSuffixes(rawName);
+		if (name === '') {
+			continue;
+		}
+		const systemName = (rows[i][systemNameIndex] ?? '').replace(/\s+/g, ' ').trim();
+
+		// The store versions carry their Steam app id or GOG product id in
+		// the manufacturer code column; the store itself is only named in the
+		// title suffix
+		let steamAppId = 0;
+		let gogId = 0;
+		const manCode = (rows[i][manCodeIndex] ?? '').trim();
+		const rawNameLower = rawName.toLowerCase();
+		if (rawNameLower.includes('steam')) {
+			const match = OGDB_STEAM_APP_ID_REGEX.exec(manCode);
+			if (match !== null) {
+				steamAppId = parseInt(match[1], 10);
+			}
+		} else if (rawNameLower.includes('gog')) {
+			const match = OGDB_GOG_ID_REGEX.exec(manCode);
+			if (match !== null) {
+				gogId = parseInt(match[1], 10);
+			}
+		}
+
+		// Store versions are keyed by title only, so that one store id wins
+		// over all other PC releases of the same title
+		const key = name.toLowerCase() + '|' + (steamAppId > 0 || gogId > 0 ? '' : systemName.toLowerCase());
+		const existing = games.get(key);
+		if (existing === undefined
+			|| (existing[0] === 0 && steamAppId > 0)
+			|| (existing[0] === 0 && existing[1] === 0 && gogId > 0)) {
+			games.set(key, [steamAppId, gogId, name, systemName]);
+		}
+	}
+
+	return games.size > 0 ? Array.from(games.values()) : null;
+}
+
+/**
+ * Reads a CSV export as UTF-8, falling back to Windows-1252 for files that
+ * were saved in the legacy encoding, which shows as replacement characters.
+ */
+async function readCsvFile(file: File): Promise<string> {
+	const buffer = await file.arrayBuffer();
+	const text = new TextDecoder('utf-8').decode(buffer);
+	if (text.includes('�')) {
+		return new TextDecoder('windows-1252').decode(buffer);
+	}
+
+	return text;
+}
+
+async function handleOgdbCollectionFile(file: File): Promise<void> {
+	const games = parseOgdbCollectionExport(await readCsvFile(file));
+	if (games === null) {
+		showInvalidFileDialog('wcf.igdb_integration.dialog.ogdb_import_title', 'wcf.igdb_integration.dialog.ogdb_import_invalid_file');
+		return;
+	}
+
+	const dialog = dialogFactory()
+		.fromHtml('<woltlab-core-notice type="warning">' + getPhrase('wcf.igdb_integration.dialog.ogdb_import_experimental') + '</woltlab-core-notice>'
+			+ '<p>' + getPhrase('wcf.igdb_integration.dialog.ogdb_import_confirm', { count: games.length }) + '</p>')
+		.asConfirmation();
+	dialog.addEventListener('primary', () => {
+		void runLibraryImportSteps(games, 'Ogdb', 'wcf.igdb_integration.dialog.ogdb_import_progress_title');
+	});
+	dialog.show(getPhrase('wcf.igdb_integration.dialog.ogdb_import_title'));
 }
 
 async function openSteamImportDialog(): Promise<void> {
@@ -703,6 +839,18 @@ export function init(steamAutoOpen: boolean, gameListUrl: string) {
 		playniteFileInput.value = '';
 		if (file !== undefined) {
 			void handlePlayniteLibraryFile(file);
+		}
+	});
+
+	const ogdbFileInput = document.getElementById('ogdbImportFileInput') as HTMLInputElement | null;
+	const ogdbFileButton = document.getElementById('ogdbImportButton');
+	ogdbFileButton?.addEventListener('click', () => ogdbFileInput?.click());
+	ogdbFileInput?.addEventListener('change', () => {
+		const file = ogdbFileInput.files?.[0];
+		// Reset so that selecting the same file again triggers a new change event
+		ogdbFileInput.value = '';
+		if (file !== undefined) {
+			void handleOgdbCollectionFile(file);
 		}
 	});
 }

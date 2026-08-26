@@ -106,6 +106,14 @@
 							<button type="button" class="button" id="playniteImportButton">{lang}wcf.igdb_integration.page.playnite_import_button{/lang}</button>
 						</div>
 					{/if}
+					{if $ogdbImportAvailable}
+						<h3>{lang}wcf.igdb_integration.page.ogdb_import{/lang}</h3>
+						<p>{lang}wcf.igdb_integration.page.ogdb_import_info{/lang}</p>
+						<div class="formSubmit">
+							<input type="file" id="ogdbImportFileInput" accept=".csv,text/csv" style="display: none;">
+							<button type="button" class="button" id="ogdbImportButton">{lang}wcf.igdb_integration.page.ogdb_import_button{/lang}</button>
+						</div>
+					{/if}
 					{if $igdbImportAvailable}
 						<h3>{lang}wcf.igdb_integration.page.igdb_import{/lang}</h3>
 						<p>{lang}wcf.igdb_integration.page.igdb_import_info{/lang}</p>
@@ -267,6 +275,11 @@
 				'wcf.igdb_integration.dialog.playnite_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.playnite_import_confirm{/jslang}',
 				'wcf.igdb_integration.dialog.playnite_import_invalid_file': '{jslang}wcf.igdb_integration.dialog.playnite_import_invalid_file{/jslang}',
 				'wcf.igdb_integration.dialog.playnite_import_progress_title': '{jslang}wcf.igdb_integration.dialog.playnite_import_progress_title{/jslang}',
+				'wcf.igdb_integration.dialog.ogdb_import_title': '{jslang}wcf.igdb_integration.dialog.ogdb_import_title{/jslang}',
+				'wcf.igdb_integration.dialog.ogdb_import_confirm': '{jslang __literal=true}wcf.igdb_integration.dialog.ogdb_import_confirm{/jslang}',
+				'wcf.igdb_integration.dialog.ogdb_import_invalid_file': '{jslang}wcf.igdb_integration.dialog.ogdb_import_invalid_file{/jslang}',
+				'wcf.igdb_integration.dialog.ogdb_import_experimental': '{jslang}wcf.igdb_integration.dialog.ogdb_import_experimental{/jslang}',
+				'wcf.igdb_integration.dialog.ogdb_import_progress_title': '{jslang}wcf.igdb_integration.dialog.ogdb_import_progress_title{/jslang}',
 				'wcf.igdb_integration.dialog.import_result_copy': '{jslang}wcf.igdb_integration.dialog.import_result_copy{/jslang}',
 				'wcf.igdb_integration.dialog.import_result_copy_success': '{jslang}wcf.igdb_integration.dialog.import_result_copy_success{/jslang}'
 			});

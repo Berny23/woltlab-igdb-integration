@@ -26,6 +26,9 @@
 		<item name="wcf.igdb_integration.page.playnite_import"><![CDATA[Playnite-Import]]></item>
 		<item name="wcf.igdb_integration.page.playnite_import_info"><![CDATA[Exportiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihre{else}deine{/if} Spiele-Bibliothek, einschließlich der Spiele aller verbundenen Launcher, mit der Erweiterung <a href="https://playnite.link/addons.html#PlayniteLibraryExporter_7d089a0e-b862-44df-bca8-df3dc13165ee" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">Playnite Library Exporter</a> als CSV-Datei und importiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Datei hier.]]></item>
 		<item name="wcf.igdb_integration.page.playnite_import_button"><![CDATA[CSV-Datei importieren]]></item>
+		<item name="wcf.igdb_integration.page.ogdb_import"><![CDATA[OGDB-Import]]></item>
+		<item name="wcf.igdb_integration.page.ogdb_import_info"><![CDATA[Exportiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihre{else}deine{/if} Spielesammlung als CSV-Datei in {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihrer{else}deiner{/if} <a href="https://ogdb.eu/mycollection.php" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">OGDB-Sammlung</a> und importiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Datei hier. Die Spalten GameName, SystemName und ManCode werden benötigt.]]></item>
+		<item name="wcf.igdb_integration.page.ogdb_import_button"><![CDATA[CSV-Datei importieren]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import"><![CDATA[IGDB-Import]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import_info"><![CDATA[Exportiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} eine Liste {if !LANGUAGE_USE_INFORMAL_VARIANT}Ihrer{else}deiner{/if} Spiele als CSV-Datei in den <a href="https://www.igdb.com" class="externalURL"{if EXTERNAL_LINK_TARGET_BLANK} target="_blank"{/if} rel="nofollow noopener">IGDB-Listen</a> und importiere{if !LANGUAGE_USE_INFORMAL_VARIANT}n Sie{/if} die Datei hier.]]></item>
 		<item name="wcf.igdb_integration.page.igdb_import_button"><![CDATA[CSV-Datei importieren]]></item>
@@ -98,6 +101,11 @@
 		<item name="wcf.igdb_integration.dialog.playnite_import_confirm"><![CDATA[Die Datei enthält <b>{#$count}</b> Spiele. Spiele, die sich bereits in der Bibliothek befinden, werden übersprungen. Je nach Größe der Bibliothek kann der Import einen Moment dauern. Import starten?]]></item>
 		<item name="wcf.igdb_integration.dialog.playnite_import_invalid_file"><![CDATA[Die ausgewählte Datei ist kein gültiger Playnite-Bibliotheksexport.]]></item>
 		<item name="wcf.igdb_integration.dialog.playnite_import_progress_title"><![CDATA[Playnite-Bibliothek wird importiert…]]></item>
+		<item name="wcf.igdb_integration.dialog.ogdb_import_title"><![CDATA[OGDB-Sammlung importieren]]></item>
+		<item name="wcf.igdb_integration.dialog.ogdb_import_confirm"><![CDATA[Die Datei enthält <b>{#$count}</b> verschiedene Spiele. Spiele, die sich bereits in der Bibliothek befinden, werden übersprungen. Je nach Größe der Sammlung kann der Import einen Moment dauern. Import starten?]]></item>
+		<item name="wcf.igdb_integration.dialog.ogdb_import_invalid_file"><![CDATA[Die ausgewählte Datei ist kein gültiger OGDB-Sammlungsexport. Beim Export müssen mindestens die Spalten <b>GameName</b>, <b>SystemName</b> und <b>ManCode</b> ausgewählt sein, da sie für die Zuordnung der Spiele benötigt werden.]]></item>
+		<item name="wcf.igdb_integration.dialog.ogdb_import_experimental"><![CDATA[Der OGDB-Import ist experimentell: OGDB führt physische Veröffentlichungen und Editionen statt Spiele auf, daher müssen Titel und Systeme erst in IGDB-Einträge übersetzt werden. Bitte das Ergebnis prüfen und nicht zugeordnete Spiele manuell hinzufügen.]]></item>
+		<item name="wcf.igdb_integration.dialog.ogdb_import_progress_title"><![CDATA[OGDB-Sammlung wird importiert…]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_title"><![CDATA[IGDB-Liste importieren]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_confirm"><![CDATA[Die Datei enthält {#$count} Spiele. Spiele, die sich bereits in der Bibliothek befinden, werden übersprungen. Import starten?]]></item>
 		<item name="wcf.igdb_integration.dialog.igdb_import_invalid_file"><![CDATA[Die ausgewählte Datei ist kein gültiger IGDB-Listenexport.]]></item>
@@ -209,6 +217,7 @@
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_steam_games"><![CDATA[Kann eigene Spiele von Steam importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_gog_games"><![CDATA[Kann eigene Spiele von GOG importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_playnite_games"><![CDATA[Kann eigene Spiele aus Playnite-Bibliotheksexporten importieren]]></item>
+		<item name="wcf.acp.group.option.user.igdb_integration.can_import_ogdb_games"><![CDATA[Kann eigene Spiele aus OGDB-Sammlungsexporten importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_import_igdb_games"><![CDATA[Kann eigene Spiele aus IGDB-Listenexporten importieren]]></item>
 		<item name="wcf.acp.group.option.user.igdb_integration.can_see_player_list"><![CDATA[Kann alle Besitzer eines Spiels auflisten]]></item>
 	</category>
