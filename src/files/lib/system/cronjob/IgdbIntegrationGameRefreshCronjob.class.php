@@ -25,6 +25,15 @@ class IgdbIntegrationGameRefreshCronjob extends AbstractCronjob
 		parent::execute($cronjob);
 
 		$limit = defined('IGDB_INTEGRATION_GENERAL_NIGHTLY_REFRESH_LIMIT') ? intval(IGDB_INTEGRATION_GENERAL_NIGHTLY_REFRESH_LIMIT) : 0;
-		IgdbIntegrationUtil::refreshStalestGames($limit);
+		if ($limit <= 0 || !IgdbIntegrationUtil::isConnectionDataValid()) {
+			// Refresh switched off or IGDB not configured yet, nothing to report
+			return;
+		}
+
+		if (IgdbIntegrationUtil::refreshStalestGames($limit) === null) {
+			// Surfaces the failure in the cronjob log instead of a silent
+			// "successful" run, e.g. expired credentials or IGDB down
+			throw new \RuntimeException('The IGDB request of the nightly game refresh failed, see the exception log for the cause. The games fetched before the failure are kept, the rest is retried in the next run.');
+		}
 	}
 }

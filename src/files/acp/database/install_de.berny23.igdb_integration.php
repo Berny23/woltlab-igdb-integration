@@ -64,6 +64,8 @@ return [
 				->columns(['releaseYear']),
 			DatabaseTableIndex::create('lastInteractionTime')
 				->columns(['lastInteractionTime']),
+			DatabaseTableIndex::create('lastFetchTime')
+				->columns(['lastFetchTime']),
 			DatabaseTableIndex::create('playerCount')
 				->columns(['playerCount']),
 			DatabaseTableIndex::create('averageRating')

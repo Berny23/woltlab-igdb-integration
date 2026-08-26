@@ -341,9 +341,11 @@ class IgdbIntegrationUtil
 
 	/**
 	 * Updates the game database with all IGDB games with the given IGDB ids.
-	 * Returns the number of games received from IGDB (ids that IGDB no longer
-	 * knows are missing from that count), or null if the connection data is
-	 * invalid or any request failed.
+	 * Requested ids that IGDB no longer knows are stamped as fetched anyway,
+	 * so they are not requested again before the refresh interval passes.
+	 * Returns the number of games received from IGDB (the unknown ids are
+	 * missing from that count), or null if the connection data is invalid or
+	 * any request failed. The chunks completed before a failure stay updated.
 	 */
 	public static function updateDatabaseGamesByIds(array $gameIds): ?int
 	{
@@ -363,53 +365,70 @@ class IgdbIntegrationUtil
 				return null;
 			}
 
-			$receivedGameCount += self::insertGamesFromResponse($response);
+			$receivedGameIds = self::insertGamesFromResponse($response);
+			$receivedGameCount += count($receivedGameIds);
+			self::markGamesAsFetched(array_diff(array_map('intval', $chunk), $receivedGameIds));
 		}
 
 		return $receivedGameCount;
 	}
 
 	/**
-	 * Refreshes the IGDB records of the stalest games in the database, never
-	 * fetched games (lastFetchTime 0) first, limited to the given count. Meant
-	 * for the nightly refresh cronjob.
+	 * Stamps the given games with the current time as their last fetch time,
+	 * unless a concurrent request has stamped them even later.
 	 */
-	public static function refreshStalestGames(int $limit): ?int
+	private static function markGamesAsFetched(array $gameIds): void
 	{
-		if ($limit <= 0 || !self::isConnectionDataValid()) {
-			return null;
-		}
-
-		$intervalDays = defined('IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL') ? intval(IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL) : 28;
-		$sql = "SELECT gameId
-				FROM wcf1_igdb_integration_game
-				WHERE lastFetchTime < ?
-				ORDER BY lastFetchTime ASC, gameId ASC
-				LIMIT ?";
-		$statement = WCF::getDB()->prepare($sql);
-		$statement->execute([TIME_NOW - $intervalDays * 86400, $limit]);
-		$gameIds = $statement->fetchAll(\PDO::FETCH_COLUMN);
 		if (empty($gameIds)) {
-			return 0;
+			return;
 		}
 
-		$receivedGameCount = self::updateDatabaseGamesByIds($gameIds);
-		if ($receivedGameCount === null) {
-			return null;
-		}
-
-		// Whatever was requested but not received is unknown to IGDB by now;
-		// the received games already carry the current time
 		$conditionBuilder = new PreparedStatementConditionBuilder();
-		$conditionBuilder->add('gameId IN (?)', [$gameIds]);
+		$conditionBuilder->add('gameId IN (?)', [array_values($gameIds)]);
 		$conditionBuilder->add('lastFetchTime < ?', [TIME_NOW]);
 		$sql = "UPDATE wcf1_igdb_integration_game
 				SET lastFetchTime = ?
 				" . $conditionBuilder;
 		$statement = WCF::getDB()->prepare($sql);
 		$statement->execute(array_merge([TIME_NOW], $conditionBuilder->getParameters()));
+	}
 
-		return $receivedGameCount;
+	/**
+	 * Refreshes the IGDB records of the stalest games in the database, never
+	 * fetched games (lastFetchTime 0) first, limited to the given count. Meant
+	 * for the nightly refresh cronjob. Returns the number of games received,
+	 * or null if the connection data is invalid or a request failed.
+	 */
+	public static function refreshStalestGames(int $limit): ?int
+	{
+		if ($limit <= 0) {
+			return 0;
+		}
+
+		$sql = "SELECT gameId
+				FROM wcf1_igdb_integration_game
+				WHERE lastFetchTime < ?
+				ORDER BY lastFetchTime ASC, gameId ASC
+				LIMIT ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([self::getStaleFetchTimeThreshold(), $limit]);
+		$gameIds = $statement->fetchAll(\PDO::FETCH_COLUMN);
+		if (empty($gameIds)) {
+			return 0;
+		}
+
+		return self::updateDatabaseGamesByIds($gameIds);
+	}
+
+	/**
+	 * Returns the time before which a game's last fetch counts as stale
+	 * according to the configured refresh interval.
+	 */
+	private static function getStaleFetchTimeThreshold(): int
+	{
+		$intervalDays = defined('IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL') ? intval(IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL) : 28;
+
+		return TIME_NOW - $intervalDays * 86400;
 	}
 
 	/**
@@ -418,9 +437,7 @@ class IgdbIntegrationUtil
 	 */
 	public static function isGameDataStale(IgdbIntegrationGame $game): bool
 	{
-		$intervalDays = defined('IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL') ? intval(IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL) : 28;
-
-		return intval($game->lastFetchTime) + $intervalDays * 86400 < TIME_NOW;
+		return intval($game->lastFetchTime) < self::getStaleFetchTimeThreshold();
 	}
 
 	/**
@@ -443,16 +460,9 @@ class IgdbIntegrationUtil
 			return $game;
 		}
 
+		// An id IGDB no longer knows is stamped as fetched by the update, so
+		// the request is not repeated on every view
 		$receivedGameCount = self::updateDatabaseGamesByIds([$game->gameId]);
-		if ($receivedGameCount === 0) {
-			// IGDB no longer knows this id; remember the attempt so that the
-			// request is not repeated on every view
-			$sql = "UPDATE wcf1_igdb_integration_game
-					SET lastFetchTime = ?
-					WHERE gameId = ?";
-			$statement = WCF::getDB()->prepare($sql);
-			$statement->execute([TIME_NOW, $game->gameId]);
-		}
 		if ($receivedGameCount === null) {
 			// Request failed, e.g. IGDB down or the queue congested; the next
 			// view retries
@@ -464,11 +474,12 @@ class IgdbIntegrationUtil
 
 	/**
 	 * Inserts or updates all games of an IGDB games response in the database.
-	 * Returns the number of games contained in the response.
+	 * Returns the IGDB ids of the games contained in the response.
 	 */
-	private static function insertGamesFromResponse($response): int
+	private static function insertGamesFromResponse($response): array
 	{
 		$gamesJson = JSON::decode($response->getBody(), false);
+		$receivedGameIds = [];
 		$sql = "INSERT INTO wcf1_igdb_integration_game
 				SET gameId = ?,
 					name = ?,
@@ -566,7 +577,8 @@ class IgdbIntegrationUtil
 				}
 			}
 
-			$gameId = $game->id;
+			$gameId = intval($game->id);
+			$receivedGameIds[] = $gameId;
 			$gameName = $game->name ?? '';
 			$gameYear = isset($game->first_release_date) ? gmdate('Y', $game->first_release_date) : null;
 			$gameSummary = $game->summary ?? '';
@@ -586,7 +598,7 @@ class IgdbIntegrationUtil
 		}
 		WCF::getDB()->commitTransaction();
 
-		return count($gamesJson);
+		return $receivedGameIds;
 	}
 
 	/**
