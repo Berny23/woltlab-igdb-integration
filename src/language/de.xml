@@ -189,6 +189,8 @@
 		<item name="wcf.acp.option.igdb_integration_general_result_limit.description"><![CDATA[IGDB liefert höchstens 500 Ergebnisse pro Suche.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_refresh_interval"><![CDATA[Aktualisierungsintervall der Spieldetails]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_refresh_interval.description"><![CDATA[Beim Öffnen des Detail-Dialogs eines Spiels wird der IGDB-Datensatz (inklusive der Shop-Verknüpfungen und weiterer Metadaten) höchstens einmal innerhalb dieses Zeitraums abgerufen. Manuelle Aktualisierungen in der ACP sind davon nicht betroffen.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_nightly_refresh_limit"><![CDATA[Aktualisierte Spiele pro Nacht]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_nightly_refresh_limit.description"><![CDATA[Ein nächtlicher Cronjob ruft die aktuellen IGDB-Datensätze von dieser Anzahl an Spielen ab, deren Daten älter als das Aktualisierungsintervall sind, die ältesten zuerst. IGDB liefert 400 Spiele pro Anfrage, bei 4.000 Spielen dauert der Job wenige Sekunden. 0 deaktiviert den Cronjob.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page"><![CDATA[Spiele pro Seite]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page.description"><![CDATA[Dies ist der <b>Standardwert</b>. Diese Einstellung kann in der Benutzerkonto-Verwaltung personalisiert werden.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_game_sort_field"><![CDATA[Feld für Spielsortierung]]></item>

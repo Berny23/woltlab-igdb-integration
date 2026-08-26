@@ -14,5 +14,17 @@
 			<canbeedited>1</canbeedited>
 			<canbedisabled>1</canbedisabled>
 		</cronjob>
+		<cronjob name="de.berny23.igdb_integration.gameRefresh">
+			<classname>wcf\system\cronjob\IgdbIntegrationGameRefreshCronjob</classname>
+			<description>Refreshes the IGDB records of the stalest games (limited by the option "Games refreshed per night")</description>
+			<description language="de">Aktualisiert die IGDB-Datensätze der ältesten Spiele (begrenzt durch die Option „Aktualisierte Spiele pro Nacht“)</description>
+			<startminute>30</startminute>
+			<starthour>2</starthour>
+			<startdom>*</startdom>
+			<startmonth>*</startmonth>
+			<startdow>*</startdow>
+			<canbeedited>1</canbeedited>
+			<canbedisabled>1</canbedisabled>
+		</cronjob>
 	</import>
 </data>

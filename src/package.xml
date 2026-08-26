@@ -50,6 +50,7 @@
 		<instruction type="template" />
 		<instruction type="language" />
 		<instruction type="option" />
+		<instruction type="cronjob" />
 		<instruction type="userGroupOption" />
 	</instructions>
 </package>

@@ -189,6 +189,8 @@
 		<item name="wcf.acp.option.igdb_integration_general_result_limit.description"><![CDATA[IGDB returns at most 500 results per search.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_refresh_interval"><![CDATA[Refresh interval of game details]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_refresh_interval.description"><![CDATA[When a game’s details dialog is opened, the IGDB record (including the store links and other metadata) is fetched at most once within this interval. Manual refreshes in the ACP are not affected.]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_nightly_refresh_limit"><![CDATA[Games refreshed per night]]></item>
+		<item name="wcf.acp.option.igdb_integration_general_nightly_refresh_limit.description"><![CDATA[A nightly cronjob fetches the current IGDB records of this many games whose data is older than the refresh interval, oldest first. IGDB delivers 400 games per request, at 4,000 games the job takes a few seconds. 0 disables the cronjob.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page"><![CDATA[Games per page]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_games_per_page.description"><![CDATA[This is the <b>default value</b>. This setting can be personalized in the Account Management.]]></item>
 		<item name="wcf.acp.option.igdb_integration_general_game_sort_field"><![CDATA[Field for game sorting]]></item>

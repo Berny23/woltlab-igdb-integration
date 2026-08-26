@@ -12,6 +12,7 @@ use \wcf\system\WCF;
 use \wcf\data\option\OptionEditor;
 use \wcf\data\option\Option;
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
+use wcf\system\database\util\PreparedStatementConditionBuilder;
 use wcf\system\user\activity\point\UserActivityPointHandler;
 use wcf\system\user\group\assignment\UserGroupAssignmentHandler;
 
@@ -364,6 +365,49 @@ class IgdbIntegrationUtil
 
 			$receivedGameCount += self::insertGamesFromResponse($response);
 		}
+
+		return $receivedGameCount;
+	}
+
+	/**
+	 * Refreshes the IGDB records of the stalest games in the database, never
+	 * fetched games (lastFetchTime 0) first, limited to the given count. Meant
+	 * for the nightly refresh cronjob.
+	 */
+	public static function refreshStalestGames(int $limit): ?int
+	{
+		if ($limit <= 0 || !self::isConnectionDataValid()) {
+			return null;
+		}
+
+		$intervalDays = defined('IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL') ? intval(IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL) : 28;
+		$sql = "SELECT gameId
+				FROM wcf1_igdb_integration_game
+				WHERE lastFetchTime < ?
+				ORDER BY lastFetchTime ASC, gameId ASC
+				LIMIT ?";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute([TIME_NOW - $intervalDays * 86400, $limit]);
+		$gameIds = $statement->fetchAll(\PDO::FETCH_COLUMN);
+		if (empty($gameIds)) {
+			return 0;
+		}
+
+		$receivedGameCount = self::updateDatabaseGamesByIds($gameIds);
+		if ($receivedGameCount === null) {
+			return null;
+		}
+
+		// Whatever was requested but not received is unknown to IGDB by now;
+		// the received games already carry the current time
+		$conditionBuilder = new PreparedStatementConditionBuilder();
+		$conditionBuilder->add('gameId IN (?)', [$gameIds]);
+		$conditionBuilder->add('lastFetchTime < ?', [TIME_NOW]);
+		$sql = "UPDATE wcf1_igdb_integration_game
+				SET lastFetchTime = ?
+				" . $conditionBuilder;
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute(array_merge([TIME_NOW], $conditionBuilder->getParameters()));
 
 		return $receivedGameCount;
 	}
