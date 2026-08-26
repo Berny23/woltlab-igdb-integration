@@ -53,6 +53,14 @@
 		<item name="wcf.igdb_integration.game.refresh"><![CDATA[Refresh from IGDB]]></item>
 		<item name="wcf.igdb_integration.game.refresh.confirmMessage"><![CDATA[Do you really want to refresh “{$game->name}” from IGDB? Manually edited game data will be overwritten.]]></item>
 		<item name="wcf.igdb_integration.game.refresh.bulkConfirmMessage"><![CDATA[Do you really want to refresh the selected games from IGDB? Manually edited game data will be overwritten.]]></item>
+		<item name="wcf.igdb_integration.game.refresh_all"><![CDATA[Refresh All Games from IGDB]]></item>
+		<item name="wcf.igdb_integration.game.refresh_all.description"><![CDATA[Fetches the current IGDB records of the games in the database, oldest data first, in batches of 400 games per request. Manually edited game data will be overwritten.]]></item>
+		<item name="wcf.igdb_integration.game.refresh_all.stale_only"><![CDATA[Only refresh games whose data is older than the refresh interval]]></item>
+		<item name="wcf.igdb_integration.game.refresh_all.start"><![CDATA[Start refresh]]></item>
+		<item name="wcf.igdb_integration.game.refresh_all.nothing_to_do"><![CDATA[There are no games to refresh.]]></item>
+		<item name="wcf.igdb_integration.game.refresh_all.failed"><![CDATA[An IGDB request failed, see the exception log for the cause. The games refreshed before the failure were kept.]]></item>
+		<item name="wcf.igdb_integration.game.refresh_all.progress_title"><![CDATA[Refreshing Games…]]></item>
+		<item name="wcf.igdb_integration.game.refresh_all.progress_finalize"><![CDATA[Finalizing refresh…]]></item>
 		<item name="wcf.igdb_integration.game.refresh.missing_title"><![CDATA[Games Not Found on IGDB]]></item>
 		<item name="wcf.igdb_integration.game.refresh.missing_message"><![CDATA[IGDB no longer knows the following games, e.g. because they were deleted or merged there. Their stored data has been kept. Do you want to delete these games?]]></item>
 	</category>

@@ -473,7 +473,7 @@ class IgdbIntegrationUtil
 	 * Returns the time before which a game's last fetch counts as stale
 	 * according to the configured refresh interval.
 	 */
-	private static function getStaleFetchTimeThreshold(): int
+	public static function getStaleFetchTimeThreshold(): int
 	{
 		$intervalDays = defined('IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL') ? intval(IGDB_INTEGRATION_GENERAL_REFRESH_INTERVAL) : 28;
 

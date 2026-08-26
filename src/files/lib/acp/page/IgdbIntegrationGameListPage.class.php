@@ -2,8 +2,13 @@
 
 namespace wcf\acp\page;
 
+use wcf\action\ApiAction;
 use wcf\page\AbstractGridViewPage;
+use wcf\system\endpoint\controller\core\igdbIntegration\DeleteGame;
 use wcf\system\gridView\admin\IgdbIntegrationGameGridView;
+use wcf\system\request\LinkHandler;
+use wcf\system\WCF;
+use wcf\util\IgdbIntegrationUtil;
 
 /**
  * Shows the list of games.
@@ -33,5 +38,21 @@ class IgdbIntegrationGameListPage extends AbstractGridViewPage
     protected function createGridView(): IgdbIntegrationGameGridView
     {
         return new IgdbIntegrationGameGridView();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function assignVariables()
+    {
+        parent::assignVariables();
+
+        WCF::getTPL()->assign([
+            // The refresh button is only offered with valid connection data,
+            // like the refresh interactions of the grid
+            'canRefreshGames' => IgdbIntegrationUtil::isConnectionDataValid(),
+            'gameDeleteEndpoint' => LinkHandler::getInstance()->getControllerLink(ApiAction::class, ['id' => 'rpc'])
+                . DeleteGame::ENDPOINT,
+        ]);
     }
 }

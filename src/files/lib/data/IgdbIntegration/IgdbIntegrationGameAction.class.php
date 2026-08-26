@@ -149,6 +149,12 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	const IGDB_IMPORT_STATE_KEY = 'igdbListImportState';
 
 	/**
+	 * Session variable holding the state of a running ACP refresh of the
+	 * whole game database.
+	 */
+	const ACP_REFRESH_STATE_KEY = 'igdbAcpRefreshState';
+
+	/**
 	 * Maximum number of results returned by the game search of the editor
 	 * button dialog.
 	 */
@@ -1609,6 +1615,114 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			'failed' => false,
 			'batchCount' => count($state['batches']),
 			'gameCount' => count($gameIds),
+		];
+	}
+
+	/**
+	 * Checks for permission to refresh the whole game database from IGDB in
+	 * the ACP and reads whether only stale games are meant.
+	 */
+	public function validateStartAcpRefresh()
+	{
+		WCF::getSession()->checkPermissions(['admin.igdb_integration.can_manage_games']);
+		if (!IgdbIntegrationUtil::isConnectionDataValid()) {
+			throw new PermissionDeniedException();
+		}
+
+		$this->readBoolean('staleOnly', true);
+	}
+
+	/**
+	 * Collects the ids of the games to refresh, stalest first, in batches of
+	 * one IGDB request each, and returns the batch count.
+	 */
+	public function startAcpRefresh()
+	{
+		$conditions = new PreparedStatementConditionBuilder();
+		if ($this->parameters['staleOnly']) {
+			$conditions->add('lastFetchTime < ?', [IgdbIntegrationUtil::getStaleFetchTimeThreshold()]);
+		}
+		$sql = "SELECT gameId
+				FROM wcf1_igdb_integration_game
+				" . $conditions . "
+				ORDER BY lastFetchTime ASC, gameId ASC";
+		$statement = WCF::getDB()->prepare($sql);
+		$statement->execute($conditions->getParameters());
+		$gameIds = array_map('intval', $statement->fetchAll(\PDO::FETCH_COLUMN));
+
+		WCF::getSession()->register(self::ACP_REFRESH_STATE_KEY, [
+			'batches' => array_chunk($gameIds, self::IGDB_IMPORT_BATCH_SIZE),
+			'missing' => [],
+			'failed' => false,
+		]);
+
+		return [
+			'batchCount' => intval(ceil(count($gameIds) / self::IGDB_IMPORT_BATCH_SIZE)),
+			'gameCount' => count($gameIds),
+		];
+	}
+
+	/**
+	 * Checks for permission to run a step of a started ACP refresh.
+	 */
+	public function validateProcessAcpRefreshBatch()
+	{
+		WCF::getSession()->checkPermissions(['admin.igdb_integration.can_manage_games']);
+
+		if (!is_array(WCF::getSession()->getVar(self::ACP_REFRESH_STATE_KEY))) {
+			// No refresh has been started in this session
+			throw new UserInputException('acpRefreshState');
+		}
+	}
+
+	/**
+	 * Fetches the next batch of games from IGDB. Games that IGDB no longer
+	 * knows are collected for the summary. A failed request stops the
+	 * refresh, the games fetched so far stay updated.
+	 */
+	public function processAcpRefreshBatch()
+	{
+		$state = WCF::getSession()->getVar(self::ACP_REFRESH_STATE_KEY);
+
+		$batch = array_shift($state['batches']);
+		if ($batch !== null && !$state['failed']) {
+			$receivedGameIds = IgdbIntegrationUtil::updateDatabaseGamesByIds($batch);
+			if ($receivedGameIds === null) {
+				$state['failed'] = true;
+				$state['batches'] = [];
+			} else {
+				$state['missing'] = array_merge($state['missing'], array_values(array_diff($batch, $receivedGameIds)));
+			}
+		}
+
+		WCF::getSession()->register(self::ACP_REFRESH_STATE_KEY, $state);
+
+		return [
+			'failed' => $state['failed'],
+			'remainingBatches' => count($state['batches']),
+		];
+	}
+
+	/**
+	 * @see IgdbIntegrationGameAction::validateProcessAcpRefreshBatch()
+	 */
+	public function validateFinishAcpRefresh()
+	{
+		$this->validateProcessAcpRefreshBatch();
+	}
+
+	/**
+	 * Returns the summary of the ACP refresh: whether it failed and the games
+	 * that IGDB no longer knows.
+	 */
+	public function finishAcpRefresh()
+	{
+		$state = WCF::getSession()->getVar(self::ACP_REFRESH_STATE_KEY);
+		WCF::getSession()->unregister(self::ACP_REFRESH_STATE_KEY);
+
+		return [
+			'failed' => $state['failed'],
+			'missingGames' => IgdbIntegrationUtil::loadGameSummaries($state['missing']),
 		];
 	}
 
