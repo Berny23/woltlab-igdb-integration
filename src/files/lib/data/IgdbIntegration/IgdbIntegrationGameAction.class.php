@@ -662,9 +662,6 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], true);
 		$this->insertImportMatches($matched, $state['stats']);
 
-		if ($state['stats']['imported'] > 0) {
-			IgdbIntegrationUtil::updateAllGameStats();
-		}
 		$gameCount = $this->updateUserGameCount(WCF::getUser()->userID);
 
 		// The verification is intended for a single import
@@ -976,9 +973,6 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$this->matchRemainingByName($state['remaining'], $matched, $state['ambiguous'], true, 'gogId');
 		$this->insertImportMatches($matched, $state['stats']);
 
-		if ($state['stats']['imported'] > 0) {
-			IgdbIntegrationUtil::updateAllGameStats();
-		}
 		$gameCount = $this->updateUserGameCount(WCF::getUser()->userID);
 
 		WCF::getSession()->unregister(self::GOG_IMPORT_STATE_KEY);
@@ -1459,9 +1453,6 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 
 		$this->matchLibraryRemaining($state, true);
 
-		if ($state['stats']['imported'] > 0) {
-			IgdbIntegrationUtil::updateAllGameStats();
-		}
 		$gameCount = $this->updateUserGameCount(WCF::getUser()->userID);
 
 		WCF::getSession()->unregister($stateKey);
@@ -1788,9 +1779,6 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	{
 		$state = WCF::getSession()->getVar(self::IGDB_IMPORT_STATE_KEY);
 
-		if ($state['stats']['imported'] > 0) {
-			IgdbIntegrationUtil::updateAllGameStats();
-		}
 		$gameCount = $this->updateUserGameCount(WCF::getUser()->userID);
 
 		WCF::getSession()->unregister(self::IGDB_IMPORT_STATE_KEY);
@@ -1864,11 +1852,18 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			}
 			WCF::getDB()->commitTransaction();
 
-			// Remember the time of the interaction for sorting
+			// Remember the time of the interaction for sorting and keep the
+			// player count of the affected games current after every import
+			// step
 			$conditions = new PreparedStatementConditionBuilder();
-			$conditions->add('gameId IN (?)', [array_values($newGameIds)]);
-			$sql = "UPDATE wcf1_igdb_integration_game
-					SET lastInteractionTime = " . TIME_NOW . "
+			$conditions->add('game.gameId IN (?)', [array_values($newGameIds)]);
+			$sql = "UPDATE wcf1_igdb_integration_game game
+					SET game.lastInteractionTime = " . TIME_NOW . ",
+						game.playerCount = (
+							SELECT COUNT(*)
+							FROM wcf1_igdb_integration_game_user game_user
+							WHERE game_user.gameId = game.gameId
+						)
 					" . $conditions;
 			$statement = WCF::getDB()->prepare($sql);
 			$statement->execute($conditions->getParameters());
@@ -2241,7 +2236,11 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$gameOwnerProfileLinks = array();
 		foreach ($gameOwners as $owner) {
 			if (!empty($profiles[$owner['userId']])) {
-				$gameOwnerProfileLinks[$owner['userId']] = $profiles[$owner['userId']]->getAnchorTag();
+				$profile = $profiles[$owner['userId']];
+				$gameOwnerProfileLinks[$owner['userId']] = StringUtil::getAnchorTag(
+					$profile->getLink() . '#igdb_integration_game_list',
+					$profile->username
+				);
 			} else {
 				$gameOwnerProfileLinks[$owner['userId']] = StringUtil::encodeHTML($owner['username']);
 			}
