@@ -12,6 +12,7 @@ use \wcf\system\WCF;
 use \wcf\data\option\OptionEditor;
 use \wcf\data\option\Option;
 use wcf\data\IgdbIntegration\IgdbIntegrationGame;
+use wcf\data\user\UserProfile;
 use wcf\system\database\util\PreparedStatementConditionBuilder;
 use wcf\system\user\activity\point\UserActivityPointHandler;
 use wcf\system\user\group\assignment\UserGroupAssignmentHandler;
@@ -29,6 +30,9 @@ use function wcf\functions\exception\logThrowable;
 class IgdbIntegrationUtil
 {
 	const ACTIVITY_POINT_OBJECT_TYPE = 'de.berny23.igdb_integration.activityPointEvent.game';
+	// Name of the user profile menu item showing the user's game list; must
+	// match userProfileMenu.xml and GAME_LIST_TAB_NAME in the TS controller
+	const GAME_LIST_TAB_NAME = 'igdb_integration_game_list';
 	const URL_BASE = 'https://api.igdb.com/v4/';
 	const TWITCH_URL_BASE = 'https://id.twitch.tv/oauth2/token';
 	const COVER_URL_BASE = 'https://images.igdb.com/igdb/image/upload/t_cover_med/';
@@ -1011,24 +1015,50 @@ class IgdbIntegrationUtil
 	}
 
 	/**
-	 * Recomputes the playerCount and averageRating columns of all games from
-	 * the game <-> user association rows. Used to fix drift caused by changes
-	 * that bypass the game actions, e.g. deleted user accounts
+	 * Recomputes the playerCount and averageRating columns from the
+	 * game <-> user association rows, either for the given games only or for
+	 * all games when no ids are passed. The unrestricted form is used to fix
+	 * drift caused by changes that bypass the game actions, e.g. deleted user
+	 * accounts
+	 *
+	 * @param int[] $gameIds
 	 */
-	public static function updateAllGameStats()
+	public static function updateAllGameStats(array $gameIds = [])
 	{
+		$statsConditions = new PreparedStatementConditionBuilder(false);
+		$gameConditions = new PreparedStatementConditionBuilder();
+		if (!empty($gameIds)) {
+			$gameIds = array_values($gameIds);
+			$statsConditions->add('gameId IN (?)', [$gameIds]);
+			$gameConditions->add('game.gameId IN (?)', [$gameIds]);
+		}
+
 		$sql = "UPDATE wcf1_igdb_integration_game game
 				LEFT JOIN (
 					SELECT gameId,
 						COUNT(*) AS playerCount,
 						ROUND(AVG(CASE WHEN rating > 0 THEN rating END)) AS averageRating
 					FROM wcf1_igdb_integration_game_user
+					" . (empty($gameIds) ? '' : 'WHERE ' . $statsConditions) . "
 					GROUP BY gameId
 				) stats ON stats.gameId = game.gameId
 				SET game.playerCount = COALESCE(stats.playerCount, 0),
-					game.averageRating = COALESCE(stats.averageRating, 0)";
+					game.averageRating = COALESCE(stats.averageRating, 0)
+				" . $gameConditions;
 		$statement = WCF::getDB()->prepare($sql);
-		$statement->execute();
+		$statement->execute(array_merge($statsConditions->getParameters(), $gameConditions->getParameters()));
+	}
+
+	/**
+	 * Returns a user link to the game list tab of the given profile. The
+	 * markup mirrors UserProfile::getAnchorTag() so the user popover keeps
+	 * working
+	 */
+	public static function getGameListProfileAnchorTag(UserProfile $profile): string
+	{
+		return '<a href="' . StringUtil::encodeHTML($profile->getLink() . '#' . self::GAME_LIST_TAB_NAME)
+			. '" class="userLink" data-object-id="' . $profile->userID . '">'
+			. StringUtil::encodeHTML($profile->username) . '</a>';
 	}
 
 	/**

@@ -44,7 +44,7 @@ class IgdbIntegrationGameListUserPageListener implements IParameterizedEventList
 		if (IgdbIntegrationGameListUserProfileMenuContent::hasFilterParameters()) {
 			// Render the games tab server-side so the filtered list is shown
 			// directly instead of the default tab
-			UserProfileMenu::getInstance()->setActiveMenuItem('igdb_integration_game_list');
+			UserProfileMenu::getInstance()->setActiveMenuItem(IgdbIntegrationUtil::GAME_LIST_TAB_NAME);
 		} else {
 			// The game list itself is unfiltered on a fresh visit, but the
 			// default platforms are pre-selected in the filter form for the
@@ -76,7 +76,7 @@ class IgdbIntegrationGameListUserPageListener implements IParameterizedEventList
 			'igdbGameListFilter' => $filter,
 			'igdbGameListAvailablePlatforms' => $availablePlatforms,
 			'igdbGameListFormUrl' => $profileLink,
-			'igdbGameListResetUrl' => $profileLink . $separator . $resetParameters . '#igdb_integration_game_list'
+			'igdbGameListResetUrl' => $profileLink . $separator . $resetParameters . '#' . IgdbIntegrationUtil::GAME_LIST_TAB_NAME
 		]);
 	}
 }

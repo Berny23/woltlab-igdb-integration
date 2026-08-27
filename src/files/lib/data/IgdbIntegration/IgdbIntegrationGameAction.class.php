@@ -1852,21 +1852,18 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 			}
 			WCF::getDB()->commitTransaction();
 
-			// Remember the time of the interaction for sorting and keep the
-			// player count of the affected games current after every import
-			// step
+			// Remember the time of the interaction for sorting
 			$conditions = new PreparedStatementConditionBuilder();
-			$conditions->add('game.gameId IN (?)', [array_values($newGameIds)]);
-			$sql = "UPDATE wcf1_igdb_integration_game game
-					SET game.lastInteractionTime = " . TIME_NOW . ",
-						game.playerCount = (
-							SELECT COUNT(*)
-							FROM wcf1_igdb_integration_game_user game_user
-							WHERE game_user.gameId = game.gameId
-						)
+			$conditions->add('gameId IN (?)', [array_values($newGameIds)]);
+			$sql = "UPDATE wcf1_igdb_integration_game
+					SET lastInteractionTime = " . TIME_NOW . "
 					" . $conditions;
 			$statement = WCF::getDB()->prepare($sql);
 			$statement->execute($conditions->getParameters());
+
+			// Keep the stats of the affected games current after every import
+			// step instead of recomputing all games at the end
+			IgdbIntegrationUtil::updateAllGameStats($newGameIds);
 		}
 
 		$stats['imported'] += count($newGameIds);
@@ -2068,21 +2065,7 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 	 */
 	protected function updateGameStats($gameId)
 	{
-		$sql = "UPDATE wcf1_igdb_integration_game
-				SET playerCount = (
-						SELECT COUNT(*)
-						FROM wcf1_igdb_integration_game_user
-						WHERE gameId = ?
-					),
-					averageRating = COALESCE((
-						SELECT ROUND(AVG(rating))
-						FROM wcf1_igdb_integration_game_user
-						WHERE gameId = ?
-							AND rating > 0
-					), 0)
-				WHERE gameId = ?";
-		$statement = WCF::getDB()->prepare($sql);
-		$statement->execute([$gameId, $gameId, $gameId]);
+		IgdbIntegrationUtil::updateAllGameStats([$gameId]);
 	}
 
 	/**
@@ -2236,10 +2219,8 @@ class IgdbIntegrationGameAction extends AbstractDatabaseObjectAction
 		$gameOwnerProfileLinks = array();
 		foreach ($gameOwners as $owner) {
 			if (!empty($profiles[$owner['userId']])) {
-				$profile = $profiles[$owner['userId']];
-				$gameOwnerProfileLinks[$owner['userId']] = StringUtil::getAnchorTag(
-					$profile->getLink() . '#igdb_integration_game_list',
-					$profile->username
+				$gameOwnerProfileLinks[$owner['userId']] = IgdbIntegrationUtil::getGameListProfileAnchorTag(
+					$profiles[$owner['userId']]
 				);
 			} else {
 				$gameOwnerProfileLinks[$owner['userId']] = StringUtil::encodeHTML($owner['username']);

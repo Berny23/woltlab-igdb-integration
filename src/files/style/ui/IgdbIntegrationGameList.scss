@@ -192,6 +192,11 @@
 	z-index: 350;
 }
 
+/* User popovers (e.g. the player list dialog) inside a dialog */
+.dialogOverlay .popoverContainer {
+	position: fixed;
+}
+
 .igdbIntegrationFooter {
 	display: flex;
 	flex-direction: column;
